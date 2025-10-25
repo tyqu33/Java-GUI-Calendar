@@ -29,7 +29,7 @@ public interface CalendarInterface {
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
   Event createSingleEvent(String subject, String startDateTime, String endDateTime,
-                          String description, String location, EventStatus eventStatus)
+                          String description, String location, String eventStatus)
       throws IllegalArgumentException;
 
   /**
@@ -57,7 +57,7 @@ public interface CalendarInterface {
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
   EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
-                                String description, String location, EventStatus eventStatus,
+                                String description, String location, String eventStatus,
                                 String weekdays, int repeatTimes, String seriesEndDateTime)
   throws IllegalArgumentException;
 
@@ -68,14 +68,10 @@ public interface CalendarInterface {
    * @param startDateTime the start date and/or time of the event series (must specify)
    * @param endDateTime the end date and/or time of the event series (must specify) if input is null,
    *                    search for an all-day event
-   * @param description a longer description of the event series (optional)
-   * @param location the location of the event series (optional)
-   * @param eventStatus the eventStatus (public/private) (optional)
    * @return the single event that is created; if fail to create, return null
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
-  Event getSingleEvent(String subject, String startDateTime, String endDateTime,
-                       String description, String location, EventStatus eventStatus)
+  Event getSingleEvent(String subject, String startDateTime, String endDateTime)
       throws IllegalArgumentException;
 
   /**
@@ -90,8 +86,9 @@ public interface CalendarInterface {
    * @return
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
-  Event editSingleEvent(String newSubject, String newStartDateTime, String newEndDateTime,
-                        String newDescription, String newLocation, EventStatus newEventStatus)
+  Event editSingleEvent(String subject, String startDateTime, String endDateTime,
+                        String newSubject, String newStartDateTime, String newEndDateTime,
+                        String newDescription, String newLocation, String newEventStatus)
       throws IllegalArgumentException;
 
   Event editEventSeries() throws IllegalArgumentException;

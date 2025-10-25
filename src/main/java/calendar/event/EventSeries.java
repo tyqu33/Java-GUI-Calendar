@@ -1,5 +1,6 @@
 package calendar.event;
 
+import calendar.enums.EventStatus;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,7 +21,7 @@ public class EventSeries implements EventInterface{
   private final LocalDate firstOccurrence;
   private final String description;
   private final String location;
-  private final String status;
+  private final EventStatus status;
   private List<Event> events;
 
   private EventSeries(EventSeriesBuilder builder) {
@@ -51,7 +52,7 @@ public class EventSeries implements EventInterface{
     private LocalDate endDate;
     private String description;
     private String location;
-    private String status = "public";
+    private EventStatus status = EventStatus.PUBLIC;
     private boolean isAllDay = false;
 
     public EventSeriesBuilder(String subject, LocalDateTime start, String weekdays) {
@@ -121,7 +122,11 @@ public class EventSeries implements EventInterface{
     }
 
     public EventSeriesBuilder status(String status) {
-      this.status = status;
+      if (status.equals("private")) {
+        this.status = EventStatus.PRIVATE;
+      } else {
+        this.status = EventStatus.PUBLIC;
+      }
       return this;
     }
 
@@ -192,7 +197,7 @@ public class EventSeries implements EventInterface{
     if (location != null) {
       builder.location(location);
     }
-    builder.status(status);
+    builder.status(status == EventStatus.PRIVATE?"private":"public");
     return builder.build();
   }
 
@@ -256,8 +261,23 @@ public class EventSeries implements EventInterface{
   }
 
   @Override
-  public String getEventStatus() {
+  public EventStatus getEventStatus() {
     return status;
+  }
+
+  @Override
+  public void editDescription(String newDescription) {
+
+  }
+
+  @Override
+  public void editLocation(String newLocation) {
+
+  }
+
+  @Override
+  public void editEventStatus(String newEventStatus) {
+
   }
 
   @Override

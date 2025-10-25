@@ -1,5 +1,6 @@
 package calendar.event;
 
+import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import java.time.LocalDateTime;
 
@@ -14,5 +15,9 @@ public interface EventInterface {
   LocalDateTime getEndDateTime();
   String getDescription();
   String getLocation();
-  String getEventStatus();
+  EventStatus getEventStatus();
+
+  void editDescription(String newDescription);
+  void editLocation(String newLocation);
+  void editEventStatus(String newEventStatus);
 }

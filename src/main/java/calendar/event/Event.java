@@ -1,5 +1,6 @@
 package calendar.event;
 
+import calendar.enums.EventStatus;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
@@ -8,9 +9,9 @@ public class Event implements EventInterface {
   private final String subject;
   private final LocalDateTime start;
   private final LocalDateTime end;
-  private final String description ;
-  private final String location;
-  private final String status;
+  private String description ;
+  private String location;
+  private EventStatus status;
   private static final LocalTime START_TIME = LocalTime.of(8, 0);
   private static final LocalTime END_TIME = LocalTime.of(17, 0);
 
@@ -41,7 +42,7 @@ public class Event implements EventInterface {
     private LocalDateTime end;
     private String description ;
     private String location;
-    private String status = "public";
+    private EventStatus status = EventStatus.PUBLIC;
     public boolean isAllDayEvent = false;
 
     public EventBuilder(String subject, LocalDateTime start) {
@@ -72,7 +73,11 @@ public class Event implements EventInterface {
     }
 
     public EventBuilder status(String status) {
-      this.status = status;
+      if (status.equals("private")) {
+        this.status = EventStatus.PRIVATE;
+      } else {
+        this.status = EventStatus.PUBLIC;
+      }
       return this;
     }
 
@@ -120,8 +125,27 @@ public class Event implements EventInterface {
   }
 
   @Override
-  public String getEventStatus() {
+  public EventStatus getEventStatus() {
     return status;
+  }
+
+  @Override
+  public void editDescription(String newDescription) {
+    this.description = newDescription;
+  }
+
+  @Override
+  public void editLocation(String newLocation) {
+    this.location = newLocation;
+  }
+
+  @Override
+  public void editEventStatus(String newEventStatus) {
+    if (newEventStatus.equals("private")) {
+      this.status = EventStatus.PRIVATE;
+    } else {
+      this.status = EventStatus.PUBLIC;
+    }
   }
 
   @Override
