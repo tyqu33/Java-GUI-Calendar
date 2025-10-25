@@ -16,6 +16,7 @@ public interface EventInterface {
   String getDescription();
   String getLocation();
   EventStatus getEventStatus();
+  String getSeriesId();
 
   void editDescription(String newDescription);
   void editLocation(String newLocation);

@@ -12,6 +12,7 @@ public class Event implements EventInterface {
   private String description ;
   private String location;
   private EventStatus status;
+  private String seriesId;
   private static final LocalTime START_TIME = LocalTime.of(8, 0);
   private static final LocalTime END_TIME = LocalTime.of(17, 0);
 
@@ -27,6 +28,7 @@ public class Event implements EventInterface {
     this.description = builder.description;
     this.location = builder.location;
     this.status = builder.status;
+    this.seriesId = null;
     if (this.end != null && this.end.isBefore(this.start)) {
       throw new IllegalArgumentException("End date/time must be after start date/time.");
     }
@@ -44,6 +46,7 @@ public class Event implements EventInterface {
     private String location;
     private EventStatus status = EventStatus.PUBLIC;
     public boolean isAllDayEvent = false;
+    private String seriesId;
 
     public EventBuilder(String subject, LocalDateTime start) {
       if (subject == null || subject.trim().isEmpty()) {
@@ -83,6 +86,11 @@ public class Event implements EventInterface {
 
     public EventBuilder setAllDayEvent() {
       this.isAllDayEvent = true;
+      return this;
+    }
+
+    public EventBuilder seriesId(String seriesId) {
+      this.seriesId = seriesId;
       return this;
     }
 
@@ -127,6 +135,11 @@ public class Event implements EventInterface {
   @Override
   public EventStatus getEventStatus() {
     return status;
+  }
+
+  @Override
+  public String getSeriesId() {
+    return seriesId;
   }
 
   @Override

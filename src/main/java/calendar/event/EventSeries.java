@@ -266,6 +266,11 @@ public class EventSeries implements EventInterface{
   }
 
   @Override
+  public String getSeriesId() {
+    return "";
+  }
+
+  @Override
   public void editDescription(String newDescription) {
 
   }

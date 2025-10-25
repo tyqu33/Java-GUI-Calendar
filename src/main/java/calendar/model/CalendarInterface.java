@@ -5,6 +5,7 @@ import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
+import calendar.event.EventSeriesOptional;
 
 /**
  * This interface contains necessary operations that a calendar should support.
@@ -25,11 +26,13 @@ public interface CalendarInterface {
    * @param description   a longer description of the event (optional)
    * @param location      the location of the event (optional)
    * @param eventStatus   the eventStatus (public/private) (optional)
+   * @param seriesId      null by default; if this event is a single independent event, then null; if belongs to a series, then not null
    * @return the single event that is created; if fail to create, return null
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
   Event createSingleEvent(String subject, String startDateTime, String endDateTime,
-                          String description, String location, String eventStatus)
+                          String description, String location, String eventStatus,
+                          String seriesId)
       throws IllegalArgumentException;
 
   /**
@@ -40,34 +43,39 @@ public interface CalendarInterface {
    * A single event in a series can only span one day (it must start and finish on the same day).
    * Two events in the calendar cannot have the same subject, start date/time and end date/time.
    *
-   * @param subject the theme of the event series on calendar (must specify)
-   * @param startDateTime the start date and/or time of the event series (must specify)
-   * @param endDateTime the end date and/or time of the event series (must specify)
-   *                    if input is null, note every event in this series as an all-day event
-   *                    with default time range from 8am to 5pm
-   * @param description a longer description of the event series (optional)
-   * @param location the location of the event series (optional)
-   * @param eventStatus the eventStatus (public/private) (optional)
-   * @param weekdays (optional) a sequence of characters where each character denotes a day of the
-   *                 event's occurrence e.g., MRU. 'M' is Monday, 'T' is Tuesday, 'W' is Wednesday,
-   *                 'R' is Thursday, 'F' is Friday, 'S' is Saturday, and 'U' is Sunday
-   * @param repeatTimes (optional) the int that denotes how many occurrences of the event on weekdays
+   * @param seriesId          every series has a unique series id, not shown to users
+   * @param subject           the theme of the event series on calendar (must specify)
+   * @param startDateTime     the start date and/or time of the event series (must specify)
+   * @param endDateTime       the end date and/or time of the event series (must specify)
+   *                          if input is null, note every event in this series as an all-day event
+   *                          with default time range from 8am to 5pm
+   * @param description       a longer description of the event series (optional)
+   * @param location          the location of the event series (optional)
+   * @param eventStatus       the eventStatus (public/private) (optional)
+   * @param weekdays          (optional) a sequence of characters where each character denotes a day of the
+   *                          event's occurrence e.g., MRU. 'M' is Monday, 'T' is Tuesday, 'W' is Wednesday,
+   *                          'R' is Thursday, 'F' is Friday, 'S' is Saturday, and 'U' is Sunday
+   * @param repeatTimes       (optional) the int that denotes how many occurrences of the event on weekdays
    * @param seriesEndDateTime (optional) the end date and/or time of the series
    * @return the event series that is created; if fail to create, return null
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
-  EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
-                                String description, String location, String eventStatus,
-                                String weekdays, int repeatTimes, String seriesEndDateTime)
-  throws IllegalArgumentException;
+  EventSeriesOptional createEventSeriesOptional(String seriesId,
+                                                String subject, String startDateTime,
+                                                String endDateTime,
+                                                String description, String location,
+                                                String eventStatus,
+                                                String weekdays, int repeatTimes,
+                                                String seriesEndDateTime)
+      throws IllegalArgumentException;
 
   /**
    * To get a single event with subject, startDateTime and optional properties given.
    *
-   * @param subject the theme of the event series on calendar (must specify)
+   * @param subject       the theme of the event series on calendar (must specify)
    * @param startDateTime the start date and/or time of the event series (must specify)
-   * @param endDateTime the end date and/or time of the event series (must specify) if input is null,
-   *                    search for an all-day event
+   * @param endDateTime   the end date and/or time of the event series (must specify) if input is null,
+   *                      search for an all-day event
    * @return the single event that is created; if fail to create, return null
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
@@ -91,9 +99,15 @@ public interface CalendarInterface {
                         String newDescription, String newLocation, String newEventStatus)
       throws IllegalArgumentException;
 
-  Event editEventSeries() throws IllegalArgumentException;
+  EventSeriesOptional editEventSeries(String subject, String startDateTime, String endDateTime,
+                                      String newSubject, String newStartDateTime, String newEndDateTime,
+                                      String newDescription, String newLocation, String newEventStatus) throws IllegalArgumentException;
 
-  void queryForEvent(String startDateTime, String endDateTime) throws IllegalArgumentException;
+  void printEventsOnSpecificDay(String startDateTime)
+      throws IllegalArgumentException;
+
+  void printEventsFromTimeToTime(String startDateTime, String endDateTime)
+      throws IllegalArgumentException;
 
   /**
    * Show UserStatus on a given date and/or time.
@@ -101,7 +115,7 @@ public interface CalendarInterface {
    * @return If there exists event on the given date and/or time, return BUSY; else, AVAILABLE
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
-  UserStatus queryForUserStatus(String queryDateTime) throws IllegalArgumentException;
+  UserStatus showUserStatusOnSpecificTime(String queryDateTime) throws IllegalArgumentException;
 
   void exportCalendarToFile(String fileName);
 }

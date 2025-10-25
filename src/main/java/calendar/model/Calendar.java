@@ -4,6 +4,7 @@ import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
+import calendar.event.EventSeriesOptional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Map;
 public class Calendar implements CalendarInterface {
 
   Map<EventKey, Event> calendar;
+  Map<String, EventSeriesOptional> seriesManager = new HashMap<>();
 
   public Calendar() {
     calendar = new HashMap<>();
@@ -19,7 +21,8 @@ public class Calendar implements CalendarInterface {
 
   @Override
   public Event createSingleEvent(String subject, String startDateTime, String endDateTime,
-                                 String description, String location, String eventStatus)
+                                 String description, String location, String eventStatus,
+                                 String seriesId)
       throws IllegalArgumentException {
     if (subject.isEmpty() || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
@@ -51,6 +54,7 @@ public class Calendar implements CalendarInterface {
         .description(description)
         .location(location)
         .status(eventStatus)
+        .seriesId(seriesId)
         .build();
     EventKey key = new EventKey(subject, start, end);
     calendar.put(key, event);
@@ -58,7 +62,8 @@ public class Calendar implements CalendarInterface {
   }
 
   @Override
-  public EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
+  public EventSeriesOptional createEventSeriesOptional(String seriesId,
+                                       String subject, String startDateTime, String endDateTime,
                                        String description, String location, String eventStatus,
                                        String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException {
@@ -80,14 +85,30 @@ public class Calendar implements CalendarInterface {
       }
     }
 
-    EventSeries series = new EventSeries.EventSeriesBuilder(subject, start, weekdays)
-        .end(end)
-        .description(description)
-        .location(location)
-        .status(eventStatus)
-        .allDay()
-        .occurrences(repeatTimes)
-        .build();
+    EventSeriesOptional series = new EventSeriesOptional(seriesId);
+    seriesManager.put(seriesId, series); // put this series into Manager
+
+    // THERE SHOULD BE A HELPER METHOD, CALCULATING EVERY START AND END IN THIS SERIES FOR EVERY EVENT
+    // IN A LOOP:
+    {
+      EventKey key = new EventKey(subject, start, end);
+      Event singleEvent =
+          createSingleEvent(subject, startDateTime, endDateTime, description, location, eventStatus,
+              seriesId);
+      calendar.put(key, singleEvent);
+
+      // PUT EVERY KEY OF CURRENT EVENT IN THIS SERIES
+      series.getEventKeys().add(key);
+    }
+
+    //    EventSeries series = new EventSeries.EventSeriesBuilder(subject, start, weekdays)
+    //        .end(end)
+    //        .description(description)
+    //        .location(location)
+    //        .status(eventStatus)
+    //        .allDay()
+    //        .occurrences(repeatTimes)
+    //        .build();
 
     return series;
   }
@@ -166,7 +187,7 @@ public class Calendar implements CalendarInterface {
 
     } else {
       newEvent = createSingleEvent(newSubject, newStartDateTime, newEndDateTime, newDescription,
-          newLocation, newEventStatus);
+          newLocation, newEventStatus, null);
 
       calendar.remove(new EventKey(oldEvent.getSubject(), oldEvent.getStartDateTime(),
           oldEvent.getEndDateTime()));
@@ -178,18 +199,94 @@ public class Calendar implements CalendarInterface {
   }
 
   @Override
-  public Event editEventSeries() throws IllegalArgumentException {
+  public EventSeriesOptional editEventSeries(String subject, String startDateTime, String endDateTime,
+                                             String newSubject, String newStartDateTime, String newEndDateTime,
+                                             String newDescription, String newLocation, String newEventStatus) throws IllegalArgumentException {
+    if (newSubject.isEmpty() || newStartDateTime.isEmpty()) {
+      throw new IllegalArgumentException("subject or startDateTime cannot be empty");
+    }
+    LocalDateTime start;
+    try {
+      start = LocalDateTime.parse(newStartDateTime);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Invalid start date/time: " + newStartDateTime);
+    }
+    LocalDateTime end = null;
+    if (!newEndDateTime.isEmpty()) {
+      try {
+        end = LocalDateTime.parse(newEndDateTime);
+      } catch (DateTimeParseException e) {
+        throw new IllegalArgumentException("Invalid end date/time: " + newEndDateTime);
+      }
+    }
+
+    EventKey key = new EventKey(subject, start, end);
+    Event event = calendar.get(key);
+    if (event == null) {
+      throw new IllegalArgumentException("Event does not exist");
+    }
+    // This event does not belong to any series
+    if (event.getSeriesId() == null) {
+      editSingleEvent(subject, startDateTime, endDateTime, newSubject, newStartDateTime, newEndDateTime,
+          newDescription, newLocation, newEventStatus);
+    } else {
+      // PRIMAL KEY NOT CHANGED
+      if (newSubject.equals(subject) && newStartDateTime.equals(startDateTime) &&
+          newEndDateTime.equals(endDateTime)) {
+        // THERE SHOULD BE A HELPER METHOD, CALCULATING EVERY START AND END IN THIS SERIES FOR EVERY EVENT
+        // IN A LOOP:
+        {
+          editSingleEvent(subject, startDateTime, endDateTime, newSubject, newStartDateTime,
+              newEndDateTime,
+              newDescription, newLocation, newEventStatus);
+        }
+      } else {
+
+        Event oldEvent = calendar.remove(key);
+        String seriesId = oldEvent.getSeriesId();
+        EventSeriesOptional series = seriesManager.get(seriesId);
+        if (series != null) {
+          series.removeEventKey(key);
+        }
+
+        EventKey newKey = new EventKey(newSubject, start, end);
+        String newSeriesId = null;
+        String newWeekdays = null;
+        int newRepeatTimes = 0;
+        String newSeriesEndDate = null;
+        EventSeriesOptional newSeries = createEventSeriesOptional(newSeriesId, newSubject,
+            newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus,
+            newWeekdays, newRepeatTimes, newSeriesEndDate);
+
+
+
+
+      }
+
+    }
+
+
+
+
+
+
     return null;
   }
 
   @Override
-  public void queryForEvent(String startDateTime, String endDateTime)
+  public void printEventsOnSpecificDay(String startDateTime)
       throws IllegalArgumentException {
+
 
   }
 
   @Override
-  public UserStatus queryForUserStatus(String queryDateTime) throws IllegalArgumentException {
+  public void printEventsFromTimeToTime(String startDateTime, String endDateTime) throws IllegalArgumentException {
+
+  }
+
+  @Override
+  public UserStatus showUserStatusOnSpecificTime(String queryDateTime) throws IllegalArgumentException {
     return null;
   }
 
