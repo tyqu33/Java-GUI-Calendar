@@ -14,10 +14,11 @@ import java.util.Set;
 public class Calendar implements CalendarInterface {
 
   Map<EventKey, Event> calendar;
-  Map<String, EventSeries> seriesManager = new HashMap<>();
+  Map<String, EventSeries> seriesManager;
 
   public Calendar() {
     calendar = new HashMap<>();
+    seriesManager = new HashMap<>();
   }
 
   @Override
@@ -95,15 +96,15 @@ public class Calendar implements CalendarInterface {
     if (!seriesEndDateTime.isEmpty()) {
       try {
         seriesEndDate = LocalDate.parse(seriesEndDateTime);
-      }  catch (DateTimeParseException e) {
+      } catch (DateTimeParseException e) {
         throw new IllegalArgumentException("Invalid series end date/time: " + seriesEndDateTime);
       }
     }
 
     EventSeries.EventSeriesBuilder seriesBuilder = EventSeries.builder(subject, start, weekdays)
-            .description(description)
-            .location(location)
-            .status(eventStatus);
+        .description(description)
+        .location(location)
+        .status(eventStatus);
     if (end != null) {
       seriesBuilder.end(end);
     }
@@ -112,7 +113,7 @@ public class Calendar implements CalendarInterface {
     } else if (seriesEndDate != null) {
       seriesBuilder.setEndDate(seriesEndDate);
     } else {
-      throw new IllegalArgumentException("Must specify either occurrences or end date" );
+      throw new IllegalArgumentException("Must specify either occurrences or end date");
     }
 
     EventSeries newSeries = seriesBuilder.build();
@@ -142,7 +143,7 @@ public class Calendar implements CalendarInterface {
     //          seriesId);
     //  calendar.put(key, singleEvent);
 
-      // PUT EVERY KEY OF CURRENT EVENT IN THIS SERIES
+    // PUT EVERY KEY OF CURRENT EVENT IN THIS SERIES
     //  series.getEventKeys().add(key);
     //}
 
@@ -243,8 +244,10 @@ public class Calendar implements CalendarInterface {
 
   @Override
   public EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
-                                             String newSubject, String newStartDateTime, String newEndDateTime,
-                                             String newDescription, String newLocation, String newEventStatus) throws IllegalArgumentException {
+                                     String newSubject, String newStartDateTime,
+                                     String newEndDateTime,
+                                     String newDescription, String newLocation,
+                                     String newEventStatus) throws IllegalArgumentException {
     if (newSubject.isEmpty() || newStartDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
@@ -270,7 +273,8 @@ public class Calendar implements CalendarInterface {
     }
     // This event does not belong to any series
     if (event.getSeriesId() == null) {
-      editSingleEvent(subject, startDateTime, endDateTime, newSubject, newStartDateTime, newEndDateTime,
+      editSingleEvent(subject, startDateTime, endDateTime, newSubject, newStartDateTime,
+          newEndDateTime,
           newDescription, newLocation, newEventStatus);
     } else {
       // PRIMAL KEY NOT CHANGED
@@ -302,15 +306,9 @@ public class Calendar implements CalendarInterface {
             newWeekdays, newRepeatTimes, newSeriesEndDate);
 
 
-
-
       }
 
     }
-
-
-
-
 
 
     return null;
@@ -324,12 +322,14 @@ public class Calendar implements CalendarInterface {
   }
 
   @Override
-  public void printEventsFromTimeToTime(String startDateTime, String endDateTime) throws IllegalArgumentException {
+  public void printEventsFromTimeToTime(String startDateTime, String endDateTime)
+      throws IllegalArgumentException {
 
   }
 
   @Override
-  public UserStatus showUserStatusOnSpecificTime(String queryDateTime) throws IllegalArgumentException {
+  public UserStatus showUserStatusOnSpecificTime(String queryDateTime)
+      throws IllegalArgumentException {
     return null;
   }
 
