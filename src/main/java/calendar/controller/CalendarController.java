@@ -61,7 +61,7 @@ public class CalendarController implements CalendarControllerInterface{
         CommandFactory createEvent = new CreateCommand(commandLine, calendar);
       break;
       case "edit":
-        CommandFactory editEvent = new EditCommand();
+        CommandFactory editEvent = new EditCommand(commandLine, calendar);
       break;
       case "print":
         CommandFactory printEvent = new PrintCommand();
