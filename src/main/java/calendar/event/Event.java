@@ -28,7 +28,7 @@ public class Event implements EventInterface {
     this.description = builder.description;
     this.location = builder.location;
     this.status = builder.status;
-    this.seriesId = null;
+    this.seriesId = builder.seriesId;
     if (this.end != null && this.end.isBefore(this.start)) {
       throw new IllegalArgumentException("End date/time must be after start date/time.");
     }

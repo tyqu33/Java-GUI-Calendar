@@ -9,7 +9,7 @@ public class EventKey {
   private final LocalDateTime endDateTime;
 
   public EventKey(String subject, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-    this.subject = subject;
+    this.subject = subject.trim();
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
   }

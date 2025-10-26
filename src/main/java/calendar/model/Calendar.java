@@ -1,19 +1,20 @@
 package calendar.model;
 
-import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
-import calendar.event.EventSeriesOptional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Calendar implements CalendarInterface {
 
   Map<EventKey, Event> calendar;
-  Map<String, EventSeriesOptional> seriesManager = new HashMap<>();
+  Map<String, EventSeries> seriesManager = new HashMap<>();
 
   public Calendar() {
     calendar = new HashMap<>();
@@ -34,7 +35,13 @@ public class Calendar implements CalendarInterface {
       throw new IllegalArgumentException("Invalid start date/time: " + startDateTime);
     }
     LocalDateTime end = null;
-    if (!endDateTime.isEmpty()) {
+    boolean isAllDay = false;
+    if (endDateTime.isEmpty()) {
+      isAllDay = true;
+      LocalDate date = start.toLocalDate();
+      start = LocalDateTime.of(date, LocalTime.of(8, 0));
+      end = LocalDateTime.of(date, LocalTime.of(17, 0));
+    } else {
       try {
         end = LocalDateTime.parse(endDateTime);
       } catch (DateTimeParseException e) {
@@ -62,8 +69,7 @@ public class Calendar implements CalendarInterface {
   }
 
   @Override
-  public EventSeriesOptional createEventSeriesOptional(String seriesId,
-                                       String subject, String startDateTime, String endDateTime,
+  public EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
                                        String description, String location, String eventStatus,
                                        String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException {
@@ -85,21 +91,60 @@ public class Calendar implements CalendarInterface {
       }
     }
 
-    EventSeriesOptional series = new EventSeriesOptional(seriesId);
-    seriesManager.put(seriesId, series); // put this series into Manager
+    LocalDate seriesEndDate = null;
+    if (!seriesEndDateTime.isEmpty()) {
+      try {
+        seriesEndDate = LocalDate.parse(seriesEndDateTime);
+      }  catch (DateTimeParseException e) {
+        throw new IllegalArgumentException("Invalid series end date/time: " + seriesEndDateTime);
+      }
+    }
+
+    EventSeries.EventSeriesBuilder seriesBuilder = EventSeries.builder(subject, start, weekdays)
+            .description(description)
+            .location(location)
+            .status(eventStatus);
+    if (end != null) {
+      seriesBuilder.end(end);
+    }
+    if (repeatTimes > 0) {
+      seriesBuilder.occurrences(repeatTimes);
+    } else if (seriesEndDate != null) {
+      seriesBuilder.setEndDate(seriesEndDate);
+    } else {
+      throw new IllegalArgumentException("Must specify either occurrences or end date" );
+    }
+
+    EventSeries newSeries = seriesBuilder.build();
+    String seriesId = newSeries.getSeriesId();
+    Set<EventKey> keys = newSeries.getSeriesKeys();
+
+    for (EventKey key : keys) {
+      Event eventInstance = new Event.EventBuilder(key.getSubject(), key.getStartDateTime())
+          .end(key.getEndDateTime())
+          .description(description)
+          .location(location)
+          .status(eventStatus)
+          .seriesId(seriesId)
+          .build();
+      calendar.put(key, eventInstance);
+    }
+
+    seriesManager.put(seriesId, newSeries); // put this series into Manager
+    return newSeries;
 
     // THERE SHOULD BE A HELPER METHOD, CALCULATING EVERY START AND END IN THIS SERIES FOR EVERY EVENT
     // IN A LOOP:
-    {
-      EventKey key = new EventKey(subject, start, end);
-      Event singleEvent =
-          createSingleEvent(subject, startDateTime, endDateTime, description, location, eventStatus,
-              seriesId);
-      calendar.put(key, singleEvent);
+    //{
+    //  EventKey key = new EventKey(subject, start, end);
+    //  Event singleEvent =
+    //      createSingleEvent(subject, startDateTime, endDateTime, description, location, eventStatus,
+    //          seriesId);
+    //  calendar.put(key, singleEvent);
 
       // PUT EVERY KEY OF CURRENT EVENT IN THIS SERIES
-      series.getEventKeys().add(key);
-    }
+    //  series.getEventKeys().add(key);
+    //}
 
     //    EventSeries series = new EventSeries.EventSeriesBuilder(subject, start, weekdays)
     //        .end(end)
@@ -109,8 +154,6 @@ public class Calendar implements CalendarInterface {
     //        .allDay()
     //        .occurrences(repeatTimes)
     //        .build();
-
-    return series;
   }
 
   @Override
@@ -199,7 +242,7 @@ public class Calendar implements CalendarInterface {
   }
 
   @Override
-  public EventSeriesOptional editEventSeries(String subject, String startDateTime, String endDateTime,
+  public EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
                                              String newSubject, String newStartDateTime, String newEndDateTime,
                                              String newDescription, String newLocation, String newEventStatus) throws IllegalArgumentException {
     if (newSubject.isEmpty() || newStartDateTime.isEmpty()) {
@@ -244,7 +287,7 @@ public class Calendar implements CalendarInterface {
 
         Event oldEvent = calendar.remove(key);
         String seriesId = oldEvent.getSeriesId();
-        EventSeriesOptional series = seriesManager.get(seriesId);
+        EventSeries series = seriesManager.get(seriesId);
         if (series != null) {
           series.removeEventKey(key);
         }
@@ -254,7 +297,7 @@ public class Calendar implements CalendarInterface {
         String newWeekdays = null;
         int newRepeatTimes = 0;
         String newSeriesEndDate = null;
-        EventSeriesOptional newSeries = createEventSeriesOptional(newSeriesId, newSubject,
+        EventSeries newSeries = createEventSeries(newSubject,
             newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus,
             newWeekdays, newRepeatTimes, newSeriesEndDate);
 

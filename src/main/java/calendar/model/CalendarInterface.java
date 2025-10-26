@@ -5,7 +5,6 @@ import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
-import calendar.event.EventSeriesOptional;
 
 /**
  * This interface contains necessary operations that a calendar should support.
@@ -43,7 +42,6 @@ public interface CalendarInterface {
    * A single event in a series can only span one day (it must start and finish on the same day).
    * Two events in the calendar cannot have the same subject, start date/time and end date/time.
    *
-   * @param seriesId          every series has a unique series id, not shown to users
    * @param subject           the theme of the event series on calendar (must specify)
    * @param startDateTime     the start date and/or time of the event series (must specify)
    * @param endDateTime       the end date and/or time of the event series (must specify)
@@ -60,13 +58,9 @@ public interface CalendarInterface {
    * @return the event series that is created; if fail to create, return null
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
-  EventSeriesOptional createEventSeriesOptional(String seriesId,
-                                                String subject, String startDateTime,
-                                                String endDateTime,
-                                                String description, String location,
-                                                String eventStatus,
-                                                String weekdays, int repeatTimes,
-                                                String seriesEndDateTime)
+  EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
+                                String description, String location, String eventStatus,
+                                String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException;
 
   /**
@@ -99,7 +93,7 @@ public interface CalendarInterface {
                         String newDescription, String newLocation, String newEventStatus)
       throws IllegalArgumentException;
 
-  EventSeriesOptional editEventSeries(String subject, String startDateTime, String endDateTime,
+  EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
                                       String newSubject, String newStartDateTime, String newEndDateTime,
                                       String newDescription, String newLocation, String newEventStatus) throws IllegalArgumentException;
 
