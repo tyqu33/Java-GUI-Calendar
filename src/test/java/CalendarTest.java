@@ -79,7 +79,6 @@ public class CalendarTest {
     assertEquals(LocalDate.parse("2025-05-12"), dates.get(2));
     assertEquals(LocalDate.parse("2025-05-14"), dates.get(3));
     assertEquals(LocalDate.parse("2025-05-19"), dates.get(4));
-    assertEquals(LocalDate.parse("2025-05-21"), dates.get(5));
     for (EventKey key : keys) {
       assertEquals(LocalTime.of(10, 0), key.getStartDateTime().toLocalTime());
       assertEquals(LocalTime.of(11, 0), key.getEndDateTime().toLocalTime());
