@@ -3,11 +3,16 @@ package calendar.model;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
+import calendar.util.CSVExporter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +35,9 @@ public class Calendar implements CalendarInterface {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
     LocalDateTime start;
+    if (startDateTime.length() <= 10) {
+      startDateTime = startDateTime + "T00:00";
+    }
     try {
       start = LocalDateTime.parse(startDateTime);
     } catch (DateTimeParseException e) {
@@ -37,7 +45,7 @@ public class Calendar implements CalendarInterface {
     }
     LocalDateTime end = null;
     boolean isAllDay = false;
-    if (endDateTime.isEmpty()) {
+    if (endDateTime == null || endDateTime.isEmpty()) {
       isAllDay = true;
       LocalDate date = start.toLocalDate();
       start = LocalDateTime.of(date, LocalTime.of(8, 0));
@@ -186,7 +194,7 @@ public class Calendar implements CalendarInterface {
                                String newSubject, String newStartDateTime, String newEndDateTime,
                                String newDescription, String newLocation,
                                String newEventStatus) throws IllegalArgumentException {
-    if (newSubject.isEmpty() || newStartDateTime.isEmpty()) {
+    if (subject == null || startDateTime == null) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
     LocalDateTime start;
@@ -196,7 +204,7 @@ public class Calendar implements CalendarInterface {
       throw new IllegalArgumentException("Invalid start date/time: " + newStartDateTime);
     }
     LocalDateTime end = null;
-    if (!newEndDateTime.isEmpty()) {
+    if (newEndDateTime != null && !newEndDateTime.isEmpty()) {
       try {
         end = LocalDateTime.parse(newEndDateTime);
       } catch (DateTimeParseException e) {
@@ -314,29 +322,6 @@ public class Calendar implements CalendarInterface {
     return null;
   }
 
-  @Override
-  public void printEventsOnSpecificDay(String startDateTime)
-      throws IllegalArgumentException {
-
-
-  }
-
-  @Override
-  public void printEventsFromTimeToTime(String startDateTime, String endDateTime)
-      throws IllegalArgumentException {
-
-  }
-
-  @Override
-  public UserStatus showUserStatusOnSpecificTime(String queryDateTime)
-      throws IllegalArgumentException {
-    return null;
-  }
-
-  @Override
-  public void exportCalendarToFile(String fileName) {
-
-  }
 
   private void verifyInputs(String subject, String startDateTime, String endDateTime,
                             LocalDateTime start, LocalDateTime end)
@@ -356,5 +341,72 @@ public class Calendar implements CalendarInterface {
         throw new IllegalArgumentException("Invalid end date/time: " + endDateTime);
       }
     }
+  }
+
+  @Override
+  public List<Event> getEventsOnDate(LocalDate date) {
+    List<Event> result = new ArrayList<>();
+    for (Event event : calendar.values()) {
+      LocalDate eventStartDate = event.getStartDateTime().toLocalDate();
+      LocalDate eventEndDate = event.getEndDateTime() != null ?
+          event.getEndDateTime().toLocalDate() : eventStartDate;
+      boolean isOnDate = (date.isEqual(eventStartDate) || date.isAfter(eventStartDate))
+          && (date.isEqual(eventEndDate) || date.isBefore(eventEndDate) || date.isEqual(eventEndDate));
+      if (isOnDate) {
+        result.add(event);
+      }
+    }
+    Collections.sort(result, new Comparator<Event>() {
+      @Override
+      public int compare(Event e1, Event e2) {
+        return e1.getStartDateTime().compareTo(e2.getStartDateTime());
+      }
+    });
+    return result;
+  }
+
+  @Override
+  public List<Event> getEventsBetween(LocalDateTime start, LocalDateTime end) {
+    List<Event> result = new ArrayList<>();
+
+    for (Event event : calendar.values()) {
+      LocalDateTime eventStart = event.getStartDateTime();
+      LocalDateTime eventEnd = event.getEndDateTime();
+      if (!(eventEnd.isBefore(start) || eventStart.isAfter(end))) {
+        result.add(event);
+      }
+    }
+    Collections.sort(result, new Comparator<Event>() {
+      @Override
+      public int compare(Event e1, Event e2) {
+        return e1.getStartDateTime().compareTo(e2.getStartDateTime());
+      }
+    });
+
+    return result;
+  }
+
+  @Override
+  public UserStatus getUserStatus(LocalDateTime queryTime) {
+    for (Event event : calendar.values()) {
+      LocalDateTime eventStart = event.getStartDateTime();
+      LocalDateTime eventEnd = event.getEndDateTime();
+      if (!queryTime.isBefore(eventStart) && !queryTime.isAfter(eventEnd)) {
+        return UserStatus.BUSY;
+      }
+    }
+    return UserStatus.AVAILABLE;
+  }
+
+  @Override
+  public String exportToCSV() {
+    List<Event> sortedEvents = new ArrayList<>(calendar.values());
+    Collections.sort(sortedEvents, new Comparator<Event>() {
+      @Override
+      public int compare(Event e1, Event e2) {
+        return e1.getStartDateTime().compareTo(e2.getStartDateTime());
+      }
+    });
+    return CSVExporter.exportToCSV(sortedEvents);
   }
 }

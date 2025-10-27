@@ -5,6 +5,9 @@ import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * This interface contains necessary operations that a calendar should support.
@@ -97,19 +100,17 @@ public interface CalendarInterface {
                                       String newSubject, String newStartDateTime, String newEndDateTime,
                                       String newDescription, String newLocation, String newEventStatus) throws IllegalArgumentException;
 
-  void printEventsOnSpecificDay(String startDateTime)
-      throws IllegalArgumentException;
+  List<Event> getEventsOnDate(LocalDate date);
 
-  void printEventsFromTimeToTime(String startDateTime, String endDateTime)
-      throws IllegalArgumentException;
+  List<Event> getEventsBetween(LocalDateTime start, LocalDateTime end);
 
   /**
    * Show UserStatus on a given date and/or time.
    *
+   * @param queryTime the given query time
    * @return If there exists event on the given date and/or time, return BUSY; else, AVAILABLE
-   * @throws IllegalArgumentException if inputs are not illegally formatted
    */
-  UserStatus showUserStatusOnSpecificTime(String queryDateTime) throws IllegalArgumentException;
+  UserStatus getUserStatus(LocalDateTime queryTime);
 
-  void exportCalendarToFile(String fileName);
+  String exportToCSV();
 }

@@ -9,10 +9,15 @@ import java.util.Scanner;
 
 public class CalendarController implements CalendarControllerInterface{
   private final CalendarInterface calendar;
-  public CalendarController(Calendar calendar, CalendarView calendarView) {
+  private final CalendarView view;
+
+  public CalendarController(Calendar calendar, CalendarView view) {
     this.calendar = new Calendar();
+    this.view = view;
   }
   public void runInteractiveMode() {
+    view.displayWelcome();
+
     Scanner consoleScanner = new Scanner(System.in);
     String commandLine;
 
@@ -59,22 +64,23 @@ public class CalendarController implements CalendarControllerInterface{
     switch (commandType) {
       case "create":
         CommandFactory createEvent = new CreateCommand(commandLine, calendar);
-      break;
+        break;
       case "edit":
         CommandFactory editEvent = new EditCommand(commandLine, calendar);
-      break;
+        break;
       case "print":
-        CommandFactory printEvent = new PrintCommand();
-      break;
+        CommandFactory printEvent = new PrintCommand(commandLine, calendar, view);
+        break;
       case "export":
-        CommandFactory exportEvent = new ExportCommand();
-      break;
+        CommandFactory exportEvent = new ExportCommand(commandLine, calendar, view);
+        break;
       case "show":
-
-      break;
+        CommandFactory shoeEvent = new ExportCommand(commandLine, calendar, view);
+        break;
       case "exit":
-      break;
+        break;
       default:
+        System.out.println("Invalid command line");
     }
   }
 }

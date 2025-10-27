@@ -1,10 +1,14 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import calendar.event.Event;
 import calendar.event.EventSeries;
 import calendar.model.Calendar;
 import calendar.model.EventKey;
+import calendar.view.CalendarView;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -19,6 +23,7 @@ import org.junit.Test;
  */
 public class CalendarTest {
   private Calendar calendar;
+  private CalendarView view;
 
   @Before
   public void setUp() {
@@ -80,4 +85,6 @@ public class CalendarTest {
       assertEquals(LocalTime.of(11, 0), key.getEndDateTime().toLocalTime());
     }
   }
+
+
 }
