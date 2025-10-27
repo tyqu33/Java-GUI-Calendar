@@ -25,10 +25,16 @@ public class CreateCommand extends CommandFactory {
       "^create event (?:(\\S+)|\"([^\"]*)\") on (\\S+)$");
 
   private final CalendarInterface calendar;
+  private final String commandLine;
 
   public CreateCommand(String commandLine, CalendarInterface calendar) {
     this.calendar = calendar;
-    parseCommand(commandLine);
+    this.commandLine = commandLine;
+  }
+
+  @Override
+  public void execute() {
+    parseCommand(this.commandLine);
   }
 
   @Override
@@ -106,6 +112,7 @@ public class CreateCommand extends CommandFactory {
       startDateTime = matcher.group(3).trim();
       this.calendar.createSingleEvent(subject, startDateTime, null,
           description, location, eventStatus, null);
+      return;
     }
     System.err.println("Create event failure. Wrong format: " + commandLine);
   }

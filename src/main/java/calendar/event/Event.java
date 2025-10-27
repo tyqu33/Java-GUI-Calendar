@@ -76,6 +76,9 @@ public class Event implements EventInterface {
     }
 
     public EventBuilder status(String status) {
+      if (status == null || status.trim().isEmpty()) {
+        return this;
+      }
       if (status.equals("private")) {
         this.status = EventStatus.PRIVATE;
       } else {

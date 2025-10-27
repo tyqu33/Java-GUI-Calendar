@@ -13,4 +13,6 @@ abstract public class CommandFactory {
   protected String eventStatus;
 
   protected abstract void parseCommand(String commandLine);
+
+  protected abstract void execute();
 }

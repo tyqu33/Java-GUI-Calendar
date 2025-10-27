@@ -10,10 +10,9 @@ import java.util.Scanner;
 public class CalendarController implements CalendarControllerInterface{
   private final CalendarInterface calendar;
   private final CalendarView view;
-
-  public CalendarController(Calendar calendar, CalendarView view) {
-    this.calendar = new Calendar();
-    this.view = view;
+  public CalendarController(Calendar calendar, CalendarView calendarView) {
+    this.calendar = calendar;
+    this.view = calendarView;
   }
   public void runInteractiveMode() {
     view.displayWelcome();
@@ -64,9 +63,11 @@ public class CalendarController implements CalendarControllerInterface{
     switch (commandType) {
       case "create":
         CommandFactory createEvent = new CreateCommand(commandLine, calendar);
+        createEvent.execute();
         break;
       case "edit":
         CommandFactory editEvent = new EditCommand(commandLine, calendar);
+        editEvent.execute();
         break;
       case "print":
         CommandFactory printEvent = new PrintCommand(commandLine, calendar, view);

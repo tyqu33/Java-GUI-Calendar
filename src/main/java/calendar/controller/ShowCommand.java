@@ -36,4 +36,9 @@ public class ShowCommand extends CommandFactory{
       view.displayError("Show status failed. " + e.getMessage());
     }
   }
+
+  @Override
+  protected void execute() {
+
+  }
 }

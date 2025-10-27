@@ -28,10 +28,16 @@ public class EditCommand extends CommandFactory {
   private static final Pattern NEW_VALUE_PARSER = Pattern.compile("^(?:(\\S+)|\"([^\"]*)\")$");
 
   private final CalendarInterface calendar;
+  private final String commandLine;
 
   public EditCommand(String commandLine, CalendarInterface calendar) {
     this.calendar = calendar;
-    parseCommand(commandLine);
+    this.commandLine = commandLine;
+  }
+
+  @Override
+  public void execute() {
+    parseCommand(this.commandLine);
   }
 
   @Override

@@ -51,4 +51,9 @@ public class PrintCommand extends CommandFactory {
       view.displayError("Print failed." + e.getMessage());
     }
   }
+
+  @Override
+  protected void execute() {
+
+  }
 }

@@ -33,7 +33,7 @@ public class CalendarRunner {
       String fileName = args[2];
       calendarController.runHeadlessMode(fileName);
     } else {
-      System.out.println("Error: Unknown mode " + args[0]);
+      System.out.println("Error: Unknown mode " + mode);
       return;
     }
 

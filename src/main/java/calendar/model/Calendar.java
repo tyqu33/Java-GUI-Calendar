@@ -197,57 +197,79 @@ public class Calendar implements CalendarInterface {
     if (subject == null || startDateTime == null) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
-    LocalDateTime start;
+    LocalDateTime oldStart;
     try {
-      start = LocalDateTime.parse(newStartDateTime);
+      oldStart = LocalDateTime.parse(startDateTime);
     } catch (DateTimeParseException e) {
-      throw new IllegalArgumentException("Invalid start date/time: " + newStartDateTime);
+      throw new IllegalArgumentException("Invalid start date/time: " + startDateTime);
     }
-    LocalDateTime end = null;
-    if (newEndDateTime != null && !newEndDateTime.isEmpty()) {
-      try {
-        end = LocalDateTime.parse(newEndDateTime);
-      } catch (DateTimeParseException e) {
-        throw new IllegalArgumentException("Invalid end date/time: " + newEndDateTime);
-      }
+
+
+    LocalDateTime oldEnd = null;
+    try {
+      oldEnd = LocalDateTime.parse(endDateTime);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Invalid end date/time: " + endDateTime);
     }
-    // The new inputs clash with existing event, the edition should not occur
-    EventKey newKey = new EventKey(newSubject, start, end);
-    if (calendar.get(newKey) != null) {
-      throw new IllegalArgumentException(
-          "Event on the new subject, start date/time, end date/time already exists");
-    }
+
+    EventKey oldKey = new EventKey(subject, oldStart, oldEnd);
+    Event oldEvent = calendar.get(oldKey);
     // The old Event does not exist
-    Event oldEvent = getSingleEvent(subject, startDateTime, endDateTime);
     if (oldEvent == null) {
       throw new IllegalArgumentException("Event does not exist, should create a new one");
     }
+    boolean isKeyChanged = (newSubject != null) || (newStartDateTime != null) || (newEndDateTime != null);
 
-    Event newEvent = null;
-    if (newSubject.equals(subject) && newStartDateTime.equals(startDateTime) &&
-        newEndDateTime.equals(endDateTime)) {
-      newEvent = getSingleEvent(newSubject, newStartDateTime, newEndDateTime);
-      if (!newDescription.isEmpty()) {
-        newEvent.editDescription(newDescription);
+    if (!isKeyChanged) {
+      if (newDescription != null && !newDescription.isEmpty()) {
+        oldEvent.editDescription(newDescription);
       }
-      if (!newLocation.isEmpty()) {
-        newEvent.editLocation(newLocation);
+      if (newLocation != null && !newLocation.isEmpty()) {
+        oldEvent.editLocation(newLocation);
       }
-      if (!newEventStatus.isEmpty()) {
-        newEvent.editEventStatus(newEventStatus);
+      if (newEventStatus != null && !newEventStatus.isEmpty()) {
+        oldEvent.editEventStatus(newEventStatus);
       }
+      return oldEvent;
 
     } else {
-      newEvent = createSingleEvent(newSubject, newStartDateTime, newEndDateTime, newDescription,
-          newLocation, newEventStatus, null);
 
-      calendar.remove(new EventKey(oldEvent.getSubject(), oldEvent.getStartDateTime(),
-          oldEvent.getEndDateTime()));
+      String finalNewSubject = (newSubject != null) ? newSubject : oldEvent.getSubject();
+      LocalDateTime finalNewStart;
+      if (newStartDateTime != null) {
+        try {
+          finalNewStart = LocalDateTime.parse(newStartDateTime);
+        } catch (DateTimeParseException e) {
+          throw new IllegalArgumentException("Invalid new start date/time: " + newStartDateTime);
+        }
+      } else {
+        finalNewStart = oldEvent.getStartDateTime();
+      }
+      LocalDateTime finalNewEnd;
+      if (newEndDateTime != null) {
+        try {
+          finalNewEnd = LocalDateTime.parse(newEndDateTime);
+        } catch (DateTimeParseException e) {
+          throw new IllegalArgumentException("Invalid new end date/time: " + newEndDateTime);
+        }
+      } else {
+        finalNewEnd = oldEvent.getEndDateTime();
+      }
+      // The new inputs clash with existing event, the edition should not occur
+      EventKey newKey = new EventKey(finalNewSubject, finalNewStart, finalNewEnd);
+      if (calendar.get(newKey) != null) { // !newKey.equals(oldKey) && calendar.containsKey(newKey)
+        throw new IllegalArgumentException(
+            "Event on the new subject, start date/time, end date/time already exists");
+      }
+
+      Event newEvent = createSingleEvent(finalNewSubject, finalNewStart.toString(), finalNewEnd.toString(), newDescription,
+          newLocation, newEventStatus, null);
+      calendar.remove(oldKey);
       calendar.put(newKey, newEvent);
+
+      return newEvent;
     }
 
-
-    return newEvent;
   }
 
   @Override

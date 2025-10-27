@@ -31,4 +31,9 @@ public class ExportCommand extends CommandFactory{
       view.displayError("Export failed." + e.getMessage());
     }
   }
+
+  @Override
+  protected void execute() {
+
+  }
 }
