@@ -277,7 +277,7 @@ public class Calendar implements CalendarInterface {
     }
 
     EventKey oldKey = new EventKey(subject, oldStart, oldEnd);
-    System.out.printf("oldKey: %s, %s, %s", subject, oldStart.toString(), oldEnd.toString());
+    // System.out.printf("oldKey: %s, %s, %s", subject, oldStart.toString(), oldEnd.toString());
     Event oldEvent = calendar.get(oldKey);
     if (oldEvent == null) {
       throw new IllegalArgumentException("Event does not exist, subject: " + subject + ", start: " + startDateTime + ", end: " + endDateTime);
