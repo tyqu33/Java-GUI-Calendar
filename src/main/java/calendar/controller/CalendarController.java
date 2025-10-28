@@ -13,7 +13,7 @@ public class CalendarController implements CalendarControllerInterface{
   private final Readable input;
   private final Appendable output;
 
-  public CalendarController(Calendar calendar, CalendarView calendarView, Readable input, Appendable output) {
+  public CalendarController(CalendarInterface calendar, CalendarView calendarView, Readable input, Appendable output) {
     this.calendar = calendar;
     this.view = calendarView;
     this.input = input;
