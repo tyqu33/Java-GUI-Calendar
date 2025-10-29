@@ -390,26 +390,19 @@ public class Calendar implements CalendarInterface {
       LocalDate eventStartDate = event.getStartDateTime().toLocalDate();
       LocalDate eventEndDate = event.getEndDateTime() != null
           ? event.getEndDateTime().toLocalDate() : eventStartDate;
-      boolean isOnDate = (date.isEqual(eventStartDate) || date.isAfter(eventStartDate))
-          &&
-          (date.isEqual(eventEndDate) || date.isBefore(eventEndDate) || date.isEqual(eventEndDate));
-      if (isOnDate) {
+      boolean isNotBeforeStart = !date.isBefore(eventStartDate);
+      boolean isNotAfterEnd = !date.isAfter(eventEndDate);
+      if (isNotBeforeStart && isNotAfterEnd) {
         result.add(event);
       }
     }
-    Collections.sort(result, new Comparator<Event>() {
-      @Override
-      public int compare(Event e1, Event e2) {
-        return e1.getStartDateTime().compareTo(e2.getStartDateTime());
-      }
-    });
+    result.sort((e1, e2) -> e1.getStartDateTime().compareTo(e2.getStartDateTime()));
     return result;
   }
 
   @Override
   public List<Event> getEventsBetween(LocalDateTime start, LocalDateTime end) {
     List<Event> result = new ArrayList<>();
-
     for (Event event : calendar.values()) {
       LocalDateTime eventStart = event.getStartDateTime();
       LocalDateTime eventEnd = event.getEndDateTime();
@@ -417,13 +410,7 @@ public class Calendar implements CalendarInterface {
         result.add(event);
       }
     }
-    Collections.sort(result, new Comparator<Event>() {
-      @Override
-      public int compare(Event e1, Event e2) {
-        return e1.getStartDateTime().compareTo(e2.getStartDateTime());
-      }
-    });
-
+    result.sort((e1, e2) -> e1.getStartDateTime().compareTo(e2.getStartDateTime()));
     return result;
   }
 
@@ -442,12 +429,7 @@ public class Calendar implements CalendarInterface {
   @Override
   public String exportToCSV() {
     List<Event> sortedEvents = new ArrayList<>(calendar.values());
-    Collections.sort(sortedEvents, new Comparator<Event>() {
-      @Override
-      public int compare(Event e1, Event e2) {
-        return e1.getStartDateTime().compareTo(e2.getStartDateTime());
-      }
-    });
+    sortedEvents.sort((e1, e2) -> e1.getStartDateTime().compareTo(e2.getStartDateTime()));
     return CSVExporter.exportToCSV(sortedEvents);
   }
 }

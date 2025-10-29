@@ -148,6 +148,19 @@ public class ViewTest {
     assertNotNull(defaultView);
   }
 
+  @Test
+  public void testDisplayEventsWithoutEndTime() {
+    List<Event> events = new ArrayList<>();
+    events.add(Event.builder("AllDay", LocalDateTime.parse("2025-05-01T08:00"))
+        .setAllDayEvent()
+        .build());
+
+    view.displayEventsOnDate(events, LocalDate.parse("2025-05-01"));
+
+    String result = output.toString();
+    assertTrue(result.contains("AllDay"));
+    assertTrue(result.contains("8:00"));
+  }
 
   @Test
   public void testDisplayEventsWithoutLocation() {
