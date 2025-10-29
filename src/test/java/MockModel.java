@@ -20,7 +20,8 @@ class MockModel implements CalendarInterface {
                                  String description, String location, String eventStatus,
                                  String seriesId) {
     LocalDate start = LocalDate.parse(startDateTime);
-    log.append("create event " + subject + " on " + start.toString() + "\nprint events on " + start.toString() + "\nexit\n");
+    log.append("create event " + subject
+        + " on " + start.toString() + "\nprint events on " + start.toString() + "\nexit\n");
     return null;
   }
 

@@ -37,7 +37,7 @@ public class Calendar implements CalendarInterface {
                                  String description, String location, String eventStatus,
                                  String seriesId)
       throws IllegalArgumentException {
-    if (subject.isEmpty() || startDateTime.isEmpty()) {
+    if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
     LocalDateTime start;
@@ -81,7 +81,7 @@ public class Calendar implements CalendarInterface {
                                        String description, String location, String eventStatus,
                                        String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException {
-    if (subject == null || startDateTime == null) {
+    if (subject == null || subject.isEmpty() || startDateTime == null  || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
     LocalDateTime start;
@@ -122,7 +122,7 @@ public class Calendar implements CalendarInterface {
       seriesBuilder.end(end);
     }
     if (repeatTimes > 0) {
-      seriesBuilder.occurrences(repeatTimes);
+      seriesBuilder.occurrences(new Integer(repeatTimes));
     } else if (seriesEndDate != null) {
       seriesBuilder.setEndDate(seriesEndDate);
     } else {
@@ -177,7 +177,7 @@ public class Calendar implements CalendarInterface {
                                String newSubject, String newStartDateTime, String newEndDateTime,
                                String newDescription, String newLocation,
                                String newEventStatus) throws IllegalArgumentException {
-    if (subject == null || startDateTime == null) {
+    if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
     LocalDateTime oldStart;
@@ -203,7 +203,9 @@ public class Calendar implements CalendarInterface {
           + ", start: " + startDateTime + ", end: " + endDateTime);
     }
     boolean isKeyChanged =
-        (newSubject != null) || (newStartDateTime != null) || (newEndDateTime != null);
+        (newSubject != null && !newSubject.isEmpty())
+            || (newStartDateTime != null && !newStartDateTime.isEmpty())
+            || (newEndDateTime != null && !newEndDateTime.isEmpty());
 
     if (!isKeyChanged) {
       if (newDescription != null && !newDescription.isEmpty()) {
@@ -218,10 +220,10 @@ public class Calendar implements CalendarInterface {
       return oldEvent;
 
     } else {
-
-      String finalNewSubject = (newSubject != null) ? newSubject : oldEvent.getSubject();
+      // System.out.println("old subject: " + oldEvent.getSubject());
+      String finalNewSubject = (newSubject != null && !newSubject.isEmpty()) ? newSubject : oldEvent.getSubject();
       LocalDateTime finalNewStart;
-      if (newStartDateTime != null) {
+      if (newStartDateTime != null && !newStartDateTime.isEmpty()) {
         try {
           finalNewStart = LocalDateTime.parse(newStartDateTime);
         } catch (DateTimeParseException e) {
@@ -231,7 +233,7 @@ public class Calendar implements CalendarInterface {
         finalNewStart = oldEvent.getStartDateTime();
       }
       LocalDateTime finalNewEnd;
-      if (newEndDateTime != null) {
+      if (newEndDateTime != null && !newEndDateTime.isEmpty()) {
         try {
           finalNewEnd = LocalDateTime.parse(newEndDateTime);
         } catch (DateTimeParseException e) {
@@ -246,7 +248,7 @@ public class Calendar implements CalendarInterface {
         throw new IllegalArgumentException(
             "Event on the new subject, start date/time, end date/time already exists");
       }
-
+      // System.out.println("finalNewSubject: " + finalNewSubject + " finalNewStart: " + finalNewStart.toString() + " finalNewEnd: " + finalNewEnd.toString());
       Event newEvent =
           createSingleEvent(finalNewSubject, finalNewStart.toString(), finalNewEnd.toString(),
               newDescription,
@@ -265,7 +267,7 @@ public class Calendar implements CalendarInterface {
                                      String newEndDateTime,
                                      String newDescription, String newLocation,
                                      String newEventStatus) throws IllegalArgumentException {
-    if (subject == null || startDateTime == null) {
+    if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
     LocalDateTime oldStart;

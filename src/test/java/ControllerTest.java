@@ -10,6 +10,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import org.junit.Test;
 
+/**
+ * Test for ControllerTest Class.
+ */
 public class ControllerTest {
 
   //  create event Meeting on 2025-10-27
@@ -39,7 +42,7 @@ public class ControllerTest {
   }
 
   @Test
-  public void testGoWithMock() {
+  public void testGoWithMockCreateEvent() {
     Reader in = new StringReader(
         "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n");
     StringBuilder log = new StringBuilder();
@@ -51,7 +54,8 @@ public class ControllerTest {
     CalendarController controller = new CalendarController(model, view, in, out);
     controller.go();
 
-    String expectedOutput = "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n";
+    String expectedOutput =
+        "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n";
     // "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
 
