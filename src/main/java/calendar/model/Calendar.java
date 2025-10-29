@@ -16,11 +16,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * The implementation of CalendarInterface that creates and edit single event and event series.
+ */
 public class Calendar implements CalendarInterface {
 
   Map<EventKey, Event> calendar;
   Map<String, EventSeries> seriesManager;
 
+  /**
+   * Constructor for Calendar Class.
+   */
   public Calendar() {
     calendar = new HashMap<>();
     seriesManager = new HashMap<>();
@@ -193,9 +199,11 @@ public class Calendar implements CalendarInterface {
     Event oldEvent = calendar.get(oldKey);
     // The old Event does not exist
     if (oldEvent == null) {
-      throw new IllegalArgumentException("Event does not exist, subject: " + subject + ", start: " + startDateTime + ", end: " + endDateTime);
+      throw new IllegalArgumentException("Event does not exist, subject: " + subject
+          + ", start: " + startDateTime + ", end: " + endDateTime);
     }
-    boolean isKeyChanged = (newSubject != null) || (newStartDateTime != null) || (newEndDateTime != null);
+    boolean isKeyChanged =
+        (newSubject != null) || (newStartDateTime != null) || (newEndDateTime != null);
 
     if (!isKeyChanged) {
       if (newDescription != null && !newDescription.isEmpty()) {
@@ -239,8 +247,10 @@ public class Calendar implements CalendarInterface {
             "Event on the new subject, start date/time, end date/time already exists");
       }
 
-      Event newEvent = createSingleEvent(finalNewSubject, finalNewStart.toString(), finalNewEnd.toString(), newDescription,
-          newLocation, newEventStatus, null);
+      Event newEvent =
+          createSingleEvent(finalNewSubject, finalNewStart.toString(), finalNewEnd.toString(),
+              newDescription,
+              newLocation, newEventStatus, null);
       calendar.remove(oldKey);
       calendar.put(newKey, newEvent);
 
@@ -280,9 +290,11 @@ public class Calendar implements CalendarInterface {
     // System.out.printf("oldKey: %s, %s, %s", subject, oldStart.toString(), oldEnd.toString());
     Event oldEvent = calendar.get(oldKey);
     if (oldEvent == null) {
-      throw new IllegalArgumentException("Event does not exist, subject: " + subject + ", start: " + startDateTime + ", end: " + endDateTime);
+      throw new IllegalArgumentException("Event does not exist, subject: "
+          + subject + ", start: " + startDateTime + ", end: " + endDateTime);
     }
-    boolean isKeyChanged = (newSubject != null) || (newStartDateTime != null) || (newEndDateTime != null);
+    boolean isKeyChanged =
+        (newSubject != null) || (newStartDateTime != null) || (newEndDateTime != null);
     String seriesId = oldEvent.getSeriesId();
     // This event does not belong to any series
     if (seriesId == null) {
@@ -292,7 +304,8 @@ public class Calendar implements CalendarInterface {
     } else {
       EventSeries series = seriesManager.get(seriesId);
       if (series == null) {
-        throw new IllegalStateException("The series with subject: " + subject + ", start: " + startDateTime + ", end: " + endDateTime + "does not exit");
+        throw new IllegalStateException("The series with subject: " + subject
+            + ", start: " + startDateTime + ", end: " + endDateTime + "does not exit");
       } else {
         if (!isKeyChanged) {
           for (EventKey eventKey : series.getEventKeys()) {
@@ -349,8 +362,10 @@ public class Calendar implements CalendarInterface {
           newLocation = series.getLocation();
           newEventStatus = series.getEventStatus().toString();
           String newWeekdays = series.getWeekdays();
-          int newRepeatTimes = (series.getOccurrences() == null ? 0 : series.getOccurrences().intValue());
-          String newSeriesEndDate = series.getEndDate() == null ? "" :series.getEndDate().toString();
+          int newRepeatTimes =
+              (series.getOccurrences() == null ? 0 : series.getOccurrences().intValue());
+          String newSeriesEndDate =
+              series.getEndDate() == null ? "" : series.getEndDate().toString();
           EventSeries newSeries = createEventSeries(finalNewSubject,
               finalNewStart.toString(), finalNewEnd.toString(), newDescription, newLocation,
               newEventStatus,
@@ -358,22 +373,6 @@ public class Calendar implements CalendarInterface {
           return newSeries;
         }
       }
-      //      // PRIMAL KEY NOT CHANGED
-      //      if (newSubject.equals(subject) && newStartDateTime.equals(startDateTime) &&
-      //          newEndDateTime.equals(endDateTime)) {
-      //        // THERE SHOULD BE A HELPER METHOD, CALCULATING EVERY START AND END IN THIS SERIES FOR EVERY EVENT
-      //        // IN A LOOP:
-      //        {
-      //          editSingleEvent(subject, startDateTime, endDateTime, newSubject, newStartDateTime,
-      //              newEndDateTime,
-      //              newDescription, newLocation, newEventStatus);
-      //        }
-      //      } else {
-      //
-      //
-      //
-      //
-      //      }
 
     }
 
@@ -382,35 +381,16 @@ public class Calendar implements CalendarInterface {
   }
 
 
-  private void verifyInputs(String subject, String startDateTime, String endDateTime,
-                            LocalDateTime start, LocalDateTime end)
-      throws IllegalArgumentException {
-    if (subject.isEmpty() || startDateTime.isEmpty()) {
-      throw new IllegalArgumentException("subject or startDateTime cannot be empty");
-    }
-    try {
-      start = LocalDateTime.parse(startDateTime);
-    } catch (DateTimeParseException e) {
-      throw new IllegalArgumentException("Invalid start date/time: " + startDateTime);
-    }
-    if (!endDateTime.isEmpty()) {
-      try {
-        end = LocalDateTime.parse(endDateTime);
-      } catch (DateTimeParseException e) {
-        throw new IllegalArgumentException("Invalid end date/time: " + endDateTime);
-      }
-    }
-  }
-
   @Override
   public List<Event> getEventsOnDate(LocalDate date) {
     List<Event> result = new ArrayList<>();
     for (Event event : calendar.values()) {
       LocalDate eventStartDate = event.getStartDateTime().toLocalDate();
-      LocalDate eventEndDate = event.getEndDateTime() != null ?
-          event.getEndDateTime().toLocalDate() : eventStartDate;
+      LocalDate eventEndDate = event.getEndDateTime() != null
+          ? event.getEndDateTime().toLocalDate() : eventStartDate;
       boolean isOnDate = (date.isEqual(eventStartDate) || date.isAfter(eventStartDate))
-          && (date.isEqual(eventEndDate) || date.isBefore(eventEndDate) || date.isEqual(eventEndDate));
+          &&
+          (date.isEqual(eventEndDate) || date.isBefore(eventEndDate) || date.isEqual(eventEndDate));
       if (isOnDate) {
         result.add(event);
       }

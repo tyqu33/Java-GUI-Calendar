@@ -12,10 +12,8 @@ import java.io.InputStreamReader;
  */
 public class CalendarRunner {
 
-  public CalendarRunner() {
-  }
   /**
-   * The main method placeholder.
+   * The main method.
    */
   public static void main(String[] args) {
     Calendar calendarModel = new Calendar();
@@ -36,7 +34,8 @@ public class CalendarRunner {
     if (args[1].equals("interactive")) {
       calendarView.displayWelcome();
     }
-    CalendarController calendarController = new CalendarController(calendarModel, calendarView, input, output);
+    CalendarController calendarController =
+        new CalendarController(calendarModel, calendarView, input, output);
     calendarController.go();
     if (input instanceof java.io.FileReader) {
       try {
@@ -50,7 +49,8 @@ public class CalendarRunner {
 
   private static Readable verifyAndGetInput(String[] args) throws FileNotFoundException {
     if (args.length == 0 || !args[0].equals("--mode") || args.length < 2) {
-      System.out.println("Error: Wrong usage of running Calendar. Usage: java CalendarRunner --mode [interactive|headless] [command.txt]");
+      System.out.println("Error: Wrong usage of running Calendar. "
+          + "Usage: java CalendarRunner --mode [interactive|headless] [command.txt]");
       return null;
     }
 

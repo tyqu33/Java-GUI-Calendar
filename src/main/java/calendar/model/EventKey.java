@@ -3,11 +3,21 @@ package calendar.model;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * EventKey (subject + start + end) serves as the primal key of an event in calendar.
+ */
 public class EventKey {
   private final String subject;
   private final LocalDateTime startDateTime;
   private final LocalDateTime endDateTime;
 
+  /**
+   * Constructor for EventKey.
+   *
+   * @param subject the theme of the event
+   * @param startDateTime the start of the event, format: YYYY-MM-DDThh:mm
+   * @param endDateTime the end of the event, format: YYYY-MM-DDThh:mm
+   */
   public EventKey(String subject, LocalDateTime startDateTime, LocalDateTime endDateTime) {
     this.subject = subject.trim();
     this.startDateTime = startDateTime;
@@ -35,9 +45,9 @@ public class EventKey {
       return false;
     }
     EventKey eventKey = (EventKey) o;
-    return Objects.equals(subject, eventKey.subject) &&
-        Objects.equals(startDateTime, eventKey.startDateTime) &&
-        Objects.equals(endDateTime, eventKey.endDateTime);
+    return Objects.equals(subject, eventKey.subject)
+        && Objects.equals(startDateTime, eventKey.startDateTime)
+        && Objects.equals(endDateTime, eventKey.endDateTime);
   }
 
   @Override

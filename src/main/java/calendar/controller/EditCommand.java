@@ -4,6 +4,10 @@ import calendar.model.CalendarInterface;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class represents the process of event edition. Use regex to match edition pattern and update
+ * the properties accordingly with the new value.
+ */
 public class EditCommand extends CommandFactory {
   private String oldProperty;
   private String newPropertyValue;
@@ -25,11 +29,18 @@ public class EditCommand extends CommandFactory {
       "^edit series (\\S+) (?:(\\S+)|\"([^\"]*)\") from (\\S+) with (.*?)$");
 
 
-  private static final Pattern NEW_VALUE_PARSER = Pattern.compile("^(?:(\\S+)|\"([^\"]*)\")$");
+  private static final Pattern NEW_VALUE_PARSER =
+      Pattern.compile("^(?:(\\S+)|\"([^\"]*)\")$");
 
   private final CalendarInterface calendar;
   private final String commandLine;
 
+  /**
+   * Constructor for EditCommand Class.
+   *
+   * @param commandLine the input line of a command
+   * @param calendar    the calendar object
+   */
   public EditCommand(String commandLine, CalendarInterface calendar) {
     this.calendar = calendar;
     this.commandLine = commandLine;
@@ -53,7 +64,8 @@ public class EditCommand extends CommandFactory {
       newPropertyValue = matcher.group(6).trim();
 
       getNewPropertyValue(oldProperty, newPropertyValue);
-      this.calendar.editSingleEvent(subject, startDateTime, endDateTime, newSubject, newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
+      this.calendar.editSingleEvent(subject, startDateTime, endDateTime, newSubject,
+          newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
       return;
     }
 
@@ -65,7 +77,8 @@ public class EditCommand extends CommandFactory {
       newPropertyValue = matcher.group(5).trim();
 
       getNewPropertyValue(oldProperty, newPropertyValue);
-      this.calendar.editEventSeries(subject, startDateTime, endDateTime, newSubject, newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
+      this.calendar.editEventSeries(subject, startDateTime, endDateTime, newSubject,
+          newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
       return;
     }
 
@@ -77,46 +90,56 @@ public class EditCommand extends CommandFactory {
       newPropertyValue = matcher.group(5).trim();
 
       getNewPropertyValue(oldProperty, newPropertyValue);
-      this.calendar.editEventSeries(subject, startDateTime, endDateTime, newSubject, newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
+      this.calendar.editEventSeries(subject, startDateTime, endDateTime, newSubject,
+          newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
       return;
     }
 
   }
 
   private void getNewPropertyValue(String oldProperty, String newPropertyValue)
-    throws IllegalArgumentException {
+      throws IllegalArgumentException {
     switch (oldProperty) {
-      case "subject": {
-        Matcher mValue = NEW_VALUE_PARSER.matcher(newPropertyValue);
-        if (mValue.find()) {
-          newSubject = (mValue.group(1) != null ? mValue.group(1) : mValue.group(2)).trim();
-        } else {
-          throw new IllegalArgumentException("New property value is invalid");
+      case "subject":
+        {
+          Matcher m = NEW_VALUE_PARSER.matcher(newPropertyValue);
+          if (m.find()) {
+            newSubject = (m.group(1) != null ? m.group(1) : m.group(2)).trim();
+          } else {
+            throw new IllegalArgumentException("New property value is invalid");
+          }
         }
-      }
-      break;
-      case "location": {
-        Matcher mValue = NEW_VALUE_PARSER.matcher(newPropertyValue);
-        if (mValue.find()) {
-          newLocation = (mValue.group(1) != null ? mValue.group(1) : mValue.group(2)).trim();
-        } else {
-          throw new IllegalArgumentException("New property value is invalid");
+        break;
+      case "location":
+        {
+          Matcher m = NEW_VALUE_PARSER.matcher(newPropertyValue);
+          if (m.find()) {
+            newLocation = (m.group(1) != null ? m.group(1) : m.group(2)).trim();
+          } else {
+            throw new IllegalArgumentException("New property value is invalid");
+          }
         }
-      }
-      break;
-      case "description": {
-        Matcher mValue = NEW_VALUE_PARSER.matcher(newPropertyValue);
-        if (mValue.find()) {
-          newDescription = (mValue.group(1) != null ? mValue.group(1) : mValue.group(2)).trim();
-        } else {
-          throw new IllegalArgumentException("New property value is invalid");
+        break;
+      case "description":
+        {
+          Matcher m = NEW_VALUE_PARSER.matcher(newPropertyValue);
+          if (m.find()) {
+            newDescription = (m.group(1) != null ? m.group(1) : m.group(2)).trim();
+          } else {
+            throw new IllegalArgumentException("New property value is invalid");
+          }
         }
-      }
-      break;
+        break;
 
-      case "start": newStartDateTime = newPropertyValue; break;
-      case "end": newEndDateTime = newPropertyValue; break;
-      case "status": newEventStatus = newPropertyValue; break;
+      case "start":
+        newStartDateTime = newPropertyValue;
+        break;
+      case "end":
+        newEndDateTime = newPropertyValue;
+        break;
+      case "status":
+        newEventStatus = newPropertyValue;
+        break;
       default:
     }
   }

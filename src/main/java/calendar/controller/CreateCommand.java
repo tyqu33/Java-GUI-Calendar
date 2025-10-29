@@ -4,13 +4,19 @@ import calendar.model.CalendarInterface;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class represents the process of event creation. Use regex to match creation pattern and
+ * create event or event series with given property values.
+ */
 public class CreateCommand extends CommandFactory {
 
   private static final Pattern C_FROM_TO_REPEATS_N = Pattern.compile(
-      "^create event (?:(\\S+)|\"([^\"]*)\") from (\\S+) to (\\S+) repeats (\\S+) for (\\d+) times$");
+      "^create event (?:(\\S+)|\"([^\"]*)\") from (\\S+) to (\\S+) "
+          + "repeats (\\S+) for (\\d+) times$");
 
   private static final Pattern C_FROM_TO_REPEATS_UNTIL = Pattern.compile(
-      "^create event (?:(\\S+)|\"([^\"]*)\") from (\\S+) to (\\S+) repeats (\\S+) until (\\S+)$");
+      "^create event (?:(\\S+)|\"([^\"]*)\") from (\\S+) to (\\S+) "
+          + "repeats (\\S+) until (\\S+)$");
 
   private static final Pattern C_FROM_TO = Pattern.compile(
       "^create event (?:(\\S+)|\"([^\"]*)\") from (\\S+) to (\\S+)$");
@@ -27,6 +33,12 @@ public class CreateCommand extends CommandFactory {
   private final CalendarInterface calendar;
   private final String commandLine;
 
+  /**
+   * Constructor for CreateCommand Class.
+   *
+   * @param commandLine the input line of a command
+   * @param calendar    the calendar object
+   */
   public CreateCommand(String commandLine, CalendarInterface calendar) {
     this.calendar = calendar;
     this.commandLine = commandLine;
@@ -61,7 +73,7 @@ public class CreateCommand extends CommandFactory {
       startDateTime = matcher.group(3).trim();
       endDateTime = matcher.group(4).trim();
       weekdays = matcher.group(5).trim();
-      seriesEndDateTime =  matcher.group(6).trim();
+      seriesEndDateTime = matcher.group(6).trim();
 
       this.calendar.createEventSeries(subject, startDateTime, endDateTime,
           description, location, eventStatus,
@@ -98,7 +110,7 @@ public class CreateCommand extends CommandFactory {
       subject = ((matcher.group(1) != null) ? matcher.group(1) : matcher.group(2)).trim();
       startDateTime = matcher.group(3).trim();
       weekdays = matcher.group(4).trim();
-      seriesEndDateTime =  matcher.group(5).trim();
+      seriesEndDateTime = matcher.group(5).trim();
 
       this.calendar.createEventSeries(subject, startDateTime, null,
           description, location, eventStatus,

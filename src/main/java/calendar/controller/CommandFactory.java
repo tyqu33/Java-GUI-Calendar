@@ -1,6 +1,6 @@
 package calendar.controller;
 
-abstract public class CommandFactory {
+abstract class CommandFactory {
   protected String subject;
   protected String startDateTime;
   protected String endDateTime;
