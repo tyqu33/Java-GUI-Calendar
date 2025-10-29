@@ -21,9 +21,9 @@ public class EventSeries implements EventInterface{
   private final Integer occurrences;
   private final LocalDate endDate;
   private final LocalDate firstOccurrence;
-  private final String description;
-  private final String location;
-  private final EventStatus status;
+  private String description;
+  private String location;
+  private EventStatus status;
   private final boolean isAllDay;
   private static final LocalTime START_TIME = LocalTime.of(8, 0);
   private static final LocalTime END_TIME = LocalTime.of(17, 0);
@@ -368,17 +368,21 @@ public class EventSeries implements EventInterface{
 
   @Override
   public void editDescription(String newDescription) {
-
+    this.description = newDescription;
   }
 
   @Override
   public void editLocation(String newLocation) {
-
+    this.location = newLocation;
   }
 
   @Override
   public void editEventStatus(String newEventStatus) {
-
+    if (newEventStatus.equals("private")) {
+      this.status = EventStatus.PRIVATE;
+    } else {
+      this.status = EventStatus.PUBLIC;
+    }
   }
 
   @Override
