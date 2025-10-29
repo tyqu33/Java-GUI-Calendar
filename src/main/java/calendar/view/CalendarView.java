@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,81 +16,188 @@ public class CalendarView {
       DateTimeFormatter.ofPattern("yyyy-MM-dd");
   private static final DateTimeFormatter TIME_FORMATTER =
       DateTimeFormatter.ofPattern("HH:mm");
+  private final Appendable output;
 
-  public void displayEventsOnDate(List<Event> events, LocalDate Date) {
-    if (events == null || events.isEmpty()) {
-      System.out.println("No events on" + DATE_FORMATTER.format(Date));
-      return;
+  /**
+   * Constructor with custom output destination.
+   *
+   * @param output the destination for all output
+   */
+  public CalendarView(Appendable output) {
+    if (output == null) {
+      throw new IllegalArgumentException("Output cannot be null");
     }
-    System.out.println("Events on " + DATE_FORMATTER.format(Date) + ":");
-    for (Event event : events) {
-      System.out.print(" • " + event.getSubject());
-      System.out.print(" from " + event.getStartDateTime().format(TIME_FORMATTER));
-      if (event.getEndDateTime() != null) {
-        System.out.print(" to " + event.getEndDateTime().format(TIME_FORMATTER));
+    this.output = output;
+  }
+
+  /**
+   * Default constructor using System.out.
+   */
+  public CalendarView() {
+    this(System.out);
+  }
+
+  /**
+   * Display events on a specific date.
+   *
+   * @param events
+   * @param date
+   */
+  public void displayEventsOnDate(List<Event> events, LocalDate date) {
+    try {
+      if (events == null || events.isEmpty()) {
+        output.append("No events on ").append(DATE_FORMATTER.format(date)).append("\n");
+        return;
       }
-      if (event.getLocation() != null && !event.getLocation().isEmpty()) {
-        System.out.print(" at " + event.getLocation());
+
+      output.append("Events on ").append(DATE_FORMATTER.format(date)).append(":\n");
+      for (Event event : events) {
+        output.append(" • ").append(event.getSubject());
+        output.append(" from ").append(TIME_FORMATTER.format(event.getStartDateTime()));
+        if (event.getEndDateTime() != null) {
+          output.append(" to ").append(TIME_FORMATTER.format(event.getEndDateTime()));
+        }
+        if (event.getLocation() != null && !event.getLocation().isEmpty()) {
+          output.append(" at ").append(event.getLocation());
+        }
+        output.append("\n");
       }
-      System.out.println();
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write output", e);
     }
   }
 
+  /**
+   * Display events between two date-times.
+   *
+   * @param events
+   * @param start
+   * @param end
+   */
   public void displayEventsBetween(List<Event> events, LocalDateTime start, LocalDateTime end) {
-    if (events == null || events.isEmpty()) {
-      System.out.println("No events between " + TIME_FORMATTER.format(start) + " and " + TIME_FORMATTER.format(end));
-      return;
-    }
-    System.out.println("Events from " + TIME_FORMATTER.format(start) + " to " + TIME_FORMATTER.format(end) + ":");
-    for (Event event : events) {
-      System.out.print(" • " + event.getSubject());
-      System.out.print(" starting on " + event.getStartDateTime().toLocalDate().format(DATE_FORMATTER));
-      System.out.print(" at " + event.getEndDateTime().format(TIME_FORMATTER));
-      if (event.getEndDateTime() != null) {
-        System.out.print(", ending on " + event.getEndDateTime().toLocalDate().format(DATE_FORMATTER));
-        System.out.print(" at " + event.getEndDateTime().format(TIME_FORMATTER));
+    try {
+      if (events == null || events.isEmpty()) {
+        output.append("No events between ")
+            .append(start.toString())
+            .append(" and ")
+            .append(end.toString())
+            .append("\n");
+        return;
       }
-      if (event.getLocation() != null && !event.getLocation().isEmpty()) {
-        System.out.print(" at " + event.getLocation());
+
+      output.append("Events from ")
+          .append(start.toString())
+          .append(" to ")
+          .append(end.toString())
+          .append(":\n");
+
+      for (Event event : events) {
+        output.append(" • ").append(event.getSubject());
+        output.append(" starting on ")
+            .append(DATE_FORMATTER.format(event.getStartDateTime().toLocalDate()));
+        output.append(" at ")
+            .append(TIME_FORMATTER.format(event.getStartDateTime()));
+
+        if (event.getEndDateTime() != null) {
+          output.append(", ending on ")
+              .append(DATE_FORMATTER.format(event.getEndDateTime().toLocalDate()));
+          output.append(" at ")
+              .append(TIME_FORMATTER.format(event.getEndDateTime()));
+        }
+
+        if (event.getLocation() != null && !event.getLocation().isEmpty()) {
+          output.append(" at ").append(event.getLocation());
+        }
+        output.append("\n");
       }
-      System.out.println();
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write output", e);
     }
   }
 
+  /**
+   * Display user status.
+   *
+   * @param status user status (busy or available)
+   */
   public void displayUserStatus(UserStatus status) {
-    if (status == UserStatus.BUSY) {
-      System.out.println("busy");
-    } else {
-      System.out.println("available");
+    try {
+      if (status == UserStatus.BUSY) {
+        output.append("busy\n");
+      } else {
+        output.append("available\n");
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write output", e);
     }
   }
 
+  /**
+   * Export calendar to a CSV file.
+   *
+   * @param content
+   * @param fileName
+   */
   public void exportCalendar(String content, String fileName) {
     try {
-      Path filePath  = Paths.get(fileName);
+      Path filePath = Paths.get(fileName);
       Files.write(filePath, content.getBytes());
-      System.out.println("Exported to" + filePath.toAbsolutePath());
+      output.append("Exported to ").append(filePath.toAbsolutePath().toString()).append("\n");
     } catch (IOException e) {
       displayError("Export failed: " + e.getMessage());
     }
   }
 
+  /**
+   * Display a success message.
+   *
+   * @param message success message
+   */
   public void displaySuccess(String message) {
-    System.out.println("Suceess:" + message);
+    try {
+      output.append("Success: ").append(message).append("\n");
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write output", e);
+    }
   }
 
+  /**
+   * Display an error message.
+   *
+   * @param error error message
+   */
   public void displayError(String error) {
-    System.err.println("Error" + error);
+    try {
+      output.append("Error: ").append(error).append("\n");
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write error output", e);
+    }
   }
 
+  /**
+   * Display a warning message.
+   *
+   * @param warning warning message
+   */
   public void displayWarning(String warning) {
-    System.out.println("Warning:" + warning);
+    try {
+      output.append("Warning: ").append(warning).append("\n");
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write output", e);
+    }
   }
 
+  /**
+   * Display welcome message.
+   */
   public void displayWelcome() {
-    System.out.println("=================================");
-    System.out.println("  Virtual Calendar Application  ");
-    System.out.println("=================================");
-    System.out.println("Type 'exit' to quit\n");
+    try {
+      output.append("=================================\n");
+      output.append("  Virtual Calendar Application  \n");
+      output.append("=================================\n");
+      output.append("Type 'exit' to quit\n\n");
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write output", e);
+    }
   }
 }
