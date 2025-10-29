@@ -1,5 +1,6 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import calendar.enums.EventStatus;
@@ -81,6 +82,20 @@ public class ModelTest {
     try {
       Event event2 = calendar.createSingleEvent("Meeting", "2025-10-28T09:00",
           "20251028t1700", "", "", "", null);
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
+
+  @Test
+  public void testModelCreateSingleEventExp1() {
+    Calendar calendar = new Calendar();
+    Event event0 = calendar.createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    try {
+      Event event1 = calendar.createSingleEvent("Meeting", "2025-10-28T09:00",
+          "2025-10-28T12:00", "", "", "", null);
       assert false;
     } catch (IllegalArgumentException e) {
       assertTrue(true);
@@ -208,6 +223,20 @@ public class ModelTest {
       assertTrue(true);
     }
   }
+
+  //  @Test
+  //  public void testModelCreateEventSeriesExp1() {
+  //    Calendar calendar = new Calendar();
+  //    EventSeries series0 = calendar.createEventSeries("Meeting", "2025-10-28T09:00",
+  //        "2025-10-28T12:00", "", "", "", "T", 4, "");
+  //    try {
+  //      EventSeries series1 = calendar.createEventSeries("Meeting", "2025-10-28T09:00",
+  //          "2025-10-28T12:00", "", "", "", "T", 4, "");
+  //      assert false;
+  //    } catch (IllegalArgumentException e) {
+  //      assertTrue(true);
+  //    }
+  //  }
 
   @Test
   public void testModelEditSingleEvent0() {
@@ -439,7 +468,7 @@ public class ModelTest {
   }
 
   @Test
-  public void testModelEditEventSeries() {
+  public void testModelEditEventSeries0() {
     Calendar calendar = new Calendar();
     EventSeries series = calendar.createEventSeries("Meeting",
         "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "T", 4, "");
@@ -452,6 +481,100 @@ public class ModelTest {
     assertEquals("", updatedSeries.getDescription());
     assertEquals("", updatedSeries.getLocation());
     assertEquals(EventStatus.PUBLIC, updatedSeries.getEventStatus());
+  }
+
+  @Test
+  public void testModelEditEventSeries1() {
+    Calendar calendar = new Calendar();
+    EventSeries series = calendar.createEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "T", 4, "");
+    EventSeries updatedSeries = calendar.editEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "2025-10-28T09:59", null, "", "", "");
+    assertNotNull(updatedSeries);
+    assertEquals("Meeting", updatedSeries.getSubject());
+    assertEquals("2025-10-28T09:59", updatedSeries.getStartDateTime().toString());
+    assertEquals("2025-10-28T12:00", updatedSeries.getEndDateTime().toString());
+    assertEquals("", updatedSeries.getDescription());
+    assertEquals("", updatedSeries.getLocation());
+    assertEquals(EventStatus.PUBLIC, updatedSeries.getEventStatus());
+
+  }
+
+  @Test
+  public void testModelEditEventSeries2() {
+    Calendar calendar = new Calendar();
+    EventSeries series = calendar.createEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "T", 4, "");
+    EventSeries updatedSeries = calendar.editEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "2025-10-28T12:59", "", "", "");
+    assertNotNull(updatedSeries);
+    assertEquals("Meeting", updatedSeries.getSubject());
+    assertEquals("2025-10-28T09:00", updatedSeries.getStartDateTime().toString());
+    assertEquals("2025-10-28T12:59", updatedSeries.getEndDateTime().toString());
+    assertEquals("", updatedSeries.getDescription());
+    assertEquals("", updatedSeries.getLocation());
+    assertEquals(EventStatus.PUBLIC, updatedSeries.getEventStatus());
+  }
+
+  @Test
+  public void testModelEditEventSeries3() {
+    Calendar calendar = new Calendar();
+    EventSeries series = calendar.createEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "T", 4, "");
+    EventSeries updatedSeries = calendar.editEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "Long Long Meeting", "", "");
+    assertNotNull(updatedSeries);
+    assertEquals("Meeting", updatedSeries.getSubject());
+    assertEquals("2025-10-28T09:00", updatedSeries.getStartDateTime().toString());
+    assertEquals("2025-10-28T12:00", updatedSeries.getEndDateTime().toString());
+    assertEquals("Long Long Meeting", updatedSeries.getDescription());
+    assertEquals("", updatedSeries.getLocation());
+    assertEquals(EventStatus.PUBLIC, updatedSeries.getEventStatus());
+  }
+
+  @Test
+  public void testModelEditEventSeries4() {
+    Calendar calendar = new Calendar();
+    EventSeries series = calendar.createEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "T", 4, "");
+    EventSeries updatedSeries = calendar.editEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "", "Boston", "");
+    assertNotNull(updatedSeries);
+    assertEquals("Meeting", updatedSeries.getSubject());
+    assertEquals("2025-10-28T09:00", updatedSeries.getStartDateTime().toString());
+    assertEquals("2025-10-28T12:00", updatedSeries.getEndDateTime().toString());
+    assertEquals("", updatedSeries.getDescription());
+    assertEquals("Boston", updatedSeries.getLocation());
+    assertEquals(EventStatus.PUBLIC, updatedSeries.getEventStatus());
+  }
+
+  @Test
+  public void testModelEditEventSeries5() {
+    Calendar calendar = new Calendar();
+    EventSeries series = calendar.createEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "T", 4, "");
+    EventSeries updatedSeries = calendar.editEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "", "", "private");
+    assertNotNull(updatedSeries);
+    assertEquals("Meeting", updatedSeries.getSubject());
+    assertEquals("2025-10-28T09:00", updatedSeries.getStartDateTime().toString());
+    assertEquals("2025-10-28T12:00", updatedSeries.getEndDateTime().toString());
+    assertEquals("", updatedSeries.getDescription());
+    assertEquals("", updatedSeries.getLocation());
+    assertEquals(EventStatus.PRIVATE, updatedSeries.getEventStatus());
+  }
+
+  @Test
+  public void testModelEditEventSeries6() {
+    Calendar calendar = new Calendar();
+    Event event0 = calendar.createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    Event event1 = calendar.createSingleEvent("Meeting", "2025-11-04T09:00",
+        "2025-11-04T12:00", "", "", "", null);
+
+    EventSeries updatedSeries = calendar.editEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "No Meeting", "", "", "", "", "");
+    assertNull(updatedSeries);
   }
 
 
@@ -504,6 +627,13 @@ public class ModelTest {
     }
     try {
       EventSeries updatedSeries = calendar.editEventSeries("Meeting",
+          "2025-10-28T09:00", "20251028t1200", "Presentation", "", null, "", "", "");
+      assert false;
+    }  catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      EventSeries updatedSeries = calendar.editEventSeries("Meeting",
           "2025-10-28T09:00", "2025-10-28T12:00", "", "20251028t0959", null, "", "", "");
       assert false;
     }  catch (IllegalArgumentException e) {
@@ -530,6 +660,64 @@ public class ModelTest {
     }
   }
 
+  @Test
+  public void testModelGetEvent0() {
+    Calendar calendar = new Calendar();
+    Event event0 = calendar.createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    Event event1 = calendar.getSingleEvent("Meeting", "2025-10-28T09:00", "2025-10-28T12:00");
+    assertNotNull(event0);
+    assertNotNull(event1);
+    assertEquals(event1.getSubject(), event0.getSubject());
+    assertEquals(event1.getStartDateTime().toString(), event0.getStartDateTime().toString());
+    assertEquals(event1.getEndDateTime().toString(), event0.getEndDateTime().toString());
+    assertEquals(event1.getDescription(), event0.getDescription());
+    assertEquals(event1.getLocation(), event0.getLocation());
+    assertEquals(event1.getEventStatus(), event0.getEventStatus());
+  }
+
+  @Test
+  public void testModelGetEventExp0() {
+    Calendar calendar = new Calendar();
+    Event event0 = calendar.createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    try {
+      Event event1 = calendar.getSingleEvent("", "2025-10-28T09:00", "2025-10-28T12:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      Event event1 = calendar.getSingleEvent(null, "2025-10-28T09:00", "2025-10-28T12:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      Event event1 = calendar.getSingleEvent("Meeting", null, "2025-10-28T12:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      Event event1 = calendar.getSingleEvent("Meeting", "", "2025-10-28T12:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      Event event1 = calendar.getSingleEvent("Meeting", "20251028t0900", "2025-10-28T12:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      Event event1 = calendar.getSingleEvent("Meeting", "2025-10-28T09:00", "20251028t1200");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
 
 
 }

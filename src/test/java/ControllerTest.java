@@ -18,7 +18,7 @@ public class ControllerTest {
   //  create event Meeting on 2025-10-27
   //  print events on 2025-10-27
   //  Events on 2025-10-27:
-  //   • Meeting from 08:00 to 17:00
+  //   • Meeting from 8:00 AM to 5:00 PM
   @Test
   public void testGoCoupledWithView() {
     PrintStream originalOut = System.out;
@@ -34,7 +34,7 @@ public class ControllerTest {
       CalendarController controller = new CalendarController(model, view, in, out);
       controller.go();
       String allOuts = bytes.toString();
-      String expectedOutput = "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
+      String expectedOutput = "Events on 2025-10-27:\n • Meeting from 8:00 AM to 5:00 PM\n";
       assertEquals(expectedOutput.trim(), allOuts.trim());
     } finally {
       System.setOut(originalOut);

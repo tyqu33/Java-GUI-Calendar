@@ -72,6 +72,9 @@ public class Calendar implements CalendarInterface {
         .seriesId(seriesId)
         .build();
     EventKey key = new EventKey(subject, start, end);
+    if (calendar.containsKey(key)) {
+      throw new IllegalArgumentException("Event already exists");
+    }
     calendar.put(key, event);
     return event;
   }
@@ -143,7 +146,9 @@ public class Calendar implements CalendarInterface {
           .build();
       calendar.put(key, eventInstance);
     }
-
+    if (seriesManager.containsKey(seriesId)) {
+      throw new IllegalArgumentException("Event series already exists");
+    }
     seriesManager.put(seriesId, newSeries); // put this series into Manager
     return newSeries;
   }
@@ -151,7 +156,7 @@ public class Calendar implements CalendarInterface {
   @Override
   public Event getSingleEvent(String subject, String startDateTime, String endDateTime)
       throws IllegalArgumentException {
-    if (subject.isEmpty() || startDateTime.isEmpty()) {
+    if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
     LocalDateTime start;
@@ -161,7 +166,7 @@ public class Calendar implements CalendarInterface {
       throw new IllegalArgumentException("Invalid start date/time: " + startDateTime);
     }
     LocalDateTime end = null;
-    if (!endDateTime.isEmpty()) {
+    if (endDateTime != null && !endDateTime.isEmpty()) {
       try {
         end = LocalDateTime.parse(endDateTime);
       } catch (DateTimeParseException e) {
@@ -220,8 +225,8 @@ public class Calendar implements CalendarInterface {
       return oldEvent;
 
     } else {
-      // System.out.println("old subject: " + oldEvent.getSubject());
-      String finalNewSubject = (newSubject != null && !newSubject.isEmpty()) ? newSubject : oldEvent.getSubject();
+      String finalNewSubject =
+          (newSubject != null && !newSubject.isEmpty()) ? newSubject : oldEvent.getSubject();
       LocalDateTime finalNewStart;
       if (newStartDateTime != null && !newStartDateTime.isEmpty()) {
         try {
@@ -248,7 +253,6 @@ public class Calendar implements CalendarInterface {
         throw new IllegalArgumentException(
             "Event on the new subject, start date/time, end date/time already exists");
       }
-      // System.out.println("finalNewSubject: " + finalNewSubject + " finalNewStart: " + finalNewStart.toString() + " finalNewEnd: " + finalNewEnd.toString());
       Event newEvent =
           createSingleEvent(finalNewSubject, finalNewStart.toString(), finalNewEnd.toString(),
               newDescription,
@@ -289,14 +293,16 @@ public class Calendar implements CalendarInterface {
     }
 
     EventKey oldKey = new EventKey(subject, oldStart, oldEnd);
-    // System.out.printf("oldKey: %s, %s, %s", subject, oldStart.toString(), oldEnd.toString());
     Event oldEvent = calendar.get(oldKey);
     if (oldEvent == null) {
       throw new IllegalArgumentException("Event does not exist, subject: "
           + subject + ", start: " + startDateTime + ", end: " + endDateTime);
     }
     boolean isKeyChanged =
-        (newSubject != null) || (newStartDateTime != null) || (newEndDateTime != null);
+        (newSubject != null && !newSubject.isEmpty())
+            || (newStartDateTime != null && !newStartDateTime.isEmpty())
+            || (newEndDateTime != null && !newEndDateTime.isEmpty());
+    // System.out.println("old Series ID: " + oldEvent.getSeriesId() + "isKeyChanged: " + ((isKeyChanged)?"true":"false"));
     String seriesId = oldEvent.getSeriesId();
     // This event does not belong to any series
     if (seriesId == null) {
@@ -324,6 +330,15 @@ public class Calendar implements CalendarInterface {
               }
             }
           }
+          if (newDescription != null && !newDescription.isEmpty()) {
+            series.editDescription(newDescription);
+          }
+          if (newLocation != null && !newLocation.isEmpty()) {
+            series.editLocation(newLocation);
+          }
+          if (newEventStatus != null && !newEventStatus.isEmpty()) {
+            series.editEventStatus(newEventStatus);
+          }
           return series;
         } else {
 
@@ -335,9 +350,10 @@ public class Calendar implements CalendarInterface {
             series.removeEventKey(oldKey);
           }
 
-          String finalNewSubject = (newSubject != null) ? newSubject : oldEvent.getSubject();
+          String finalNewSubject =
+              (newSubject != null && !newSubject.isEmpty()) ? newSubject : oldEvent.getSubject();
           LocalDateTime finalNewStart;
-          if (newStartDateTime != null) {
+          if (newStartDateTime != null && !newStartDateTime.isEmpty()) {
             try {
               finalNewStart = LocalDateTime.parse(newStartDateTime);
             } catch (DateTimeParseException e) {
@@ -348,7 +364,7 @@ public class Calendar implements CalendarInterface {
             finalNewStart = oldEvent.getStartDateTime();
           }
           LocalDateTime finalNewEnd;
-          if (newEndDateTime != null) {
+          if (newEndDateTime != null && !newEndDateTime.isEmpty()) {
             try {
               finalNewEnd = LocalDateTime.parse(newEndDateTime);
             } catch (DateTimeParseException e) {
@@ -357,7 +373,6 @@ public class Calendar implements CalendarInterface {
           } else {
             finalNewEnd = oldEvent.getEndDateTime();
           }
-
           EventKey newKey = new EventKey(finalNewSubject, finalNewStart, finalNewEnd);
           String newSeriesId = series.getSeriesId();
           newDescription = series.getDescription();
