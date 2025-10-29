@@ -11,11 +11,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Represents the view component for the calendar application.
+ * Displaying information (welcome, events, messages, errors, warning, etc.)
+ */
 public class CalendarView {
   private static final DateTimeFormatter DATE_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd");
   private static final DateTimeFormatter TIME_FORMATTER =
-      DateTimeFormatter.ofPattern("HH:mm");
+      DateTimeFormatter.ofPattern("h:mm a");
   private final Appendable output;
 
   /**
@@ -201,3 +205,4 @@ public class CalendarView {
     }
   }
 }
+

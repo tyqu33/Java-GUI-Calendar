@@ -3,8 +3,11 @@ package calendar.event;
 import calendar.enums.EventStatus;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Objects;
 
+/**
+ * Represents a calendar event with a subject, start date & time,
+ * and optional details like end date & time, description, location and status.
+ */
 public class Event implements EventInterface {
   private final String subject;
   private final LocalDateTime start;
@@ -16,7 +19,13 @@ public class Event implements EventInterface {
   private static final LocalTime START_TIME = LocalTime.of(8, 0);
   private static final LocalTime END_TIME = LocalTime.of(17, 0);
 
-  private Event (EventBuilder builder) {
+  /**
+   * Constructor with the use of eventBuilder.
+   *
+   * @param builder the builder object containing the event details.
+   * @throws IllegalArgumentException if the end date/time is before the start date/time.
+   */
+  private Event (EventBuilder builder) throws IllegalArgumentException {
     this.subject = builder.subject;
     if (builder.isAllDayEvent && builder.end == null) {
       this.start = builder.start.with(START_TIME);
@@ -34,10 +43,20 @@ public class Event implements EventInterface {
     }
   }
 
+  /**
+   * Static factory method to create a new EventBuilder.
+   *
+   * @param subject the subject of the event
+   * @param start the start date & time of the event
+   * @return a new EventBuilder instance
+   */
   public static EventBuilder builder(String subject, LocalDateTime start) {
     return new EventBuilder(subject, start);
   }
 
+  /**
+   * Builder class for constructing an Event object.
+   */
   public static class EventBuilder {
     private String subject;
     private LocalDateTime start;
@@ -48,6 +67,12 @@ public class Event implements EventInterface {
     public boolean isAllDayEvent = false;
     private String seriesId;
 
+    /**
+     * Constructs a new EventBuilder with given information.
+     *
+     * @param subject the subject of the event
+     * @param start the start date & time of the event
+     */
     public EventBuilder(String subject, LocalDateTime start) {
       if (subject == null || subject.trim().isEmpty()) {
         throw new IllegalArgumentException("Subject cannot be null or empty");
@@ -59,22 +84,46 @@ public class Event implements EventInterface {
       this.start = start;
     }
 
+    /**
+     * Sets the optional end date & time of the event.
+     *
+     * @param end the end date & time
+     * @return the builder instance
+     */
     public EventBuilder end(LocalDateTime end) {
       this.end = end;
       this.isAllDayEvent = false;
       return this;
     }
 
+    /**
+     * Sets the description of the event.
+     *
+     * @param description the event description
+     * @return the builder instance
+     */
     public EventBuilder description(String description) {
       this.description = description;
       return this;
     }
 
+    /**
+     * Sets the location of the event.
+     *
+     * @param location the event location
+     * @return the builder instance
+     */
     public EventBuilder location(String location) {
       this.location = location;
       return this;
     }
 
+    /**
+     * Sets the status (public or private) of the event.
+     *
+     * @param status a string representing the status
+     * @return the builder instance
+     */
     public EventBuilder status(String status) {
       if (status == null || status.trim().isEmpty()) {
         return this;
@@ -87,21 +136,43 @@ public class Event implements EventInterface {
       return this;
     }
 
+    /**
+     * Marks the event as an all-day event.
+     * If an end date/time is not explicitly set, the event will span from 8:00 to 17:00.
+     *
+     * @return the builder instance
+     */
     public EventBuilder setAllDayEvent() {
       this.isAllDayEvent = true;
       return this;
     }
 
+    /**
+     * Sets the series ID for recurring events.
+     *
+     * @param seriesId the ID of the event series
+     * @return the builder instance
+     */
     public EventBuilder seriesId(String seriesId) {
       this.seriesId = seriesId;
       return this;
     }
 
+    /**
+     * Creates and returns the final event object.
+     *
+     * @return the constructed event
+     */
     public Event build() {
       return new Event(this);
     }
   }
 
+  /**
+   * Checks if the event is considered an all-day event.
+   *
+   * @return true if the event is an all-day event, false otherwise.
+   */
   public boolean isAllDayEvent() {
     if (end != null && start.toLocalTime().equals(START_TIME) &&
         end.toLocalTime().equals(END_TIME)) {
@@ -181,3 +252,4 @@ public class Event implements EventInterface {
     return sb.toString();
   }
 }
+
