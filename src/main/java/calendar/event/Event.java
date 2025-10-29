@@ -165,23 +165,6 @@ public class Event implements EventInterface {
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(subject, start, end);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-    Event event = (Event) obj;
-    return Objects.equals(subject, event.subject) && Objects.equals(start, event.start) && Objects.equals(end, event.end);
-  }
-
-  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(subject);

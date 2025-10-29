@@ -9,11 +9,12 @@ public class ExportCommand extends CommandFactory{
   private static final Pattern EXPORT = Pattern.compile("^export cal (\\S+)$");
   private final CalendarInterface calendar;
   private final CalendarView view;
+  private final String commandLine;
 
   public ExportCommand(String commandLine, CalendarInterface calendar, CalendarView view) {
     this.calendar = calendar;
     this.view = view;
-    parseCommand(commandLine);
+    this.commandLine = commandLine;
   }
 
   @Override
@@ -34,6 +35,6 @@ public class ExportCommand extends CommandFactory{
 
   @Override
   protected void execute() {
-
+    parseCommand(commandLine);
   }
 }

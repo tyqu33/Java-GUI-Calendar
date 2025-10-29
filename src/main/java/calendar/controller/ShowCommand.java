@@ -13,11 +13,12 @@ public class ShowCommand extends CommandFactory{
 
   private final CalendarInterface calendar;
   private final CalendarView view;
+  private final String commandLine;
 
-  public ShowCommand(String commandline, CalendarInterface calendar, CalendarView view) {
+  public ShowCommand(String commandLine, CalendarInterface calendar, CalendarView view) {
     this.calendar = calendar;
     this.view = view;
-    parseCommand(commandline);
+    this.commandLine = commandLine;
   }
 
   @Override
@@ -39,6 +40,6 @@ public class ShowCommand extends CommandFactory{
 
   @Override
   protected void execute() {
-
+    parseCommand(commandLine);
   }
 }

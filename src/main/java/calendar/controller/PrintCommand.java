@@ -17,11 +17,12 @@ public class PrintCommand extends CommandFactory {
 
   private final CalendarInterface calendar;
   private final CalendarView view;
+  private final String commandLine;
 
   public PrintCommand(String commandLine, CalendarInterface calendar, CalendarView view) {
     this.calendar = calendar;
     this.view = view;
-    parseCommand(commandLine);
+    this.commandLine = commandLine;
   }
 
   @Override
@@ -54,6 +55,6 @@ public class PrintCommand extends CommandFactory {
 
   @Override
   protected void execute() {
-
+    parseCommand(this.commandLine);
   }
 }

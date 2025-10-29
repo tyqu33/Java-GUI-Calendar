@@ -93,12 +93,15 @@ public class CalendarController implements CalendarControllerInterface{
         break;
       case "print":
         CommandFactory printEvent = new PrintCommand(commandLine, calendar, view);
+        printEvent.execute();
         break;
       case "export":
         CommandFactory exportEvent = new ExportCommand(commandLine, calendar, view);
+        exportEvent.execute();
         break;
       case "show":
-        CommandFactory shoeEvent = new ExportCommand(commandLine, calendar, view);
+        CommandFactory showEvent = new ExportCommand(commandLine, calendar, view);
+        showEvent.execute();
         break;
       case "exit":
         break;
