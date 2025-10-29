@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import org.junit.Test;
 
+/**
+ * Test class for EventSeries.
+ */
 public class EventSeriesTest {
 
   @Test

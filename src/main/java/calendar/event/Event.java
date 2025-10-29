@@ -234,22 +234,5 @@ public class Event implements EventInterface {
       this.status = EventStatus.PUBLIC;
     }
   }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(subject);
-    sb.append(" from ");
-    sb.append(start);
-    if (end != null) {
-      sb.append(" to ");
-      sb.append(end);
-    }
-    if (location != null) {
-      sb.append(" at ");
-      sb.append(location);
-    }
-    return sb.toString();
-  }
 }
 

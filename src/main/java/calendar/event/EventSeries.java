@@ -12,6 +12,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * This class represents a series of recurring calendar events,
+ * and generates the individual event keys based on recurrence rules (weekdays, occurrences/end date).
+ */
 public class EventSeries implements EventInterface{
   private final String seriesId;
   private final String subject;
@@ -31,6 +35,11 @@ public class EventSeries implements EventInterface{
   private final Set<EventKey> eventKeys;
   private final Set<LocalDate> removeDates;
 
+  /**
+   * Constructor used by the EventSeriesBuilder for initializing.
+   *
+   * @param builder the builder instance containing given details
+   */
   private EventSeries(EventSeriesBuilder builder) {
     if (builder.existingSeriesId != null) {
       this.seriesId = builder.existingSeriesId;
@@ -58,10 +67,24 @@ public class EventSeries implements EventInterface{
     generateKeys();
   }
 
+  /**
+   * Factory method to obtain a new builder instance.
+   *
+   * @param subject the subject of the event series
+   * @param start the start date and time of the first occurrence
+   * @param weekdays a string representing the recurrence days (e.g., "MWR")
+   * @return a new EventSeriesBuilder instance
+   */
   public static EventSeriesBuilder builder(String subject, LocalDateTime start, String weekdays) {
     return new EventSeriesBuilder(subject, start, weekdays);
   }
 
+  /**
+   * Creates a new builder initialized with the current EventSeries's data.
+   * For modifying an existing series.
+   *
+   * @return a EventSeriesBuilder with given details
+   */
   public EventSeriesBuilder toBuilder() {
     EventSeriesBuilder builder = new EventSeriesBuilder(
         this.subject,
@@ -87,6 +110,9 @@ public class EventSeries implements EventInterface{
     return builder;
   }
 
+  /**
+   * Builder class for creating and reset instances.
+   */
   public static class EventSeriesBuilder {
     private String subject;
     private LocalTime startTime;
@@ -102,6 +128,13 @@ public class EventSeries implements EventInterface{
     private String existingSeriesId = null;
     private Set<LocalDate> existingRemovedDates = new HashSet<>();
 
+    /**
+     * Constructs a new builder with mandatory parameters.
+     *
+     * @param subject the subject of the series
+     * @param start the start date and time of the first occurrence
+     * @param weekdays a string representing the recurrence days
+     */
     public EventSeriesBuilder(String subject, LocalDateTime start, String weekdays) {
       if (subject == null || subject.trim().isEmpty()) {
         throw new IllegalArgumentException("Subject cannot be null or empty");
@@ -121,6 +154,12 @@ public class EventSeries implements EventInterface{
       this.weekdays = weekdays.toUpperCase();
     }
 
+    /**
+     * Sets the end time for the event series.
+     *
+     * @param end the end date and time
+     * @return the builder instance
+     */
     public EventSeriesBuilder end(LocalDateTime end) {
       if (end != null) {
         if (end.toLocalTime().isBefore(this.startTime)) {
@@ -131,22 +170,45 @@ public class EventSeries implements EventInterface{
       return this;
     }
 
+    /**
+     * Marks the event series as an all-day event.
+     *
+     * @return the builder instance.
+     */
     public EventSeriesBuilder setAllDay() {
       this.isAllDay = true;
       this.endTime = null;
       return this;
     }
 
+    /**
+     *  Sets an existing series ID for updating an existing series
+     *
+     * @param seriesId the existing unique ID of the series
+     * @return the builder instance
+     */
     public EventSeriesBuilder withExistingId(String seriesId) {
       this.existingSeriesId = seriesId;
       return this;
     }
 
+    /**
+     * Includes a set of dates that have been removed from the series.
+     *
+     * @param removedDates  the set of removed dates
+     * @return the builder instance
+     */
     public EventSeriesBuilder withExistingRemovedDates(Set<LocalDate> removedDates) {
       this.existingRemovedDates = new HashSet<>(removedDates);
       return this;
     }
 
+    /**
+     * Sets the maximum number of occurrences for the series.
+     *
+     * @param occurrences the number of times the event occurs
+     * @return the builder instance
+     */
     public EventSeriesBuilder occurrences(Integer occurrences) {
       if (occurrences <= 0) {
         throw new IllegalArgumentException("Occurrences must be greater than zero");
@@ -156,6 +218,12 @@ public class EventSeries implements EventInterface{
       return this;
     }
 
+    /**
+     * Sets the end date of the event series.
+     *
+     * @param endDate the end date of the series
+     * @return the builder instance
+     */
     public EventSeriesBuilder setEndDate(LocalDate endDate) {
       if (endDate == null) {
         throw new IllegalArgumentException("End date cannot be null");
@@ -168,16 +236,34 @@ public class EventSeries implements EventInterface{
       return this;
     }
 
+    /**
+     * Sets the descriptive text for the event series.
+     *
+     * @param description the description
+     * @return the builder instance
+     */
     public EventSeriesBuilder description(String description) {
       this.description = description;
       return this;
     }
 
+    /**
+     * Sets the location for the event series.
+     *
+     * @param location the location string
+     * @return the builder instance
+     */
     public EventSeriesBuilder location(String location) {
       this.location = location;
       return this;
     }
 
+    /**
+     * Sets the status of the event series.
+     *
+     * @param status the status string ("private" or "public")
+     * @return the builder instance
+     */
     public EventSeriesBuilder status(String status) {
       if (status == null || status.trim().isEmpty()) {
         return this;
@@ -190,6 +276,11 @@ public class EventSeries implements EventInterface{
       return this;
     }
 
+    /**
+     * Builds and returns the event series object.
+     *
+     * @return an EventSeries instance.
+     */
     public EventSeries build() {
       if (occurrences == null && endDate == null) {
         throw new IllegalArgumentException("Must input either occurrences or end date");
@@ -200,6 +291,12 @@ public class EventSeries implements EventInterface{
       return new EventSeries(this);
     }
 
+    /**
+     * Internal helper to validate the weekdays string.
+     *
+     * @param weekdays the string to validate
+     * @return true if all characters are valid (M, T, W, R, F, S, U)
+     */
     private boolean isValidWeekdays(String weekdays) {
       if (weekdays == null || weekdays.trim().isEmpty()) {
         throw new IllegalArgumentException("Weekdays cannot be null or empty");
@@ -214,6 +311,12 @@ public class EventSeries implements EventInterface{
     }
   }
 
+  /**
+   * Generates the set of EventKey objects for all events in the series.
+   *
+   * @return an unmodifiable set of EventKeys
+   * @throws IllegalArgumentException if no events are found
+   */
   public Set<EventKey> generateKeys() {
     this.eventKeys.clear();
     Set<DayOfWeek> targetDays = parseWeekdays(weekdays);
@@ -249,10 +352,21 @@ public class EventSeries implements EventInterface{
     return Collections.unmodifiableSet(this.eventKeys);
   }
 
+  /**
+   * Marks a date removed from key generation.
+   *
+   * @param date the date to be removed from the series
+   */
   public void markDateRemoved(LocalDate date) {
     this.removeDates.add(date);
   }
 
+  /**
+   * Updates the series keys collection by adding or removing a single key.
+   *
+   * @param key the EventKey to add or remove
+   * @param add true to add the key, false to remove it
+   */
   public void updateSeriesKeys(EventKey key, boolean add) {
     if (add) {
       this.eventKeys.add(key);
@@ -261,6 +375,12 @@ public class EventSeries implements EventInterface{
     }
   }
 
+  /**
+   * Parses the weekday string (e.g., "MWR") into a Set of DayOfWeek enums.
+   *
+   * @param weekdays the string representation of weekdays
+   * @return a Set of DayOfWeek enums
+   */
   private Set<DayOfWeek> parseWeekdays(String weekdays) {
     Set<DayOfWeek> targetDays = new HashSet<>();
     for (char c : weekdays.toUpperCase().toCharArray()) {
@@ -400,24 +520,5 @@ public class EventSeries implements EventInterface{
     }
     EventSeries that = (EventSeries) o;
     return Objects.equals(seriesId, that.seriesId);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("EventSeries: ID: ");
-    sb.append(seriesId.substring(0, 8));
-    sb.append(" subject: ");
-    sb.append(subject);
-    sb.append(" at ");
-    sb.append(startTime);
-    sb.append(" on ");
-    sb.append(weekdays);
-    if (occurrences != null) {
-      sb.append(" for ").append(occurrences).append(" times");
-    } else {
-      sb.append(" until ").append(endDate);
-    }
-    return sb.toString();
   }
 }

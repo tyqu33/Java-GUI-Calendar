@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import org.junit.Test;
 
+/**
+ * Test class for Event.
+ */
 public class EventTest {
   @Test
   public void testEventCreation() {
@@ -63,6 +66,11 @@ public class EventTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void testCreateNullStart() {
+    Event.builder("Meeting", null).build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void testCreateEmptySubject() {
     LocalDateTime start = LocalDateTime.parse("2025-05-01T10:00");
     Event.builder("   ", start).build();
@@ -102,7 +110,7 @@ public class EventTest {
   }
 
   @Test
-  public void testEditStatus() {
+  public void testEditStatus1() {
     LocalDateTime start = LocalDateTime.parse("2025-05-01T10:00");
     Event event = Event.builder("Meeting", start)
         .status("public")
@@ -110,6 +118,17 @@ public class EventTest {
 
     event.editEventStatus("private");
     assertEquals("PRIVATE", event.getEventStatus().toString());
+  }
+
+  @Test
+  public void testEditStatus2() {
+    LocalDateTime start = LocalDateTime.parse("2025-05-01T10:00");
+    Event event = Event.builder("Meeting", start)
+        .status("private")
+        .build();
+
+    event.editEventStatus("public");
+    assertEquals("PUBLIC", event.getEventStatus().toString());
   }
 
   @Test

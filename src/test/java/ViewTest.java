@@ -6,6 +6,11 @@ import static org.junit.Assert.assertTrue;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.view.CalendarView;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,6 +18,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Test class for CalendarView.
+ */
 public class ViewTest {
   private StringBuilder output;
   private CalendarView view;
@@ -175,6 +183,25 @@ public class ViewTest {
     assertTrue(result.contains("Meeting"));
     assertTrue(result.contains("10:00"));
     assertFalse(result.contains(" at null"));
+  }
+
+  @Test
+  public void testExportCalendar() throws IOException {
+    String csvContent = "Subject,Start Date,Start Time\nMeeting,05/01/2025,10:00 AM\n";
+    String fileName = "test_export.csv";
+
+    view.exportCalendar(csvContent, fileName);
+
+    String result = output.toString();
+    assertTrue(result.contains("Exported to"));
+    assertTrue(result.contains(fileName));
+
+    Path filePath = Paths.get(fileName);
+    assertTrue(Files.exists(filePath));
+    String fileContent = new String(Files.readAllBytes(filePath));
+    assertEquals(csvContent, fileContent);
+
+    Files.deleteIfExists(filePath);
   }
 }
 
