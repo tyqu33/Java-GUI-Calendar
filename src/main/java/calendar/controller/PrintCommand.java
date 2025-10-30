@@ -9,16 +9,28 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Represents the process of handling print command.
+ */
 public class PrintCommand extends CommandFactory {
 
-  private static final Pattern PRINT_ON = Pattern.compile("^print events on (\\S+)$");
+  private static final Pattern PRINT_ON = Pattern.compile(
+      "^print events on (\\S+)$");
 
-  private static final Pattern PRINT_FROM_TO = Pattern.compile("^print events from (\\S+) to (\\S+)$");
+  private static final Pattern PRINT_FROM_TO = Pattern.compile(
+      "^print events from (\\S+) to (\\S+)$");
 
   private final CalendarInterface calendar;
   private final CalendarView view;
   private final String commandLine;
 
+  /**
+   * Constructs an PrintCommand instance.
+   *
+   * @param commandLine the input command string
+   * @param calendar the calendar object
+   * @param view the calendar view to display
+   */
   public PrintCommand(String commandLine, CalendarInterface calendar, CalendarView view) {
     this.calendar = calendar;
     this.view = view;

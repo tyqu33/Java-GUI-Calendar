@@ -3,14 +3,12 @@ package calendar.model;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
-import calendar.util.CSVExporter;
+import calendar.util.CsvExporter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -441,9 +439,9 @@ public class Calendar implements CalendarInterface {
   }
 
   @Override
-  public String exportToCSV() {
+  public String exportToCsv() {
     List<Event> sortedEvents = new ArrayList<>(calendar.values());
     sortedEvents.sort((e1, e2) -> e1.getStartDateTime().compareTo(e2.getStartDateTime()));
-    return CSVExporter.exportToCSV(sortedEvents);
+    return CsvExporter.exportToCsv(sortedEvents);
   }
 }

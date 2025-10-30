@@ -26,8 +26,9 @@ public class CalendarView {
    * Constructor with custom output destination.
    *
    * @param output the destination for all output
+   * @throws IllegalArgumentException if the output destination is null
    */
-  public CalendarView(Appendable output) {
+  public CalendarView(Appendable output) throws IllegalArgumentException {
     if (output == null) {
       throw new IllegalArgumentException("Output cannot be null");
     }
@@ -44,8 +45,8 @@ public class CalendarView {
   /**
    * Display events on a specific date.
    *
-   * @param events
-   * @param date
+   * @param events the list of events scheduled on the given date
+   * @param date the given date
    */
   public void displayEventsOnDate(List<Event> events, LocalDate date) {
     try {
@@ -74,9 +75,9 @@ public class CalendarView {
   /**
    * Display events between two date-times.
    *
-   * @param events
-   * @param start
-   * @param end
+   * @param events the list of events scheduled within given range.
+   * @param start the start date & time of the range
+   * @param end the end date & time of the range
    */
   public void displayEventsBetween(List<Event> events, LocalDateTime start, LocalDateTime end) {
     try {
@@ -139,8 +140,8 @@ public class CalendarView {
   /**
    * Export calendar to a CSV file.
    *
-   * @param content
-   * @param fileName
+   * @param content the CSV formatted string
+   * @param fileName the name for the output file
    */
   public void exportCalendar(String content, String fileName) {
     try {
@@ -192,7 +193,7 @@ public class CalendarView {
   }
 
   /**
-   * Display welcome message.
+   * Display welcome message for the calendar application.
    */
   public void displayWelcome() {
     try {

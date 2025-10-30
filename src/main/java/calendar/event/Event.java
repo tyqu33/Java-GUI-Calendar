@@ -12,7 +12,7 @@ public class Event implements EventInterface {
   private final String subject;
   private final LocalDateTime start;
   private final LocalDateTime end;
-  private String description ;
+  private String description;
   private String location;
   private EventStatus status;
   private String seriesId;
@@ -25,7 +25,7 @@ public class Event implements EventInterface {
    * @param builder the builder object containing the event details.
    * @throws IllegalArgumentException if the end date/time is before the start date/time.
    */
-  private Event (EventBuilder builder) throws IllegalArgumentException {
+  private Event(EventBuilder builder) throws IllegalArgumentException {
     this.subject = builder.subject;
     if (builder.isAllDayEvent && builder.end == null) {
       this.start = builder.start.with(START_TIME);
@@ -61,7 +61,7 @@ public class Event implements EventInterface {
     private String subject;
     private LocalDateTime start;
     private LocalDateTime end;
-    private String description ;
+    private String description;
     private String location;
     private EventStatus status = EventStatus.PUBLIC;
     public boolean isAllDayEvent = false;
@@ -174,8 +174,8 @@ public class Event implements EventInterface {
    * @return true if the event is an all-day event, false otherwise.
    */
   public boolean isAllDayEvent() {
-    if (end != null && start.toLocalTime().equals(START_TIME) &&
-        end.toLocalTime().equals(END_TIME)) {
+    if (end != null && start.toLocalTime().equals(START_TIME)
+        && end.toLocalTime().equals(END_TIME)) {
       return true;
     }
     return false;

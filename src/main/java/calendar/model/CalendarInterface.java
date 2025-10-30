@@ -123,8 +123,21 @@ public interface CalendarInterface {
                               String newDescription, String newLocation, String newEventStatus)
       throws IllegalArgumentException;
 
+  /**
+   * Get all events that take place on the given date.
+   *
+   * @param date the date to query
+   * @return a List of Event objects scheduled on the date, sorted by start time
+   */
   List<Event> getEventsOnDate(LocalDate date);
 
+  /**
+   * Retrieves all events within the given time range.
+   *
+   * @param start the start date & time of the query range
+   * @param end the end date & time of the query range
+   * @return a List of Event objects within the range, sorted by start time
+   */
   List<Event> getEventsBetween(LocalDateTime start, LocalDateTime end);
 
   /**
@@ -135,5 +148,10 @@ public interface CalendarInterface {
    */
   UserStatus getUserStatus(LocalDateTime queryTime);
 
-  String exportToCSV();
+  /**
+   * Exports all events in the calendar to a CSV formatted string.
+   *
+   * @return a String representing the full CSV content, including headers.
+   */
+  String exportToCsv();
 }

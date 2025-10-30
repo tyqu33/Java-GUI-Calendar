@@ -3,7 +3,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import calendar.event.Event;
-import calendar.util.CSVExporter;
+import calendar.util.CsvExporter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.junit.Test;
 /**
  * Test class for CSVExporter.
  */
-public class CSVExporterTest {
+public class CsvExporterTest {
 
   @Test
   public void testExportEvent() {
@@ -24,7 +24,7 @@ public class CSVExporterTest {
         .status("public")
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("Subject,Start Date,Start Time,End Date,End Time"));
     assertTrue(csv.contains("Meeting"));
@@ -42,7 +42,7 @@ public class CSVExporterTest {
         .setAllDayEvent()
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("Holiday"));
     assertTrue(csv.contains("True")); // All Day Event = True
@@ -56,7 +56,7 @@ public class CSVExporterTest {
         .status("private")
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     String[] lines = csv.split("\n");
     assertTrue(lines[1].endsWith("True")); // Private = True
@@ -69,7 +69,7 @@ public class CSVExporterTest {
         .end(LocalDateTime.parse("2025-05-01T11:00"))
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("\"Meeting, with \"\"quotes\"\"\""));
   }
@@ -82,7 +82,7 @@ public class CSVExporterTest {
         .description("Description with, commas and \"quotes\"")
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("\"Description with, commas and \"\"quotes\"\"\""));
   }
@@ -90,7 +90,7 @@ public class CSVExporterTest {
   @Test
   public void testExportEmptyList() {
     List<Event> events = new ArrayList<>();
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("Subject,Start Date"));
     assertEquals(1, csv.split("\n").length);
@@ -106,7 +106,7 @@ public class CSVExporterTest {
         .end(LocalDateTime.parse("2025-05-02T15:00"))
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("Event1"));
     assertTrue(csv.contains("Event2"));
@@ -121,7 +121,7 @@ public class CSVExporterTest {
         .end(LocalDateTime.parse("2025-05-01T11:00"))
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("Basic"));
     assertFalse(csv.contains("null"));
@@ -136,7 +136,7 @@ public class CSVExporterTest {
         .status("public")
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("Subject,Start Date,Start Time"));
     assertTrue(csv.contains("Meeting"));
@@ -152,7 +152,7 @@ public class CSVExporterTest {
     events.add(Event.builder("Multi-line\nTitle", LocalDateTime.parse("2025-05-01T10:00"))
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("\"Multi-line\nTitle\""));
   }
@@ -163,7 +163,7 @@ public class CSVExporterTest {
     events.add(Event.builder("Meeting 1, room 1", LocalDateTime.parse("2025-05-01T10:00"))
         .build());
 
-    String csv = CSVExporter.exportToCSV(events);
+    String csv = CsvExporter.exportToCsv(events);
 
     assertTrue(csv.contains("\"Meeting 1, room 1\""));
     assertFalse(csv.contains("\"\""));

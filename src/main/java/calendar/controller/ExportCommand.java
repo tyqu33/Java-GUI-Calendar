@@ -5,12 +5,22 @@ import calendar.view.CalendarView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ExportCommand extends CommandFactory{
+/**
+ * Represents the process of handling export command.
+ */
+public class ExportCommand extends CommandFactory {
   private static final Pattern EXPORT = Pattern.compile("^export cal (\\S+)$");
   private final CalendarInterface calendar;
   private final CalendarView view;
   private final String commandLine;
 
+  /**
+   * Constructs an ExportCommand instance.
+   *
+   * @param commandLine the input command string
+   * @param calendar the calendar object
+   * @param view the calendar view to display
+   */
   public ExportCommand(String commandLine, CalendarInterface calendar, CalendarView view) {
     this.calendar = calendar;
     this.view = view;
@@ -23,7 +33,7 @@ public class ExportCommand extends CommandFactory{
     try {
       if (matcher.matches()) {
         String fileName = matcher.group(1).trim();
-        String csvContent = calendar.exportToCSV();
+        String csvContent = calendar.exportToCsv();
         view.exportCalendar(csvContent, fileName);
         return;
       }

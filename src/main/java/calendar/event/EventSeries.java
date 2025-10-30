@@ -14,9 +14,9 @@ import java.util.UUID;
 
 /**
  * This class represents a series of recurring calendar events,
- * and generates the individual event keys based on recurrence rules (weekdays, occurrences/end date).
+ * and generates the individual event keys based on weekdays, occurrences/end date.
  */
-public class EventSeries implements EventInterface{
+public class EventSeries implements EventInterface {
   private final String seriesId;
   private final String subject;
   private final LocalTime startTime;
@@ -70,8 +70,8 @@ public class EventSeries implements EventInterface{
   /**
    * Factory method to obtain a new builder instance.
    *
-   * @param subject the subject of the event series
-   * @param start the start date and time of the first occurrence
+   * @param subject  the subject of the event series
+   * @param start    the start date and time of the first occurrence
    * @param weekdays a string representing the recurrence days (e.g., "MWR")
    * @return a new EventSeriesBuilder instance
    */
@@ -131,8 +131,8 @@ public class EventSeries implements EventInterface{
     /**
      * Constructs a new builder with mandatory parameters.
      *
-     * @param subject the subject of the series
-     * @param start the start date and time of the first occurrence
+     * @param subject  the subject of the series
+     * @param start    the start date and time of the first occurrence
      * @param weekdays a string representing the recurrence days
      */
     public EventSeriesBuilder(String subject, LocalDateTime start, String weekdays) {
@@ -182,7 +182,7 @@ public class EventSeries implements EventInterface{
     }
 
     /**
-     *  Sets an existing series ID for updating an existing series
+     * Sets an existing series ID for updating an existing series.
      *
      * @param seriesId the existing unique ID of the series
      * @return the builder instance
@@ -195,7 +195,7 @@ public class EventSeries implements EventInterface{
     /**
      * Includes a set of dates that have been removed from the series.
      *
-     * @param removedDates  the set of removed dates
+     * @param removedDates the set of removed dates
      * @return the builder instance
      */
     public EventSeriesBuilder withExistingRemovedDates(Set<LocalDate> removedDates) {
@@ -406,6 +406,8 @@ public class EventSeries implements EventInterface{
         case 'U':
           targetDays.add(DayOfWeek.SUNDAY);
           break;
+        default:
+          break;
       }
     }
     return targetDays;
@@ -416,42 +418,92 @@ public class EventSeries implements EventInterface{
     return seriesId;
   }
 
+  /**
+   * Get a copy of the current set of event keys.
+   *
+   * @return a copy of the set of EventKeys
+   */
   public Set<EventKey> getEventKeys() {
     return new HashSet<>(eventKeys);
   }
 
+  /**
+   * Adds an EventKey to the series keys.
+   *
+   * @param eventKey the key to add
+   */
   public void addEventKey(EventKey eventKey) {
     this.eventKeys.add(eventKey);
   }
 
+  /**
+   * Removes an EventKey from the series keys.
+   *
+   * @param eventKey the key to remove
+   */
   public void removeEventKey(EventKey eventKey) {
     this.eventKeys.remove(eventKey);
   }
 
+  /**
+   * Retrieves the set of keys for this series.
+   *
+   * @return an unmodifiable set of EventKey instances
+   */
   public Set<EventKey> getSeriesKeys() {
     return Collections.unmodifiableSet(this.eventKeys);
   }
 
+  /**
+   * Retrieves the set of dates that have been removed.
+   *
+   * @return an unmodifiable set of removed dates
+   */
   public Set<LocalDate> getRemovedDates() {
     return Collections.unmodifiableSet(removeDates);
   }
 
+  /**
+   * Retrieves the date of the first event in the series.
+   *
+   * @return the first occurrence date
+   */
   public LocalDate getFirstOccurrence() {
-    return  firstOccurrence;
+    return firstOccurrence;
   }
 
+  /**
+   * Retrieves the recurrence string (e.g., "MWR").
+   *
+   * @return a weekday string.
+   */
   public String getWeekdays() {
     return weekdays;
   }
 
+  /**
+   * Retrieves the number of occurrences of this series.
+   *
+   * @return the number of occurrences
+   */
   public Integer getOccurrences() {
     return occurrences;
   }
 
+  /**
+   * Retrieves the end date of this series.
+   *
+   * @return the end date
+   */
   public LocalDate getEndDate() {
     return endDate;
   }
 
+  /**
+   * Checks if the series is defined as an all-day event.
+   *
+   * @return true if the event series is all-day
+   */
   public boolean isAllDay() {
     return isAllDay;
   }

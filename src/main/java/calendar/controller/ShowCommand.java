@@ -7,7 +7,10 @@ import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ShowCommand extends CommandFactory{
+/**
+ * Represents the process of handling print command.
+ */
+public class ShowCommand extends CommandFactory {
 
   private static final Pattern SHOW_STATUS =  Pattern.compile("^show status on (\\S+)$");
 
@@ -15,6 +18,13 @@ public class ShowCommand extends CommandFactory{
   private final CalendarView view;
   private final String commandLine;
 
+  /**
+   * Constructs an ShowCommand instance.
+   *
+   * @param commandLine the input command string
+   * @param calendar the calendar object
+   * @param view the calendar view to display
+   */
   public ShowCommand(String commandLine, CalendarInterface calendar, CalendarView view) {
     this.calendar = calendar;
     this.view = view;

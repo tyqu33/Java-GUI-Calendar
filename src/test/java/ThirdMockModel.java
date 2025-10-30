@@ -74,7 +74,7 @@ class ThirdMockModel implements CalendarInterface {
   }
 
   @Override
-  public String exportToCSV() {
+  public String exportToCsv() {
     return "";
   }
 }
