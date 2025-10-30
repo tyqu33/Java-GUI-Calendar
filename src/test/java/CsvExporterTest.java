@@ -168,4 +168,28 @@ public class CsvExporterTest {
     assertTrue(csv.contains("\"Meeting 1, room 1\""));
     assertFalse(csv.contains("\"\""));
   }
+
+  @Test
+  public void testEscapeEmpty() {
+    List<Event> events = new ArrayList<>();
+    events.add(Event.builder("Test", LocalDateTime.parse("2025-05-01T10:00"))
+        .description("")
+        .build());
+    String csv = CsvExporter.exportToCsv(events);
+    String[] lines = csv.split("\n");
+    String dataLine = lines[1].trim();
+    assertTrue(dataLine.contains(",,"));
+  }
+
+  @Test
+  public void testEscape5() {
+    String value = "Title with \"quotes\"\nand newline";
+    List<Event> events = new ArrayList<>();
+    events.add(Event.builder(value, LocalDateTime.parse("2025-05-01T10:00"))
+        .build());
+    String csv = CsvExporter.exportToCsv(events);
+    String expectedSubject = "\"Title with \"\"quotes\"\"\nand newline\"";
+
+    assertTrue(csv.contains(expectedSubject));
+  }
 }

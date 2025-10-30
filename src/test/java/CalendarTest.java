@@ -31,28 +31,19 @@ import org.junit.Test;
  */
 public class CalendarTest {
   private Calendar calendar;
-  private CalendarView view;
   private ByteArrayOutputStream outContent;
   private ByteArrayOutputStream errContent;
-  private PrintStream originalOut;
-  private PrintStream originalErr;
 
+  /**
+   * Initialize a calendar and view.
+   */
   @Before
   public void setUp() {
     calendar = new Calendar();
-    view = new CalendarView();
     outContent = new ByteArrayOutputStream();
     errContent = new ByteArrayOutputStream();
-    originalOut = System.out;
-    originalErr = System.err;
     System.setOut(new PrintStream(outContent));
     System.setErr(new PrintStream(errContent));
-  }
-
-  @After
-  public void tearDown() {
-    System.setOut(originalOut);
-    System.setErr(originalErr);
   }
 
   @Test
@@ -110,7 +101,5 @@ public class CalendarTest {
       assertEquals(LocalTime.of(11, 0), key.getEndDateTime().toLocalTime());
     }
   }
-
-  //Print and export
 
 }

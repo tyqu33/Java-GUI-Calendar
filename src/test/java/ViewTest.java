@@ -25,6 +25,9 @@ public class ViewTest {
   private StringBuilder output;
   private CalendarView view;
 
+  /**
+   * Set up a new view for testing.
+   */
   @Before
   public void setUp() {
     output = new StringBuilder();
@@ -203,5 +206,149 @@ public class ViewTest {
 
     Files.deleteIfExists(filePath);
   }
+
+  @Test
+  public void testDisplayEventsInvalid() {
+    List<Event> events = new ArrayList<>();
+    events.add(Event.builder("Meeting", LocalDateTime.parse("2025-05-01T10:00"))
+        .end(LocalDateTime.parse("2025-05-01T11:00"))
+        .location("")
+        .build());
+    view.displayEventsOnDate(events, LocalDate.parse("2025-05-01"));
+
+    String result = output.toString();
+    assertTrue(result.contains("Meeting"));
+    assertFalse(result.contains(" at "));
+    assertFalse(result.contains(" at "));
+  }
+
+  @Test
+  public void testDisplayEventsBetween2() {
+    List<Event> events = new ArrayList<>();
+    events.add(Event.builder("Project Meeting", LocalDateTime.parse("2025-05-10T14:00"))
+        .end(LocalDateTime.parse("2025-05-10T16:00"))
+        .location("Room C") // 确保设置了地点
+        .build());
+
+    LocalDateTime start = LocalDateTime.parse("2025-05-01T00:00");
+    LocalDateTime end = LocalDateTime.parse("2025-05-11T00:00");
+
+    view.displayEventsBetween(events, start, end);
+
+    String result = output.toString();
+    assertTrue(result.contains("Events from"));
+    assertTrue(result.contains("Project Meeting"));
+    assertTrue(result.contains(" at Room C"));
+  }
+
+  @Test
+  public void testDisplayEventsBetween3() {
+    List<Event> events = new ArrayList<>();
+    events.add(Event.builder("Simple Event", LocalDateTime.parse("2025-05-05T10:00"))
+        .location("Office")
+        .build());
+    LocalDateTime start = LocalDateTime.parse("2025-05-01T00:00");
+    LocalDateTime end = LocalDateTime.parse("2025-05-06T00:00");
+
+    view.displayEventsBetween(events, start, end);
+
+    String result = output.toString();
+    assertTrue(result.contains("Events from"));
+    assertTrue(result.contains("Simple Event"));
+    assertFalse("Should not contain 'ending on' because EndDateTime is null.",
+        result.contains(", ending on "));
+
+    assertTrue(result.contains("at 10:00 AM"));
+  }
+
+  @Test
+  public void testDisplayEventsBetween4() {
+    List<Event> events = null;
+    LocalDateTime start = LocalDateTime.parse("2025-05-01T00:00");
+    LocalDateTime end = LocalDateTime.parse("2025-05-02T00:00");
+    view.displayEventsBetween(events, start, end);
+
+    String result = output.toString();
+    assertTrue(result.contains("No events between"));
+  }
+
+  /**
+   * Inner class which forces an IOException each time append() is called.
+   */
+  private static class ThrowingAppendable implements Appendable {
+    @Override
+    public Appendable append(CharSequence csq) throws IOException {
+      throw new IOException("Simulated write failure for catch coverage.");
+    }
+
+    @Override
+    public Appendable append(CharSequence csq, int start, int end) throws IOException {
+      throw new IOException("Simulated write failure for catch coverage.");
+    }
+
+    @Override
+    public Appendable append(char c) throws IOException {
+      throw new IOException("Simulated write failure for catch coverage.");
+    }
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDisplayEventsException() {
+    CalendarView view = new CalendarView(new ThrowingAppendable());
+    List<Event> events = new ArrayList<>();
+    events.add(Event.builder("Test", LocalDateTime.now()).build());
+
+    view.displayEventsOnDate(events, LocalDate.now());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDisplayEventsException2() {
+    CalendarView view = new CalendarView(new ThrowingAppendable());
+    List<Event> events = new ArrayList<>();
+    events.add(Event.builder("Test", LocalDateTime.now()).build());
+
+    view.displayEventsBetween(events, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDisplayEventsException3() {
+    CalendarView view = new CalendarView(new ThrowingAppendable());
+
+    view.displayUserStatus(UserStatus.AVAILABLE);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDisplayEventsException4() {
+    CalendarView view = new CalendarView(new ThrowingAppendable());
+    view.displaySuccess("Success!");
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDisplayEventsException5() {
+    CalendarView view = new CalendarView(new ThrowingAppendable());
+    view.displayError("Error!");
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDisplayEventsException6() {
+    CalendarView view = new CalendarView(new ThrowingAppendable());
+    view.displayWarning("Warning!");
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDisplayEventsException7() {
+    CalendarView view = new CalendarView(new ThrowingAppendable());
+    view.displayWelcome();
+  }
+
+  @Test
+  public void testDisplayEventsException8() {
+    CalendarView view = new CalendarView(output);
+    String fileName = "/invalid_test_file.csv";
+    view.exportCalendar("content", fileName);
+    String result = output.toString();
+    assertTrue(result.contains("Error: Export failed:"));
+  }
+
 }
 

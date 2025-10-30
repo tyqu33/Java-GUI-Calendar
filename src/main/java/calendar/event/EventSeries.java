@@ -90,10 +90,10 @@ public class EventSeries implements EventInterface {
         this.subject,
         LocalDateTime.of(this.firstOccurrence, this.startTime),
         this.weekdays);
-    if (this.endTime != null) {
-      builder.end(LocalDateTime.of(this.firstOccurrence, this.endTime));
-    } else if (this.isAllDay) {
+    if (this.isAllDay) {
       builder.setAllDay();
+    } else if (this.endTime != null) {
+      builder.end(LocalDateTime.of(this.firstOccurrence, this.endTime));
     }
 
     builder.description(this.description)
@@ -362,20 +362,6 @@ public class EventSeries implements EventInterface {
   }
 
   /**
-   * Updates the series keys collection by adding or removing a single key.
-   *
-   * @param key the EventKey to add or remove
-   * @param add true to add the key, false to remove it
-   */
-  public void updateSeriesKeys(EventKey key, boolean add) {
-    if (add) {
-      this.eventKeys.add(key);
-    } else {
-      this.eventKeys.remove(key);
-    }
-  }
-
-  /**
    * Parses the weekday string (e.g., "MWR") into a Set of DayOfWeek enums.
    *
    * @param weekdays the string representation of weekdays
@@ -425,15 +411,6 @@ public class EventSeries implements EventInterface {
    */
   public Set<EventKey> getEventKeys() {
     return new HashSet<>(eventKeys);
-  }
-
-  /**
-   * Adds an EventKey to the series keys.
-   *
-   * @param eventKey the key to add
-   */
-  public void addEventKey(EventKey eventKey) {
-    this.eventKeys.add(eventKey);
   }
 
   /**
