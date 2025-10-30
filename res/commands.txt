@@ -1,0 +1,12 @@
+create event "Morning Standup" from 2025-11-01T09:00 to 2025-11-01T09:15
+create event "Project Meeting" from 2025-11-01T14:00 to 2025-11-01T15:00
+create event "Lunch" on 2025-11-01
+create event "Gym Session" on 2025-11-02 repeats MWF for 4 times
+create event "Lecture 101" from 2025-11-05T10:00 to 2025-11-05T11:30
+edit event subject "Morning Standup" from 2025-11-01T09:00 to 2025-11-01T09:15 with "Daily Standup"
+edit event location "Project Meeting" from 2025-11-01T14:00 to 2025-11-01T15:00 with "Room 101"
+print events on 2025-11-01
+print events from 2025-11-01T00:00 to 2025-11-10T23:59
+show status on 2025-11-01T14:30
+export cal test_calendar.csv
+exit
