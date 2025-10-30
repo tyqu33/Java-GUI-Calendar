@@ -302,7 +302,6 @@ public class Calendar implements CalendarInterface {
         (newSubject != null && !newSubject.isEmpty())
             || (newStartDateTime != null && !newStartDateTime.isEmpty())
             || (newEndDateTime != null && !newEndDateTime.isEmpty());
-    // System.out.println("old Series ID: " + oldEvent.getSeriesId() + "isKeyChanged: " + ((isKeyChanged)?"true":"false"));
     String seriesId = oldEvent.getSeriesId();
     // This event does not belong to any series
     if (seriesId == null) {
