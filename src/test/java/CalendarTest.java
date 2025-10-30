@@ -1,4 +1,6 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -31,8 +33,9 @@ import org.junit.Test;
  */
 public class CalendarTest {
   private Calendar calendar;
-  private ByteArrayOutputStream outContent;
-  private ByteArrayOutputStream errContent;
+  private LocalDateTime time;
+  private EventKey key1;
+  private EventKey key2;
 
   /**
    * Initialize a calendar and view.
@@ -40,10 +43,9 @@ public class CalendarTest {
   @Before
   public void setUp() {
     calendar = new Calendar();
-    outContent = new ByteArrayOutputStream();
-    errContent = new ByteArrayOutputStream();
-    System.setOut(new PrintStream(outContent));
-    System.setErr(new PrintStream(errContent));
+    time = LocalDateTime.now().withNano(0);
+    key1 = new EventKey("Test Subject", time, time.plusHours(1));
+    key2 = new EventKey("Test Subject", time, time.plusHours(1));
   }
 
   @Test
@@ -77,7 +79,7 @@ public class CalendarTest {
         "Lecture",
         "2025-05-05T10:00",
         "2025-05-05T11:00",
-        "Java Programming",
+        "Java",
         "Room 101",
         "public",
         "MW",
@@ -100,6 +102,60 @@ public class CalendarTest {
       assertEquals(LocalTime.of(10, 0), key.getStartDateTime().toLocalTime());
       assertEquals(LocalTime.of(11, 0), key.getEndDateTime().toLocalTime());
     }
+  }
+
+  @Test
+  public void testEquals1() {
+    assertEquals(key1, key1);
+  }
+
+  @Test
+  public void testEquals2() {
+    assertNotEquals(null, key1);
+  }
+
+  @Test
+  public void testEquals3() {
+    assertFalse(key1.equals("Not EventKey"));
+  }
+
+  @Test
+  public void testEquals4() {
+    assertEquals(key1, key2);
+  }
+
+  @Test
+  public void testEquals5() {
+    EventKey differentSubject = new EventKey("Other", time, time.plusHours(1));
+    assertNotEquals(key1, differentSubject);
+  }
+
+  @Test
+  public void testEquals6() {
+    EventKey differentStart = new EventKey("Test Subject", time.plusMinutes(30), time.plusHours(1));
+    assertNotEquals(key1, differentStart);
+  }
+
+  @Test
+  public void testEquals7() {
+    EventKey differentEnd = new EventKey("Test Subject", time, time.plusHours(2));
+    assertNotEquals(key1, differentEnd);
+  }
+
+  @Test
+  public void testEquals8() {
+    assertFalse(key1.equals(null));
+  }
+
+  @Test
+  public void testHashCode1() {
+    assertEquals(key1.hashCode(), key2.hashCode());
+  }
+
+  @Test
+  public void testHashCode2() {
+    EventKey differentSubject = new EventKey("Other", time, time.plusHours(1));
+    assertTrue(key1.hashCode() != differentSubject.hashCode());
   }
 
 }

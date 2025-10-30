@@ -17,6 +17,7 @@ java -jar build/libs/calendar-1.0.jar --mode interactive
 ## Headless Mode
 
 This mode is used for batch processing. The application reads commands from the specified text file in sequence, executes the commands, and exits at the end of the file when it reaches "exit".
+
 Example:
 
 java -jar build/libs/calendar-1.0.jar --mode headless command2.txt
