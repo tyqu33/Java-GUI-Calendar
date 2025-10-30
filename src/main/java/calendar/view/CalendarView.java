@@ -13,13 +13,13 @@ import java.util.List;
 
 /**
  * Represents the view component for the calendar application.
- * Displaying information (welcome, events, messages, errors, warning, etc.)
  */
-public class CalendarView {
+public class CalendarView implements CalendarViewInterface {
   private static final DateTimeFormatter DATE_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd");
   private static final DateTimeFormatter TIME_FORMATTER =
       DateTimeFormatter.ofPattern("h:mm a");
+
   private final Appendable output;
 
   /**
@@ -42,12 +42,7 @@ public class CalendarView {
     this(System.out);
   }
 
-  /**
-   * Display events on a specific date.
-   *
-   * @param events the list of events scheduled on the given date
-   * @param date the given date
-   */
+  @Override
   public void displayEventsOnDate(List<Event> events, LocalDate date) {
     try {
       if (events == null || events.isEmpty()) {
@@ -72,13 +67,7 @@ public class CalendarView {
     }
   }
 
-  /**
-   * Display events between two date-times.
-   *
-   * @param events the list of events scheduled within given range.
-   * @param start the start date & time of the range
-   * @param end the end date & time of the range
-   */
+  @Override
   public void displayEventsBetween(List<Event> events, LocalDateTime start, LocalDateTime end) {
     try {
       if (events == null || events.isEmpty()) {
@@ -120,11 +109,7 @@ public class CalendarView {
     }
   }
 
-  /**
-   * Display user status.
-   *
-   * @param status user status (busy or available)
-   */
+  @Override
   public void displayUserStatus(UserStatus status) {
     try {
       if (status == UserStatus.BUSY) {
@@ -137,12 +122,7 @@ public class CalendarView {
     }
   }
 
-  /**
-   * Export calendar to a CSV file.
-   *
-   * @param content the CSV formatted string
-   * @param fileName the name for the output file
-   */
+  @Override
   public void exportCalendar(String content, String fileName) {
     try {
       Path filePath = Paths.get(fileName);
@@ -153,11 +133,7 @@ public class CalendarView {
     }
   }
 
-  /**
-   * Display a success message.
-   *
-   * @param message success message
-   */
+  @Override
   public void displaySuccess(String message) {
     try {
       output.append("Success: ").append(message).append("\n");
@@ -166,11 +142,7 @@ public class CalendarView {
     }
   }
 
-  /**
-   * Display an error message.
-   *
-   * @param error error message
-   */
+  @Override
   public void displayError(String error) {
     try {
       output.append("Error: ").append(error).append("\n");
@@ -179,11 +151,7 @@ public class CalendarView {
     }
   }
 
-  /**
-   * Display a warning message.
-   *
-   * @param warning warning message
-   */
+  @Override
   public void displayWarning(String warning) {
     try {
       output.append("Warning: ").append(warning).append("\n");
@@ -192,9 +160,7 @@ public class CalendarView {
     }
   }
 
-  /**
-   * Display welcome message for the calendar application.
-   */
+  @Override
   public void displayWelcome() {
     try {
       output.append("=================================\n");
@@ -206,4 +172,3 @@ public class CalendarView {
     }
   }
 }
-
