@@ -15,7 +15,7 @@ public class CalendarRunner {
   /**
    * The main method.
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     Calendar calendarModel = new Calendar();
     CalendarView calendarView = new CalendarView();
     Readable input;

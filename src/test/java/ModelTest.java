@@ -465,6 +465,13 @@ public class ModelTest {
     }  catch (IllegalArgumentException e) {
       assertTrue(true);
     }
+    try {
+      Event updatedEvent = calendar.editSingleEvent("Meeting",
+          "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "", "", "Invalid Status");
+      assert false;
+    }  catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
   }
 
   @Test
@@ -565,6 +572,22 @@ public class ModelTest {
   }
 
   @Test
+  public void testModelEditEventSeries7() {
+    Calendar calendar = new Calendar();
+    EventSeries series = calendar.createEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "T", 4, "");
+    EventSeries updatedSeries = calendar.editEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "", "", "public");
+    assertNotNull(updatedSeries);
+    assertEquals("Meeting", updatedSeries.getSubject());
+    assertEquals("2025-10-28T09:00", updatedSeries.getStartDateTime().toString());
+    assertEquals("2025-10-28T12:00", updatedSeries.getEndDateTime().toString());
+    assertEquals("", updatedSeries.getDescription());
+    assertEquals("", updatedSeries.getLocation());
+    assertEquals(EventStatus.PUBLIC, updatedSeries.getEventStatus());
+  }
+
+  @Test
   public void testModelEditEventSeries6() {
     Calendar calendar = new Calendar();
     Event event0 = calendar.createSingleEvent("Meeting", "2025-10-28T09:00",
@@ -657,6 +680,22 @@ public class ModelTest {
       assert false;
     } catch (IllegalArgumentException e) {
       assertTrue(true);
+    }
+  }
+
+  @Test
+  public void testModelEditEventSeriesExp2() {
+    Calendar calendar = new Calendar();
+    EventSeries series = calendar.createEventSeries("Meeting",
+        "2025-10-28T09:00", "2025-10-28T12:00", "", "", "", "T", 4, "");
+    try {
+      EventSeries updatedSeries = calendar.editEventSeries("Meeting",
+          "2025-10-28T09:00", "2025-10-28T12:00",
+          "", "", "", "", "", "Invalid Status");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertEquals(null,
+          "Invalid event series status: Invalid Status", e.getMessage());
     }
   }
 

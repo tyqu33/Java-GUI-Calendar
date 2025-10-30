@@ -218,6 +218,9 @@ public class Calendar implements CalendarInterface {
         oldEvent.editLocation(newLocation);
       }
       if (newEventStatus != null && !newEventStatus.isEmpty()) {
+        if (!newEventStatus.equals("private") && !newEventStatus.equals("public")) {
+          throw new IllegalArgumentException("Invalid event status: " + newEventStatus);
+        }
         oldEvent.editEventStatus(newEventStatus);
       }
       return oldEvent;
@@ -323,6 +326,10 @@ public class Calendar implements CalendarInterface {
                 eventInSeries.editLocation(newLocation);
               }
               if (newEventStatus != null && !newEventStatus.isEmpty()) {
+                if (!newEventStatus.equals("private") && !newEventStatus.equals("public")) {
+                  throw new IllegalArgumentException("Invalid event series status: "
+                      + newEventStatus);
+                }
                 eventInSeries.editEventStatus(newEventStatus);
               }
             }

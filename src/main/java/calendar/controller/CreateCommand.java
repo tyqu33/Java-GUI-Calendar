@@ -45,12 +45,12 @@ public class CreateCommand extends CommandFactory {
   }
 
   @Override
-  public void execute() {
+  public void execute() throws IllegalArgumentException {
     parseCommand(this.commandLine);
   }
 
   @Override
-  public void parseCommand(String commandLine) {
+  public void parseCommand(String commandLine) throws IllegalArgumentException {
     Matcher matcher;
 
     matcher = C_FROM_TO_REPEATS_N.matcher(commandLine);
@@ -126,7 +126,7 @@ public class CreateCommand extends CommandFactory {
           description, location, eventStatus, null);
       return;
     }
-    System.err.println("Create event failure. Wrong format: " + commandLine);
+    throw new IllegalArgumentException("Create event failure. Wrong format: " + commandLine);
   }
 
 }

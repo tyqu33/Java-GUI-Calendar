@@ -2,6 +2,7 @@ package calendar.controller;
 
 import calendar.model.CalendarInterface;
 import calendar.view.CalendarView;
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -33,7 +34,7 @@ public class CalendarController {
   /**
    * The executioner of taking in next line of command and processing.
    */
-  public void go() {
+  public void go() throws IOException {
     Scanner scanner = new Scanner(this.input);
     String commandLine;
     boolean exitFlag = true;
@@ -87,7 +88,7 @@ public class CalendarController {
   //    }
   //  }
 
-  private void processCommand(String commandLine) {
+  private void processCommand(String commandLine) throws IOException {
     String commandType = "";
     int indexFirstSpace = commandLine.indexOf(' ');
     if (indexFirstSpace != -1) {
@@ -98,11 +99,19 @@ public class CalendarController {
     switch (commandType) {
       case "create":
         CommandFactory createEvent = new CreateCommand(commandLine, calendar);
-        createEvent.execute();
+        try {
+          createEvent.execute();
+        } catch (IllegalArgumentException e) {
+          this.output.append(e.getMessage()).append("\n");
+        }
         break;
       case "edit":
         CommandFactory editEvent = new EditCommand(commandLine, calendar);
-        editEvent.execute();
+        try {
+          editEvent.execute();
+        } catch (IllegalArgumentException e) {
+          this.output.append(e.getMessage()).append("\n");
+        }
         break;
       case "print":
         CommandFactory printEvent = new PrintCommand(commandLine, calendar, view);

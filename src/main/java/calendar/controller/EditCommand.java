@@ -47,12 +47,12 @@ public class EditCommand extends CommandFactory {
   }
 
   @Override
-  public void execute() {
+  public void execute() throws IllegalArgumentException {
     parseCommand(this.commandLine);
   }
 
   @Override
-  protected void parseCommand(String commandLine) {
+  protected void parseCommand(String commandLine) throws IllegalArgumentException {
     Matcher matcher;
 
     matcher = E_P_FROM_TO_WNP.matcher(commandLine);
@@ -62,8 +62,11 @@ public class EditCommand extends CommandFactory {
       startDateTime = matcher.group(4).trim();
       endDateTime = matcher.group(5).trim();
       newPropertyValue = matcher.group(6).trim();
-
-      getNewPropertyValue(oldProperty, newPropertyValue);
+      try {
+        getNewPropertyValue(oldProperty, newPropertyValue);
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException(e.getMessage());
+      }
       this.calendar.editSingleEvent(subject, startDateTime, endDateTime, newSubject,
           newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
       return;
@@ -76,7 +79,11 @@ public class EditCommand extends CommandFactory {
       startDateTime = matcher.group(4).trim();
       newPropertyValue = matcher.group(5).trim();
 
-      getNewPropertyValue(oldProperty, newPropertyValue);
+      try {
+        getNewPropertyValue(oldProperty, newPropertyValue);
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException(e.getMessage());
+      }
       this.calendar.editEventSeries(subject, startDateTime, endDateTime, newSubject,
           newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
       return;
@@ -89,11 +96,16 @@ public class EditCommand extends CommandFactory {
       startDateTime = matcher.group(4).trim();
       newPropertyValue = matcher.group(5).trim();
 
-      getNewPropertyValue(oldProperty, newPropertyValue);
+      try {
+        getNewPropertyValue(oldProperty, newPropertyValue);
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException(e.getMessage());
+      }
       this.calendar.editEventSeries(subject, startDateTime, endDateTime, newSubject,
           newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
+      return;
     }
-    return;
+    throw new IllegalArgumentException("Edit event failure. Wrong format: " + commandLine);
   }
 
   private void getNewPropertyValue(String oldProperty, String newPropertyValue)
@@ -105,7 +117,7 @@ public class EditCommand extends CommandFactory {
           if (m.find()) {
             newSubject = (m.group(1) != null ? m.group(1) : m.group(2)).trim();
           } else {
-            throw new IllegalArgumentException("New property value is invalid");
+            throw new IllegalArgumentException("New subject value is invalid");
           }
         }
         break;
@@ -115,7 +127,7 @@ public class EditCommand extends CommandFactory {
           if (m.find()) {
             newLocation = (m.group(1) != null ? m.group(1) : m.group(2)).trim();
           } else {
-            throw new IllegalArgumentException("New property value is invalid");
+            throw new IllegalArgumentException("New location value is invalid");
           }
         }
         break;
@@ -125,7 +137,7 @@ public class EditCommand extends CommandFactory {
           if (m.find()) {
             newDescription = (m.group(1) != null ? m.group(1) : m.group(2)).trim();
           } else {
-            throw new IllegalArgumentException("New property value is invalid");
+            throw new IllegalArgumentException("New description value is invalid");
           }
         }
         break;
