@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import org.junit.Test;
 
 /**
@@ -22,10 +23,10 @@ public class ControllerTest {
   //  Events on 2025-10-27:
   //   • Meeting from 8:00 AM to 5:00 PM
   @Test
-  public void testGoCoupledWithView() throws IOException {
+  public void testGoExamineOutput() throws IOException {
     PrintStream originalOut = System.out;
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(bytes);
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
     System.setOut(out);
     // Appendable out = new StringBuffer();
     try {
@@ -35,7 +36,7 @@ public class ControllerTest {
       CalendarView view = new CalendarView();
       CalendarController controller = new CalendarController(model, view, in, out);
       controller.go();
-      String allOuts = bytes.toString();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
       String expectedOutput = "Events on 2025-10-27:\n • Meeting from 8:00 AM to 5:00 PM\n";
       assertEquals(expectedOutput.trim(), allOuts.trim());
     } finally {
