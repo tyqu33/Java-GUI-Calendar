@@ -1,4 +1,5 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import calendar.controller.CalendarController;
 import calendar.model.Calendar;
@@ -101,7 +102,8 @@ public class ControllerTest {
   @Test
   public void testGoWithMockCreateEvent3() {
     Reader in = new StringReader(
-        "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 repeats M for 4 times\nexit\n");
+        "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
+            + "repeats M for 4 times\nexit\n");
     StringBuilder log = new StringBuilder();
     String uniqueResult = "";
     StringBuffer out = new StringBuffer();
@@ -112,7 +114,8 @@ public class ControllerTest {
     controller.go();
 
     String expectedOutput =
-        "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 repeats M for 4 times\nexit\n";
+        "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00"
+            + " repeats M for 4 times\nexit\n";
     // "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
@@ -120,7 +123,8 @@ public class ControllerTest {
   @Test
   public void testGoWithMockCreateEvent4() {
     Reader in = new StringReader(
-        "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 repeats M until 2025-11-17\nexit\n");
+        "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
+            + "repeats M until 2025-11-17\nexit\n");
     StringBuilder log = new StringBuilder();
     String uniqueResult = "";
     StringBuffer out = new StringBuffer();
@@ -131,7 +135,8 @@ public class ControllerTest {
     controller.go();
 
     String expectedOutput =
-        "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 repeats M until 2025-11-17\nexit\n";
+        "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
+            + "repeats M until 2025-11-17\nexit\n";
     // "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
@@ -160,7 +165,8 @@ public class ControllerTest {
   @Test
   public void testGoWithMockEditEvent0() {
     Reader in = new StringReader(
-        "edit event subject Meeting from 2025-10-27T09:00 to 2025-10-2712:00 with Presentation\nprint events on 2025-10-27\nexit\n");
+        "edit event subject Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
+            + "with Presentation\nprint events on 2025-10-27\nexit\n");
     StringBuilder log = new StringBuilder();
     String uniqueResult = "";
     StringBuffer out = new StringBuffer();
@@ -171,14 +177,37 @@ public class ControllerTest {
     controller.go();
 
     String expectedOutput =
-        "edit event subject Meeting from 2025-10-27T09:00 to 2025-10-2712:00 with Presentation\nprint events on 2025-10-27\nexit\n";
+        "edit event subject Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
+            + "with Presentation\nprint events on 2025-10-27\nexit\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
+  }
+
+  @Test
+  public void testGoWithMockEditEvent00() {
+    Reader in = new StringReader(
+        "edit event subject Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
+            + "with \"Long Long Meeting\"\nprint events on 2025-10-27\nexit\n");
+    StringBuilder log = new StringBuilder();
+    String uniqueResult = "";
+    StringBuffer out = new StringBuffer();
+
+    CalendarInterface model = new MockModel(log, uniqueResult);
+    CalendarView view = new CalendarView();
+    CalendarController controller = new CalendarController(model, view, in, out);
+    controller.go();
+
+    String expectedOutput =
+        "edit event subject Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
+            + "with Long Long Meeting\nprint events on 2025-10-27\nexit\n";
+    assertEquals(expectedOutput.trim(), log.toString().trim());
+
   }
 
   @Test
   public void testGoWithMockEditEvent1() {
     Reader in = new StringReader(
-        "edit series description Meeting from 2025-10-27T09:00 with \"Long Long Meeting\"\nprint events on 2025-10-27\nexit\n");
+        "edit series description Meeting from 2025-10-27T09:00 "
+            + "with \"Long Long Meeting\"\nprint events on 2025-10-27\nexit\n");
     StringBuilder log = new StringBuilder();
     String uniqueResult = "";
     StringBuffer out = new StringBuffer();
@@ -189,14 +218,16 @@ public class ControllerTest {
     controller.go();
 
     String expectedOutput =
-        "edit series description Meeting from 2025-10-27T09:00 with Long Long Meeting\nprint events on 2025-10-27\nexit\n";
+        "edit series description Meeting from 2025-10-27T09:00 "
+            + "with Long Long Meeting\nprint events on 2025-10-27\nexit\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
 
   @Test
   public void testGoWithMockEditEvent2() {
     Reader in = new StringReader(
-        "edit events location Meeting from 2025-10-27T09:00 with Boston\nprint events on 2025-10-27\nexit\n");
+        "edit events location Meeting from 2025-10-27T09:00 "
+            + "with Boston\nprint events on 2025-10-27\nexit\n");
     StringBuilder log = new StringBuilder();
     String uniqueResult = "";
     StringBuffer out = new StringBuffer();
@@ -207,7 +238,8 @@ public class ControllerTest {
     controller.go();
 
     String expectedOutput =
-        "edit events location Meeting from 2025-10-27T09:00 with Boston\nprint events on 2025-10-27\nexit\n";
+        "edit events location Meeting from 2025-10-27T09:00 "
+            + "with Boston\nprint events on 2025-10-27\nexit\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
 
@@ -250,7 +282,8 @@ public class ControllerTest {
   @Test
   public void testGoWithMockEditEvent5() {
     Reader in = new StringReader(
-        "edit event status Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 with private\nexit\n");
+        "edit event status Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
+            + "with private\nexit\n");
     StringBuilder log = new StringBuilder();
     String uniqueResult = "";
     StringBuffer out = new StringBuffer();
@@ -265,21 +298,100 @@ public class ControllerTest {
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
 
+  @Test
+  public void testGoWithMockEditEvent6() {
+    Reader in = new StringReader(
+        "edit event subject Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 with Meeting \"");
+    StringBuilder log = new StringBuilder();
+    String uniqueResult = "";
+    StringBuffer out = new StringBuffer();
 
+    CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    CalendarView view = new CalendarView();
+    CalendarController controller = new CalendarController(model, view, in, out);
+    try {
+      controller.go();
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
 
+  @Test
+  public void testGoWithMockEditEvent7() {
+    Reader in = new StringReader(
+        "edit event location Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 with Boston \"");
+    StringBuilder log = new StringBuilder();
+    String uniqueResult = "";
+    StringBuffer out = new StringBuffer();
 
+    CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    CalendarView view = new CalendarView();
+    CalendarController controller = new CalendarController(model, view, in, out);
+    try {
+      controller.go();
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
 
+  @Test
+  public void testGoWithMockEditEvent8() {
+    Reader in = new StringReader(
+        "edit event description Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 with tea \"");
+    StringBuilder log = new StringBuilder();
+    String uniqueResult = "";
+    StringBuffer out = new StringBuffer();
 
+    CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    CalendarView view = new CalendarView();
+    CalendarController controller = new CalendarController(model, view, in, out);
+    try {
+      controller.go();
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
 
+  @Test
+  public void testGoWithMockEditEvent9() {
+    Reader in = new StringReader(
+        "edit event location Meeting from 2025-10-27T09:00 to 2025-10-27T12:00"
+            + " with \"Boston Huntington Ave\"");
+    StringBuilder log = new StringBuilder();
+    String uniqueResult = "";
+    StringBuffer out = new StringBuffer();
 
+    CalendarInterface model = new ThirdMockModel(log, uniqueResult);
+    CalendarView view = new CalendarView();
+    CalendarController controller = new CalendarController(model, view, in, out);
+    controller.go();
 
+    String expectedOutput =
+        "edit event location Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
+            + "with Boston Huntington Ave";
+    assertEquals(expectedOutput.trim(), log.toString().trim());
+  }
 
+  @Test
+  public void testGoWithMockEditEvent10() {
+    Reader in = new StringReader(
+        "edit event description Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 with tea");
+    StringBuilder log = new StringBuilder();
+    String uniqueResult = "";
+    StringBuffer out = new StringBuffer();
 
+    CalendarInterface model = new ForthMockModel(log, uniqueResult);
+    CalendarView view = new CalendarView();
+    CalendarController controller = new CalendarController(model, view, in, out);
+    controller.go();
 
-
-
-
-
+    String expectedOutput =
+        "edit event description Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 with tea";
+    assertEquals(expectedOutput.trim(), log.toString().trim());
+  }
 
 
 }

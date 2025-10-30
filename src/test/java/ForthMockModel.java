@@ -6,10 +6,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * This is a mock model to replace the Calendar for testing the controller in isolation.
+ */
 public class ForthMockModel implements CalendarInterface {
   private StringBuilder log;
   private final String uniqueResult;
 
+  /**
+   * Constructor for test class ForthMockModel.
+   *
+   * @param log the record to receive input arguments for commands
+   * @param uniqueResult the result of output
+   */
   public ForthMockModel(StringBuilder log, String uniqueResult) {
     this.log = log;
     this.uniqueResult = uniqueResult;
@@ -27,8 +36,8 @@ public class ForthMockModel implements CalendarInterface {
                                        String description, String location, String eventStatus,
                                        String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException {
-    log.append("create event " + subject
-        + " on " + startDateTime + " repeats " + weekdays + " until " + seriesEndDateTime + "\nexit\n");
+    log.append("create event " + subject + " on " + startDateTime + " repeats " + weekdays
+        + " until " + seriesEndDateTime + "\nexit\n");
     return null;
   }
 
@@ -43,6 +52,8 @@ public class ForthMockModel implements CalendarInterface {
                                String newSubject, String newStartDateTime, String newEndDateTime,
                                String newDescription, String newLocation, String newEventStatus)
       throws IllegalArgumentException {
+    log.append("edit event description " + subject
+        + " from " + startDateTime + " to " + endDateTime + " with " + newDescription);
     return null;
   }
 

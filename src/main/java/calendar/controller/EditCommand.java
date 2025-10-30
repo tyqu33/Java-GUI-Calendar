@@ -92,9 +92,8 @@ public class EditCommand extends CommandFactory {
       getNewPropertyValue(oldProperty, newPropertyValue);
       this.calendar.editEventSeries(subject, startDateTime, endDateTime, newSubject,
           newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
-      return;
     }
-
+    return;
   }
 
   private void getNewPropertyValue(String oldProperty, String newPropertyValue)

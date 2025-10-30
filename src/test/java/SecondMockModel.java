@@ -6,10 +6,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * This is a mock model to replace the Calendar for testing the controller in isolation.
+ */
 class SecondMockModel implements CalendarInterface {
   private StringBuilder log;
   private final String uniqueResult;
 
+  /**
+   * Constructor for test class SecondMockModel.
+   *
+   * @param log the record to receive input arguments for commands
+   * @param uniqueResult the result of output
+   */
   public SecondMockModel(StringBuilder log, String uniqueResult) {
     this.log = log;
     this.uniqueResult = uniqueResult;
@@ -32,7 +41,8 @@ class SecondMockModel implements CalendarInterface {
                                        String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException {
     log.append("create event " + subject
-        + " from " + startDateTime + " to " + endDateTime + " repeats " + weekdays + " for " + repeatTimes + " times" + "\nexit\n");
+        + " from " + startDateTime + " to " + endDateTime + " repeats " + weekdays
+        + " for " + repeatTimes + " times" + "\nexit\n");
     return null;
   }
 
