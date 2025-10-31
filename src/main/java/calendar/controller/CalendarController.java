@@ -50,43 +50,6 @@ public class CalendarController {
       processCommand(commandLine.trim());
     }
   }
-  //  public void runInteractiveMode() {
-  //    view.displayWelcome();
-  //
-  //    Scanner consoleScanner = new Scanner(System.in); // bad design! coupled with specific input
-  //    String commandLine;
-  //
-  //    while (true) {
-  //      System.out.print("> ");
-  //      commandLine = consoleScanner.nextLine();
-  //
-  //      if (commandLine.equalsIgnoreCase("exit")) {
-  //        break;
-  //      }
-  //
-  //      processCommand(commandLine.trim());
-  //    }
-  //    consoleScanner.close();
-  //  }
-  //
-  //  public void runHeadlessMode(String fileName) {
-  //    File commandFile = new File(fileName);
-  //    try {
-  //      Scanner fileScanner = new Scanner(commandFile); // bad design! coupled with specific input
-  //      while (fileScanner.hasNextLine()) {
-  //        String commandLine = fileScanner.nextLine();
-  //        if (commandLine.equalsIgnoreCase("exit")) {
-  //          break;
-  //        }
-  //        if (commandLine.trim().isEmpty()) {
-  //          continue;
-  //        }
-  //        processCommand(commandLine.trim());
-  //      }
-  //    } catch (FileNotFoundException e) {
-  //      System.out.println("File not found");
-  //    }
-  //  }
 
   private void processCommand(String commandLine) throws IOException {
     String commandType = "";

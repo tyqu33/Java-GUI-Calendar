@@ -57,7 +57,6 @@ public class CalendarRunner {
     String mode = args[1];
     if (mode.equalsIgnoreCase("interactive")) {
 
-      // calendarController.runInteractiveMode();
       return new InputStreamReader(System.in);
 
     } else if (mode.equalsIgnoreCase("headless")) {
@@ -66,7 +65,6 @@ public class CalendarRunner {
         return null;
       }
       String fileName = args[2];
-      // calendarController.runHeadlessMode(fileName);
       return new FileReader(fileName);
     } else {
       System.out.println("Error: Unknown mode " + mode);
