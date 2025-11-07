@@ -10,7 +10,7 @@ import java.util.Objects;
 public class CalendarEntity implements CalendarEntityInterface {
   private String calendarName;
   private ZoneId zoneId;
-  private final Calendar calendar;
+  private Calendar calendar;
 
   /**
    * Private constructor used by the Builder.
@@ -18,33 +18,29 @@ public class CalendarEntity implements CalendarEntityInterface {
    * @param builder the builder instance
    */
   private CalendarEntity(CalendarEntityBuilder builder) {
+    if (builder.calendarName == null || builder.calendarName.trim().isEmpty()) {
+      throw new IllegalStateException("Calendar name must be set.");
+    }
+    if (builder.zoneId == null) {
+      throw new IllegalStateException("Timezone must be set.");
+    }
     this.calendarName = builder.calendarName;
     this.zoneId = builder.zoneId;
-    this.calendar = new Calendar();
+
+    if (builder.calendar != null) {
+      this.calendar = builder.calendar;
+    } else {
+      this.calendar = new Calendar();
+    }
   }
 
   /**
    * Static factory method to create a new CalendarEntityBuilder.
    *
-   * @param calendarName the name of the calendar entity
-   * @param zoneId       the timezone of the calendar entity
    * @return a new CalendarEntityBuilder instance
    */
-  public static CalendarEntityBuilder builder(String calendarName, ZoneId zoneId) {
-    return new CalendarEntityBuilder(calendarName, zoneId);
-  }
-
-  /**
-   * Creates a new builder initialized with the current data, for modifying an existing calendar.
-   *
-   * @return a CalendarEntityBuilder with current values
-   */
-  public CalendarEntityBuilder toBuilder() {
-    CalendarEntityBuilder builder = new CalendarEntityBuilder(
-        this.calendarName,
-        this.zoneId
-    );
-    return builder;
+  public static CalendarEntityBuilder builder() {
+    return new CalendarEntityBuilder();
   }
 
   /**
@@ -53,23 +49,15 @@ public class CalendarEntity implements CalendarEntityInterface {
   public static class CalendarEntityBuilder {
     private String calendarName;
     private ZoneId zoneId;
+    private Calendar calendar;
 
     /**
-     * Constructs a new CalendarEntityBuilder with required parameters.
-     *
-     * @param calendarName the name of the calendar entity
-     * @param zoneId       the timezone of the calendar entity
-     * @throws IllegalArgumentException if calendar name is null or empty, or timezone is null
+     * Constructs a new CalendarEntityBuilder to use chained set methods.
      */
-    public CalendarEntityBuilder(String calendarName, ZoneId zoneId) {
-      if (calendarName == null || calendarName.trim().isEmpty()) {
-        throw new IllegalArgumentException("Calendar name cannot be null or empty");
-      }
-      if (zoneId == null) {
-        throw new IllegalArgumentException("Timezone cannot be null");
-      }
-      this.calendarName = calendarName.trim();
-      this.zoneId = zoneId;
+    public CalendarEntityBuilder() {
+      this.calendarName = null;
+      this.zoneId = null;
+      this.calendar = null;
     }
 
     /**
@@ -99,6 +87,21 @@ public class CalendarEntity implements CalendarEntityInterface {
         throw new IllegalArgumentException("Timezone cannot be null");
       }
       this.zoneId = zoneId;
+      return this;
+    }
+
+    /**
+     * Sets the Calendar object.
+     *
+     * @param calendar the Calendar object to use
+     * @return the builder instance
+     * @throws IllegalArgumentException if calendar is null
+     */
+    public CalendarEntityBuilder calendar(Calendar calendar) {
+      if (calendar == null) {
+        throw new IllegalArgumentException("Calendar cannot be null");
+      }
+      this.calendar = calendar;
       return this;
     }
 
