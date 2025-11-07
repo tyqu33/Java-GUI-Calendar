@@ -1,0 +1,78 @@
+package calendar.model;
+
+import calendar.calendarEntity.CalendarEntity;
+import java.time.ZoneId;
+
+/**
+ * This interface contains necessary operations that a Multi Calendar Manager should support.
+ */
+public interface MultiCalendarManagerInterface {
+
+  /**
+   * To create a calendar entity with name and timezone.
+   *
+   * @param calendarName the name of the calendar entity
+   * @param zoneId       the timezone of the calendar entity
+   * @return the calendar entity with name and timezone
+   */
+  CalendarEntity createCalendar(String calendarName, ZoneId zoneId);
+
+  /**
+   * To update a property of the calendar entity with new value.
+   *
+   * @param calendarName  the name of the calendar entity
+   * @param property      the property of the calendar entity
+   * @param propertyValue the new value of the property
+   */
+  void editCalendar(String calendarName, String property, String propertyValue);
+
+  /**
+   * To get a calendar entity with given name.
+   *
+   * @param calendarName the name of the calendar entity
+   * @return the CalendarEntity with that name
+   */
+  CalendarEntity getCalendar(String calendarName);
+
+  /**
+   * To get the timezone of the calendar entity with given name.
+   *
+   * @param calendarName the name of the calendar entity
+   * @return the timezone of the calendar entity
+   */
+  ZoneId getCalendarTimeZone(String calendarName);
+
+  /**
+   * To copy a single event with given start date/time from one calendar entity
+   * to another calendar entity falling on specific target date/time.
+   *
+   * @param subject            the subject of the single event
+   * @param startDateTime      the start date/time of the event to-be-copied
+   * @param targetCalendarName the name of the target calendar entity
+   * @param targetDateTime     the target date/time of the target calendar entity
+   */
+  void copyEvent(String subject, String startDateTime, String targetCalendarName,
+                 String targetDateTime);
+
+  /**
+   * To copy multiple events on the specific date from one calendar entity
+   * to another calendar entity falling on specific target day.
+   *
+   * @param specificDate       the start day on which the multiple events start
+   * @param targetCalendarName the name of the target calendar entity
+   * @param targetDay          the target date of the target calendar entity
+   */
+  void copyEventsOnThatDay(String specificDate, String targetCalendarName, String targetDay);
+
+  /**
+   * To copy multiple events from a start date to an end date
+   * from one calendar entity to another calendar entity falling on the specific target start day.
+   *
+   * @param startDate          the start day on which the multiple events start
+   * @param endDate            the end day on which the multiple events start
+   * @param targetCalendarName the name of the target calendar entity
+   * @param targetDay          the target date of the target calendar entity
+   */
+  void copyEventsBetweenDays(String startDate, String endDate, String targetCalendarName,
+                             String targetDay);
+}
