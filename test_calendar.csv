@@ -1,0 +1,9 @@
+Subject,Start Date,Start Time,End Date,End Time,All Day Event,Description,Location,Private
+"""Lunch""",11/01/2025,,11/01/2025,,True,,,False
+Daily Standup,11/01/2025,09:00 AM,11/01/2025,09:15 AM,False,,,False
+Project Meeting,11/01/2025,02:00 PM,11/01/2025,03:00 PM,False,,Room 101,False
+Gym Session,11/03/2025,,11/03/2025,,True,,,False
+Gym Session,11/05/2025,,11/05/2025,,True,,,False
+Lecture 101,11/05/2025,10:00 AM,11/05/2025,11:30 AM,False,,,False
+Gym Session,11/07/2025,,11/07/2025,,True,,,False
+Gym Session,11/10/2025,,11/10/2025,,True,,,False

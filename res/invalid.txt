@@ -1,0 +1,8 @@
+creeat event "Lecture" from 2025-11-01T10:00 to 2025-11-01T11:00
+create event "Invalid Date" from 2025/11/01T10:00 to 2025-11-01T11:00
+create event "Invalid Repeat" on 2025-11-03 repeats XYZ for 3 times
+edit event location "Missing location" with "New location"
+print 2025-11-01 events
+export cal
+show status on 2025-11-01
+exit
