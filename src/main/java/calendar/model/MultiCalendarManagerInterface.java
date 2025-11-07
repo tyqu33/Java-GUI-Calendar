@@ -1,6 +1,7 @@
 package calendar.model;
 
 import calendar.calendarEntity.CalendarEntity;
+import calendar.calendarEntity.CalendarEntityInterface;
 import java.time.ZoneId;
 
 /**
@@ -12,10 +13,10 @@ public interface MultiCalendarManagerInterface {
    * To create a calendar entity with name and timezone.
    *
    * @param calendarName the name of the calendar entity
-   * @param zoneId       the timezone of the calendar entity
+   * @param timeZone     the timezone of the calendar entity
    * @return the calendar entity with name and timezone
    */
-  CalendarEntity createCalendar(String calendarName, ZoneId zoneId);
+  CalendarEntityInterface createCalendar(String calendarName, String timeZone);
 
   /**
    * To update a property of the calendar entity with new value.
@@ -32,7 +33,7 @@ public interface MultiCalendarManagerInterface {
    * @param calendarName the name of the calendar entity
    * @return the CalendarEntity with that name
    */
-  CalendarEntity getCalendar(String calendarName);
+  CalendarEntityInterface getCalendar(String calendarName);
 
   /**
    * To get the timezone of the calendar entity with given name.
