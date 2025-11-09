@@ -1,6 +1,7 @@
 package calendar.controller;
 
 import calendar.model.CalendarInterface;
+import calendar.model.MultiCalendarManager;
 import calendar.view.CalendarView;
 import java.io.IOException;
 import java.util.Scanner;
@@ -14,6 +15,7 @@ public class CalendarController {
   private final CalendarView view;
   private final Readable input;
   private final Appendable output;
+  private final MultiCalendarManager manager;
 
   /**
    * The Constructor for CalendarController Class.
@@ -23,12 +25,13 @@ public class CalendarController {
    * @param input        the abstracted input
    * @param output       the abstracted output
    */
-  public CalendarController(CalendarInterface calendar, CalendarView calendarView,
+  public CalendarController(MultiCalendarManager manager, CalendarInterface calendar, CalendarView calendarView,
                             Readable input, Appendable output) {
     this.calendar = calendar;
     this.view = calendarView;
     this.input = input;
     this.output = output;
+    this.manager = manager;
   }
 
   /**
@@ -59,6 +62,29 @@ public class CalendarController {
     } else {
       commandType = commandLine;
     }
+
+    if (commandLine.startsWith("create calendar")) {
+      CommandFactory createCalendar = new CreateCalendarCommand(commandLine, manager, view);
+      createCalendar.execute();
+      return;
+    }
+
+    if (commandLine.startsWith("edit calendar")) {
+      CommandFactory editCalendar = new EditCalendarCommand(commandLine, manager, view);
+      editCalendar.execute();
+      return;
+    }
+
+    if (commandLine.startsWith("use calendar")) {
+
+      return;
+    }
+
+    if (commandLine.startsWith("copy event")) {
+
+      return;
+    }
+
     switch (commandType) {
       case "create":
         CommandFactory createEvent = new CreateCommand(commandLine, calendar);

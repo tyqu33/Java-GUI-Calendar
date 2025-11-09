@@ -1,5 +1,6 @@
 import calendar.controller.CalendarController;
 import calendar.model.Calendar;
+import calendar.model.MultiCalendarManager;
 import calendar.view.CalendarView;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -18,6 +19,7 @@ public class CalendarRunner {
   public static void main(String[] args) throws IOException {
     Calendar calendarModel = new Calendar();
     CalendarView calendarView = new CalendarView();
+    MultiCalendarManager manager = new MultiCalendarManager();
     Readable input;
     Appendable output = System.out;
 
@@ -35,7 +37,7 @@ public class CalendarRunner {
       calendarView.displayWelcome();
     }
     CalendarController calendarController =
-        new CalendarController(calendarModel, calendarView, input, output);
+        new CalendarController(manager, calendarModel, calendarView, input, output);
     calendarController.go();
     if (input instanceof java.io.FileReader) {
       try {
