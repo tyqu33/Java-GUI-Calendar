@@ -127,6 +127,11 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
   }
 
   @Override
+  public void useThisCalendarEntity(CalendarEntityInterface calendarEntity) {
+    this.calendarEntity = calendarEntity;
+  }
+
+  @Override
   public void copyEvent(String subject, String startDateTime, String targetCalendarName,
                         String targetDateTime) throws IllegalArgumentException {
     if (subject == null || startDateTime == null || targetCalendarName == null

@@ -76,12 +76,14 @@ public class CalendarController {
     }
 
     if (commandLine.startsWith("use calendar")) {
-
+      CommandFactory useCalendar = new UseCalendarCommand(commandLine, manager, view);
+      useCalendar.execute();
       return;
     }
 
-    if (commandLine.startsWith("copy event")) {
-
+    if (commandLine.startsWith("copy")) {
+      CommandFactory copyEvent = new CopyCommand(commandLine, manager, calendar);
+      copyEvent.execute();
       return;
     }
 

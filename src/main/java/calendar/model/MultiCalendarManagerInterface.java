@@ -44,6 +44,13 @@ public interface MultiCalendarManagerInterface {
   ZoneId getCalendarTimeZone(String calendarName);
 
   /**
+   * To designate the calendarEntity as the context calendar entity.
+   *
+   * @param calendarEntity the context calendar entity
+   */
+  void useThisCalendarEntity(CalendarEntityInterface calendarEntity);
+
+  /**
    * To copy a single event with given start date/time from one calendar entity
    * to another calendar entity falling on specific target date/time.
    *
