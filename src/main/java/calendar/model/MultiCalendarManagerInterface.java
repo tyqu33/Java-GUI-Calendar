@@ -33,7 +33,7 @@ public interface MultiCalendarManagerInterface {
    * @param calendarName the name of the calendar entity
    * @return the CalendarEntity with that name
    */
-  CalendarEntityInterface getCalendar(String calendarName);
+  CalendarEntityInterface getCalendarEntity(String calendarName);
 
   /**
    * To get the timezone of the calendar entity with given name.
