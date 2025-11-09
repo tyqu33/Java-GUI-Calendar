@@ -1,6 +1,7 @@
 package calendar.controller;
 
 import calendar.model.MultiCalendarManager;
+import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,11 +10,11 @@ public class EditCalendarCommand extends CommandFactory{
   private static final Pattern EDIT_CALENDAR = Pattern.compile(
       "^edit calendar --name (\\S+) --property (\\S+) (.+)$");
 
-  private final MultiCalendarManager manager;
+  private final MultiCalendarManagerInterface manager;
   private final CalendarView view;
   private final String commandLine;
 
-  public EditCalendarCommand(String commandLine, MultiCalendarManager manager, CalendarView view) {
+  public EditCalendarCommand(String commandLine, MultiCalendarManagerInterface manager, CalendarView view) {
     this.commandLine = commandLine;
     this.manager = manager;
     this.view = view;

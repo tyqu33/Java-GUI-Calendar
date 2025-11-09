@@ -1,6 +1,7 @@
 package calendar.controller;
 
 import calendar.model.MultiCalendarManager;
+import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +13,7 @@ public class CreateCalendarCommand extends CommandFactory{
   private static final Pattern CREATE_CALENDAR = Pattern.compile(
       "^create calendar --name (\\S+) --timezone (.+)$");
 
-  private final MultiCalendarManager manager;
+  private final MultiCalendarManagerInterface manager;
   private final String commandLine;
   private final CalendarView view;
 
@@ -22,7 +23,7 @@ public class CreateCalendarCommand extends CommandFactory{
    * @param commandLine the input command string
    * @param manager the calendat manager
    */
-  public CreateCalendarCommand(String commandLine, MultiCalendarManager manager, CalendarView view) {
+  public CreateCalendarCommand(String commandLine, MultiCalendarManagerInterface manager, CalendarView view) {
     this.commandLine = commandLine;
     this.manager = manager;
     this.view = view;

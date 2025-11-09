@@ -142,6 +142,9 @@ public class Calendar implements CalendarInterface {
           .status(eventStatus)
           .seriesId(seriesId)
           .build();
+      if (calendar.containsKey(key)) {
+        throw new IllegalArgumentException("Event already exists");
+      }
       calendar.put(key, eventInstance);
     }
     if (seriesManager.containsKey(seriesId)) {

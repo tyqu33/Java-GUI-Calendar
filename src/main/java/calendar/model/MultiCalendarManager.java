@@ -58,7 +58,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
         .calendar(calendar)
         .build();
     this.calendarManager.put(calendarName, entity);
-    this.calendarEntity = entity;
+    // this.calendarEntity = entity;
     return entity;
   }
 
@@ -102,12 +102,17 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
           .build();
 
       this.calendarManager.replace(calendarName, newEntity);
-      this.calendarEntity = newEntity;
+      // this.calendarEntity = newEntity;
 
     } else {
       throw new IllegalArgumentException("Invalid property input: " + property);
     }
 
+  }
+
+  @Override
+  public CalendarEntityInterface getCurrentCalendarEntity() {
+    return this.calendarEntity;
   }
 
   @Override
@@ -271,21 +276,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
             .withZoneSameInstant(newZoneId).toLocalDateTime();
         // single event that doesn't belong to a series
         if (event.getSeriesId() == null) {
-          newCalendar.createSingleEvent(
-              event.getSubject(),
-              newStart.toString(),
-              newEnd.toString(),
-              event.getDescription(),
-              event.getLocation(),
-              event.getEventStatus().toString(),
-              null
-          );
-        } else {
-
-          String oldSeriesId = event.getSeriesId();
-          EventSeries oldSeries = this.calendarEntity.getCalendar().seriesManager.get(oldSeriesId);
-          // invalid old series id
-          if (oldSeries == null) {
+          try {
             newCalendar.createSingleEvent(
                 event.getSubject(),
                 newStart.toString(),
@@ -295,11 +286,47 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
                 event.getEventStatus().toString(),
                 null
             );
+          } catch (IllegalArgumentException e) {
+            if (e.getMessage().equals("Event already exists")) {
+              throw new IllegalArgumentException("Calendar " + targetCalendarName
+                  + " already has an event with the name " + event.getSubject()
+                  + ", the start date/time " + newStart.toString()
+                  + ", the end date/time " + newEnd.toString() + " existed ");
+            } else {
+              throw e;
+            }
+          }
+        } else {
+
+          String oldSeriesId = event.getSeriesId();
+          EventSeries oldSeries = this.calendarEntity.getCalendar().seriesManager.get(oldSeriesId);
+          // invalid old series id
+          if (oldSeries == null) {
+            try {
+              newCalendar.createSingleEvent(
+                  event.getSubject(),
+                  newStart.toString(),
+                  newEnd.toString(),
+                  event.getDescription(),
+                  event.getLocation(),
+                  event.getEventStatus().toString(),
+                  null
+              );
+            } catch (IllegalArgumentException e) {
+              if (e.getMessage().equals("Event already exists")) {
+                throw new IllegalArgumentException("Calendar " + targetCalendarName
+                    + " already has an event with the name " + event.getSubject()
+                    + ", the start date/time " + newStart.toString()
+                    + ", the end date/time " + newEnd.toString() + " existed ");
+              } else {
+                throw e;
+              }
+            }
           } else {
             if (newStart.isBefore(
                 LocalDateTime.parse(newStart.toString().substring(0, 8) + "T00:00"))
                 || newEnd.isAfter(
-                    LocalDateTime.parse(newEnd.toString().substring(0, 8) + "T23:59"))) {
+                LocalDateTime.parse(newEnd.toString().substring(0, 8) + "T23:59"))) {
               throw new IllegalArgumentException(
                   "New event in a series should not cover more than one day "
                       + "after being copied to the new calendar");
@@ -342,17 +369,27 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
                 .withZoneSameInstant(newZoneId).toLocalDateTime();
             int newOccurrence = calOccurrenceBetweenDays(oldSeries.getStartDateTime(),
                 oldSeries.getEndDateTime(), oldStart, oldEnd, oldSeries.getWeekdays());
-            newCalendar.createEventSeries(
-                oldSeries.getSubject(),
-                newSeriesStart.toString(),
-                newSeriesEnd.toString(),
-                oldSeries.getDescription(),
-                oldSeries.getLocation(),
-                oldSeries.getEventStatus().toString(),
-                oldSeries.getWeekdays(),
-                newOccurrence,
-                null
-            );
+            try {
+              newCalendar.createEventSeries(
+                  oldSeries.getSubject(),
+                  newSeriesStart.toString(),
+                  newSeriesEnd.toString(),
+                  oldSeries.getDescription(),
+                  oldSeries.getLocation(),
+                  oldSeries.getEventStatus().toString(),
+                  oldSeries.getWeekdays(),
+                  newOccurrence,
+                  null
+              );
+            } catch (IllegalArgumentException e) {
+              if (e.getMessage().equals("Event already exists")) {
+                throw new IllegalArgumentException("Calendar " + targetCalendarName
+                    + " already has an event with the name " + oldSeries.getSubject()
+                    + " in conflict with events to be copied ");
+              } else {
+                throw e;
+              }
+            }
 
           }
 
@@ -379,7 +416,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
     } else if (originalEnd.isAfter(newStart) && originalEnd.isBefore(newEnd)) {
       newOccurrence = countOccurrencesWithTime(newStart, originalEnd, targetDays);
     } else { // else if (originalStart.isAfter(newStart) && originalStart.isBefore(newEnd))
-      newOccurrence =  countOccurrencesWithTime(originalStart, newEnd, targetDays);
+      newOccurrence = countOccurrencesWithTime(originalStart, newEnd, targetDays);
     }
     //    int originalOccurrence = originalOccurrences > 0 ? originalOccurrences :
     //    calOccurrence(originalStart, originalEnd, targetDays);

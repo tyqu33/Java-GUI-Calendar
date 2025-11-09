@@ -1,7 +1,9 @@
 package calendar.controller;
 
+import calendar.calendarEntity.CalendarEntityInterface;
 import calendar.model.CalendarInterface;
 import calendar.model.MultiCalendarManager;
+import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
 import java.io.IOException;
 import java.util.Scanner;
@@ -11,23 +13,23 @@ import java.util.Scanner;
  * specific command execution process accordingly, and transmits the result.
  */
 public class CalendarController {
-  private final CalendarInterface calendar;
+  private CalendarInterface calendar;
   private final CalendarView view;
   private final Readable input;
   private final Appendable output;
-  private final MultiCalendarManager manager;
+  private final MultiCalendarManagerInterface manager;
 
   /**
    * The Constructor for CalendarController Class.
    *
-   * @param calendar     the calendar object
+   * @param manager      the calendar manager
    * @param calendarView the calendarView object
    * @param input        the abstracted input
    * @param output       the abstracted output
    */
-  public CalendarController(MultiCalendarManager manager, CalendarInterface calendar, CalendarView calendarView,
+  public CalendarController(MultiCalendarManagerInterface manager, CalendarView calendarView,
                             Readable input, Appendable output) {
-    this.calendar = calendar;
+    this.calendar = null;
     this.view = calendarView;
     this.input = input;
     this.output = output;
@@ -41,7 +43,7 @@ public class CalendarController {
     Scanner scanner = new Scanner(this.input);
     String commandLine;
     boolean exitFlag = true;
-    while (scanner.hasNextLine() && exitFlag) { // java cant judge int as bool
+    while (scanner.hasNextLine() && exitFlag) {
       commandLine = scanner.nextLine();
       if (commandLine.trim().isEmpty()) {
         continue;
@@ -84,6 +86,17 @@ public class CalendarController {
     if (commandLine.startsWith("copy")) {
       CommandFactory copyEvent = new CopyCommand(commandLine, manager, calendar);
       copyEvent.execute();
+      return;
+    }
+
+    CalendarEntityInterface entity = manager.getCurrentCalendarEntity();
+    if (entity == null) {
+      output.append("No current calendar. Please specify which calendar you want to use\n");
+      return;
+    }
+    this.calendar = entity.getCalendar();
+    if (this.calendar == null) {
+      output.append("No current calendar. Please specify which calendar you want to use\n");
       return;
     }
 

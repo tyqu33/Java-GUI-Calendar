@@ -28,6 +28,13 @@ public interface MultiCalendarManagerInterface {
   void editCalendar(String calendarName, String property, String propertyValue);
 
   /**
+   * To get the current calendar entity after use.
+   *
+   * @return the current calendar entity
+   */
+  public CalendarEntityInterface getCurrentCalendarEntity();
+
+  /**
    * To get a calendar entity with given name.
    *
    * @param calendarName the name of the calendar entity

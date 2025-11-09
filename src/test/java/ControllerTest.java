@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 import calendar.controller.CalendarController;
 import calendar.model.Calendar;
 import calendar.model.CalendarInterface;
+import calendar.model.MultiCalendarManager;
+import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,12 +13,24 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test for ControllerTest Class.
  */
 public class ControllerTest {
+  MultiCalendarManagerInterface manager;
+  String premise;
+  String use;
+
+  @Before
+  public void setUp() {
+    // manager = new MultiCalendarManager();
+    premise = "create calendar --name Meetings --timezone America/New_York\n";
+    use = "use calendar --name Meetings\n";
+
+  }
 
   //  create event Meeting on 2025-10-27
   //  print events on 2025-10-27
@@ -29,15 +43,19 @@ public class ControllerTest {
     PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
     System.setOut(out);
     // Appendable out = new StringBuffer();
+    // System.out.println("testGoExamineOutput STARTING=======\n");
     try {
-      Reader in = new StringReader(
-          "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n");
-      Calendar model = new Calendar();
+      Reader in = new StringReader(premise + use
+          + "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n");
+      MultiCalendarManagerInterface manager = new MultiCalendarManager();
+      // Calendar model = new Calendar();
       CalendarView view = new CalendarView();
-      CalendarController controller = new CalendarController(model, view, in, out);
+      CalendarController controller = new CalendarController(manager, view, in, out);
       controller.go();
+      // System.out.println("testGoExamineOutput ENDING=======\n");
       String allOuts = bytes.toString(StandardCharsets.UTF_8);
-      String expectedOutput = "Events on 2025-10-27:\n • Meeting from 8:00 AM to 5:00 PM\n";
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Events on 2025-10-27:\n • Meeting from 8:00 AM to 5:00 PM\n";
       assertEquals(expectedOutput.trim(), allOuts.trim());
     } finally {
       System.setOut(originalOut);
@@ -46,17 +64,19 @@ public class ControllerTest {
 
   @Test
   public void testGoWithMockCreateEvent0() throws IOException {
-    Reader in = new StringReader(
-        "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n");
+    System.out.println("testGoWithMockCreateEvent0 STARTING=======\n");
+    Reader in = new StringReader( use
+        + "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n");
     StringBuilder log = new StringBuilder();
     String uniqueResult = "";
     StringBuffer out = new StringBuffer();
 
-    CalendarInterface model = new MockModel(log, uniqueResult);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    // CalendarInterface model = new MockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
-
+    System.out.println("testGoWithMockCreateEvent0 ENDING=======\n");
     String expectedOutput =
         "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n";
     // "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
@@ -73,7 +93,7 @@ public class ControllerTest {
 
     CalendarInterface model = new MockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -92,7 +112,7 @@ public class ControllerTest {
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -112,7 +132,7 @@ public class ControllerTest {
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -133,7 +153,7 @@ public class ControllerTest {
 
     CalendarInterface model = new ThirdMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -153,7 +173,7 @@ public class ControllerTest {
 
     CalendarInterface model = new ForthMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -175,7 +195,7 @@ public class ControllerTest {
 
     CalendarInterface model = new MockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -195,7 +215,7 @@ public class ControllerTest {
 
     CalendarInterface model = new MockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -216,7 +236,7 @@ public class ControllerTest {
 
     CalendarInterface model = new MockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -236,7 +256,7 @@ public class ControllerTest {
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -255,7 +275,7 @@ public class ControllerTest {
 
     CalendarInterface model = new ThirdMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -273,7 +293,7 @@ public class ControllerTest {
 
     CalendarInterface model = new ForthMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -292,7 +312,7 @@ public class ControllerTest {
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -310,7 +330,7 @@ public class ControllerTest {
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     assertEquals(null, "New subject value is invalid\n", out.toString());
@@ -326,7 +346,7 @@ public class ControllerTest {
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     assertEquals(null, "New location value is invalid\n", out.toString());
@@ -342,7 +362,7 @@ public class ControllerTest {
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     assertEquals(null, "New description value is invalid\n", out.toString());
@@ -359,7 +379,7 @@ public class ControllerTest {
 
     CalendarInterface model = new ThirdMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -378,7 +398,7 @@ public class ControllerTest {
 
     CalendarInterface model = new ForthMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
@@ -396,7 +416,7 @@ public class ControllerTest {
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     assertEquals(null,
@@ -413,7 +433,7 @@ public class ControllerTest {
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view, in, out);
+    CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     assertEquals(null,
