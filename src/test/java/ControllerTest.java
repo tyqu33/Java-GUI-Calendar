@@ -1,10 +1,7 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import calendar.calendarEntity.CalendarEntity;
-import calendar.calendarEntity.CalendarEntityInterface;
 import calendar.controller.CalendarController;
-import calendar.model.Calendar;
 import calendar.model.CalendarInterface;
 import calendar.model.MultiCalendarManager;
 import calendar.model.MultiCalendarManagerInterface;
@@ -25,6 +22,9 @@ public class ControllerTest {
   String premise;
   String use;
 
+  /**
+   * To set up the context of a calendar.
+   */
   @Before
   public void setUp() {
     premise = "create calendar --name Meetings --timezone America/New_York\n";

@@ -2,10 +2,16 @@ import calendar.calendarEntity.CalendarEntityInterface;
 import calendar.model.MultiCalendarManagerInterface;
 import java.time.ZoneId;
 
+/**
+ * This is a mock model to replace the MultiCalendarManager for testing the controller in isolation.
+ */
 public class MultiCalendarManagerMockModel implements MultiCalendarManagerInterface {
 
   private CalendarEntityInterface mockEntity;
 
+  /**
+   * Constructor for test class MultiCalendarManagerMockModel.
+   */
   public MultiCalendarManagerMockModel() {
     this.mockEntity = null;
   }
@@ -16,8 +22,9 @@ public class MultiCalendarManagerMockModel implements MultiCalendarManagerInterf
   }
 
   @Override
-  public void editCalendar(String calendarName, String property, String propertyValue) {
-
+  public CalendarEntityInterface editCalendar(String calendarName, String property,
+                                              String propertyValue) {
+    return this.mockEntity;
   }
 
   @Override

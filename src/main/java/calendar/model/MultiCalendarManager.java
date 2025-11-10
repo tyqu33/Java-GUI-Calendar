@@ -9,16 +9,11 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * This class implements interface MultiCalendarManagerInterface and offers create, edit a calendar
@@ -63,7 +58,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
   }
 
   @Override
-  public void editCalendar(String calendarName, String property, String propertyValue) {
+  public CalendarEntityInterface editCalendar(String calendarName, String property, String propertyValue) {
     if (calendarName == null || calendarName.isEmpty()) {
       throw new IllegalArgumentException("calendar name cannot be empty");
     }
@@ -80,12 +75,12 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       CalendarEntityInterface newEntity = new CalendarEntity.CalendarEntityBuilder()
           .calendarName(propertyValue.trim())
           .timezone(oldEntity.getTimeZone())
-          .calendar((Calendar)oldEntity.getCalendar())
+          .calendar((Calendar) oldEntity.getCalendar())
           .build();
       this.calendarManager.put(propertyValue.trim(), newEntity);
       this.calendarManager.remove(calendarName);
       this.calendarEntity = newEntity;
-
+      return newEntity;
     } else if (property.equals("timezone")) {
       ZoneId newZoneId = null;
       try {
@@ -98,12 +93,12 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       CalendarEntityInterface newEntity = new CalendarEntity.CalendarEntityBuilder()
           .calendarName(calendarName)
           .timezone(newZoneId)
-          .calendar((Calendar)oldEntity.getCalendar())
+          .calendar((Calendar) oldEntity.getCalendar())
           .build();
 
       this.calendarManager.replace(calendarName, newEntity);
       // this.calendarEntity = newEntity;
-
+      return newEntity;
     } else {
       throw new IllegalArgumentException("Invalid property input: " + property);
     }

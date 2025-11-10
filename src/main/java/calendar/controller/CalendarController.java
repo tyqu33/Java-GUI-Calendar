@@ -2,7 +2,6 @@ package calendar.controller;
 
 import calendar.calendarEntity.CalendarEntityInterface;
 import calendar.model.CalendarInterface;
-import calendar.model.MultiCalendarManager;
 import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
 import java.io.IOException;
