@@ -176,9 +176,9 @@ public class CalendarEntity implements CalendarEntityInterface {
 
   @Override
   public String toString() {
-    return "CalendarEntity{" +
-        "name='" + calendarName + '\'' +
-        ", timezone=" + zoneId +
-        '}';
+    return "CalendarEntity{"
+        + "name='" + calendarName + '\''
+        + ", timezone=" + zoneId
+        + '}';
   }
 }

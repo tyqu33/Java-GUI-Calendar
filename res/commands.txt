@@ -1,12 +1,13 @@
-create event "Morning Standup" from 2025-11-01T09:00 to 2025-11-01T09:15
-create event "Project Meeting" from 2025-11-01T14:00 to 2025-11-01T15:00
-create event "Lunch" on 2025-11-01
-create event "Gym Session" on 2025-11-02 repeats MWF for 4 times
-create event "Lecture 101" from 2025-11-05T10:00 to 2025-11-05T11:30
-edit event subject "Morning Standup" from 2025-11-01T09:00 to 2025-11-01T09:15 with "Daily Standup"
-edit event location "Project Meeting" from 2025-11-01T14:00 to 2025-11-01T15:00 with "Room 101"
-print events on 2025-11-01
-print events from 2025-11-01T00:00 to 2025-11-10T23:59
-show status on 2025-11-01T14:30
-export cal test_calendar.csv
+create calendar --name WorkCalendar --timezone America/New_York
+use calendar --name WorkCalendar
+create event "Team Meeting" from 2025-11-03T09:00 to 2025-11-03T09:15
+create event "Discussion" from 2025-11-04T10:00 to 2025-11-04T11:30
+create event "DDL" on 2025-11-03
+create event "Code Review" from 2025-11-06T14:00 to 2025-11-06T15:00
+create event "Weekly Meeting" from 2025-11-04T10:00 to 2025-11-04T11:00 repeats MW for 4 times
+create event "Gym" on 2025-11-05 repeats MWF for 6 times
+edit event description "Team Meeting" from 2025-11-03T09:00 to 2025-11-03T09:15 with "Daily team meeting"
+edit event location "Discussion" from 2025-11-03T10:00 to 2025-11-03T11:30 with "Room A"
+edit event status "Code Review" from 2025-11-03T14:00 to 2025-11-03T15:00 with private
+export cal work_calendar.ical
 exit

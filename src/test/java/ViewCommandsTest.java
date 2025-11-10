@@ -13,6 +13,8 @@ import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -411,5 +413,59 @@ public class ViewCommandsTest {
         result.contains("Print failed."));
     assertTrue("Should contain the custom exception message, but got: " + result,
         result.contains("Force failure for PrintCommand coverage."));
+  }
+
+  @Test
+  public void testExportCommandICal() throws IOException {
+    calendar.createSingleEvent("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
+        "Description", "Location", "public", null);
+    String tempFile = "test" + System.currentTimeMillis() + ".ical";
+    String input = "export cal " + tempFile + "\nexit\n";
+    Readable readable = new StringReader(input);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
+    controller.go();
+
+    String result = output.toString();
+    assertTrue("Should contain 'Exported to'", result.contains("Exported to"));
+    try {
+      java.nio.file.Path path = java.nio.file.Paths.get(tempFile);
+      String content = new String(java.nio.file.Files.readAllBytes(path));
+      assertTrue("File should contain iCal format", content.contains("BEGIN:VCALENDAR"));
+      assertTrue("File should contain event", content.contains("SUMMARY:Meeting"));
+      java.nio.file.Files.deleteIfExists(path);
+    } catch (Exception e) {
+      // Ignore cleanup errors
+    }
+  }
+
+  @Test
+  public void testExportCommandInvalid4() throws IOException {
+    String input = "export cal test.txt\nexit\n";
+    Readable readable = new StringReader(input);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
+    controller.go();
+
+    String result = output.toString();
+    assertTrue("Should contain error",
+        result.contains("Invalid file name") || result.contains("Error"));
+  }
+
+  @Test
+  public void testExportEmptyCalendar() throws IOException {
+    String tempFile = "test_export_empty_" + System.currentTimeMillis() + ".csv";
+    String input = "export cal " + tempFile + "\nexit\n";
+    Readable readable = new StringReader(input);
+
+    CalendarController controller = new CalendarController(manager, view, readable, output);
+    controller.go();
+
+    String result = output.toString();
+    assertTrue("Should successfully export empty calendar", result.contains("Exported to"));
+
+    try {
+      Files.deleteIfExists(Paths.get(tempFile));
+    } catch (Exception e) {
+      // Ignore
+    }
   }
 }
