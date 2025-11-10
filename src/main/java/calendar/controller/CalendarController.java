@@ -122,7 +122,7 @@ public class CalendarController {
         printEvent.execute();
         break;
       case "export":
-        CommandFactory exportEvent = new ExportCommand(commandLine, calendar, view);
+        CommandFactory exportEvent = new ExportCommand(commandLine, entity, view);
         exportEvent.execute();
         break;
       case "show":

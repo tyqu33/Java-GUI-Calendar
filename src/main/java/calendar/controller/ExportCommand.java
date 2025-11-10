@@ -1,5 +1,6 @@
 package calendar.controller;
 
+import calendar.calendarEntity.CalendarEntityInterface;
 import calendar.model.CalendarInterface;
 import calendar.view.CalendarView;
 import java.util.regex.Matcher;
@@ -13,6 +14,7 @@ public class ExportCommand extends CommandFactory {
   private final CalendarInterface calendar;
   private final CalendarView view;
   private final String commandLine;
+  private final CalendarEntityInterface calendarEntity;
 
   /**
    * Constructs an ExportCommand instance.
@@ -25,6 +27,15 @@ public class ExportCommand extends CommandFactory {
     this.calendar = calendar;
     this.view = view;
     this.commandLine = commandLine;
+    this.calendarEntity = null;
+  }
+
+  public ExportCommand(String commandLine, CalendarEntityInterface calendarEntity,
+                       CalendarView view) {
+    this.calendar = calendarEntity != null ? calendarEntity.getCalendar() : null;
+    this.calendarEntity = calendarEntity;
+    this.view = view;
+    this.commandLine = commandLine;
   }
 
   @Override
@@ -33,8 +44,28 @@ public class ExportCommand extends CommandFactory {
     try {
       if (matcher.matches()) {
         String fileName = matcher.group(1).trim();
-        String csvContent = calendar.exportToCsv();
-        view.exportCalendar(csvContent, fileName);
+        if (calendar == null) {
+          view.displayError("No calendar available.");
+          return;
+        }
+        String content;
+        String lowerFileName = fileName.toLowerCase();
+        if (lowerFileName.endsWith(".csv")) {
+          content = calendar.exportToCsv();
+        } else if (lowerFileName.endsWith(".ical")) {
+          if (calendarEntity == null) {
+            view.displayError("No calendar entity available.");
+            return;
+          }
+          content = calendar.exportToICal(
+              calendarEntity.getCalendarName(),
+              calendarEntity.getTimeZone()
+          );
+        } else {
+          view.displayError("Invalid file name.");
+          return;
+        }
+        view.exportCalendar(content, fileName);
         return;
       }
       view.displayError("Export failed. Invalid command: " + commandLine);

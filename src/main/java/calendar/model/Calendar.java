@@ -4,9 +4,11 @@ import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
 import calendar.util.CsvExporter;
+import calendar.util.ICalExporter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -453,5 +455,12 @@ public class Calendar implements CalendarInterface {
     List<Event> sortedEvents = new ArrayList<>(calendar.values());
     sortedEvents.sort((e1, e2) -> e1.getStartDateTime().compareTo(e2.getStartDateTime()));
     return CsvExporter.exportToCsv(sortedEvents);
+  }
+
+  @Override
+  public String exportToICal(String calendarName, ZoneId timezone) {
+    List<Event> sortedEvents = new ArrayList<>(calendar.values());
+    sortedEvents.sort((e1, e2) -> e1.getStartDateTime().compareTo(e2.getStartDateTime()));
+    return ICalExporter.exportToICal(sortedEvents, calendarName, timezone);
   }
 }

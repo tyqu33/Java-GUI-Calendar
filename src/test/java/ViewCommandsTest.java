@@ -7,6 +7,8 @@ import calendar.event.Event;
 import calendar.event.EventSeries;
 import calendar.model.Calendar;
 import calendar.model.CalendarInterface;
+import calendar.model.MultiCalendarManager;
+import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import org.junit.Before;
@@ -28,6 +31,7 @@ public class ViewCommandsTest {
   private Calendar calendar;
   private StringBuilder output;
   private CalendarView view;
+  private MultiCalendarManager manager;
 
   /**
    * Set up a new Calendar.
@@ -47,7 +51,7 @@ public class ViewCommandsTest {
     String input = "print events on 2025-05-01\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(calendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
 
     String result = output.toString();
@@ -68,7 +72,7 @@ public class ViewCommandsTest {
     String input = "print events from 2025-05-01T00:00 to 2025-05-03T00:00\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(calendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
 
     String result = output.toString();
@@ -82,7 +86,7 @@ public class ViewCommandsTest {
     String input = "print events on 2025-05-01\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(calendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
 
     String result = output.toString();
@@ -94,7 +98,7 @@ public class ViewCommandsTest {
     String input = "print events invalid format\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(calendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
 
     String result = output.toString();
@@ -109,7 +113,7 @@ public class ViewCommandsTest {
     String input = "show status on 2025-05-01T10:30\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(calendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
 
     String result = output.toString();
@@ -124,7 +128,7 @@ public class ViewCommandsTest {
     String input = "show status on 2025-05-01T09:00\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(calendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
 
     String result = output.toString();
@@ -136,7 +140,7 @@ public class ViewCommandsTest {
     String input = "show status on datetime\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(calendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
 
     String result = output.toString();
@@ -152,7 +156,7 @@ public class ViewCommandsTest {
     String input = "export cal " + tempFile + "\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(calendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
 
     String result = output.toString();
@@ -166,7 +170,7 @@ public class ViewCommandsTest {
     String input = "export cal\nexit\n";  // Missing filename
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(calendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
 
     String result = output.toString();
@@ -178,7 +182,7 @@ public class ViewCommandsTest {
     String input = "export cal\nexit\n";
 
     CalendarController controller = new CalendarController(
-        calendar, view, new StringReader(input), output);
+        manager, view, new StringReader(input), output);
     controller.go();
 
     String result = output.toString();
@@ -191,7 +195,7 @@ public class ViewCommandsTest {
     String input = "export calendar test.csv\nexit\n";
 
     CalendarController controller = new CalendarController(
-        calendar, view, new StringReader(input), output);
+        manager, view, new StringReader(input), output);
     controller.go();
 
     String result = output.toString();
@@ -204,7 +208,7 @@ public class ViewCommandsTest {
     String input = "export cal test file.csv\nexit\n";
 
     CalendarController controller = new CalendarController(
-        calendar, view, new StringReader(input), output);
+        manager, view, new StringReader(input), output);
     controller.go();
 
     String result = output.toString();
@@ -217,7 +221,7 @@ public class ViewCommandsTest {
     String input = "show status 2025-05-01T10:00\nexit\n";
 
     CalendarController controller = new CalendarController(
-        calendar, view, new StringReader(input), output);
+        manager, view, new StringReader(input), output);
     controller.go();
 
     String result = output.toString();
@@ -232,7 +236,7 @@ public class ViewCommandsTest {
     String input = "show status at 2025-05-01T10:00\nexit\n";
 
     CalendarController controller = new CalendarController(
-        calendar, view, new StringReader(input), output);
+        manager, view, new StringReader(input), output);
     controller.go();
 
     String result = output.toString();
@@ -251,6 +255,11 @@ public class ViewCommandsTest {
     @Override
     public String exportToCsv() {
       throw new RuntimeException("Force failure for catch coverage.");
+    }
+
+    @Override
+    public String exportToICal(String calendarName, ZoneId timezone) {
+      return "";
     }
 
     @Override
@@ -312,7 +321,7 @@ public class ViewCommandsTest {
     CalendarInterface errorCalendar = new RuntimeThrowingCalendar();
     String input = "export cal test_runtime_fail.csv\nexit\n";
     Readable readable = new StringReader(input);
-    CalendarController controller = new CalendarController(errorCalendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
     String result = output.toString();
     assertTrue("Should contain 'Export failed.' message from the catch block.",
@@ -328,7 +337,7 @@ public class ViewCommandsTest {
     CalendarInterface errorCalendar = new RuntimeThrowingCalendar();
     String input = "print events on 2025-05-01\nexit\n";
     Readable readable = new StringReader(input);
-    CalendarController controller = new CalendarController(errorCalendar, view, readable, output);
+    CalendarController controller = new CalendarController(manager, view, readable, output);
     controller.go();
     String result = output.toString();
     assertTrue("Should contain 'Print failed.' message from the catch block.",

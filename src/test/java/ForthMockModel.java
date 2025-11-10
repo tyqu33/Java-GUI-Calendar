@@ -4,6 +4,7 @@ import calendar.event.EventSeries;
 import calendar.model.CalendarInterface;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -86,6 +87,11 @@ public class ForthMockModel implements CalendarInterface {
 
   @Override
   public String exportToCsv() {
+    return "";
+  }
+
+  @Override
+  public String exportToICal(String calendarName, ZoneId timezone) {
     return "";
   }
 }

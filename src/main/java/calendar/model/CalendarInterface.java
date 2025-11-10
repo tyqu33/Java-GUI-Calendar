@@ -7,6 +7,7 @@ import calendar.event.Event;
 import calendar.event.EventSeries;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -154,4 +155,13 @@ public interface CalendarInterface {
    * @return a String representing the full CSV content, including headers.
    */
   String exportToCsv();
+
+  /**
+   * Exports all events in the calendar to iCal format.
+   *
+   * @param calendarName the name of the calendar
+   * @param timezone the timezone of the calendar
+   * @return an iCal formatted string
+   */
+  String exportToICal(String calendarName, ZoneId timezone);
 }
