@@ -1,6 +1,7 @@
 package calendar.calendarEntity;
 
 import calendar.model.Calendar;
+import calendar.model.CalendarInterface;
 import java.time.ZoneId;
 import java.util.Objects;
 
@@ -10,7 +11,7 @@ import java.util.Objects;
 public class CalendarEntity implements CalendarEntityInterface {
   private String calendarName;
   private ZoneId zoneId;
-  private Calendar calendar;
+  private CalendarInterface calendar;
 
   /**
    * Private constructor used by the Builder.
@@ -126,7 +127,7 @@ public class CalendarEntity implements CalendarEntityInterface {
   }
 
   @Override
-  public Calendar getCalendar() {
+  public CalendarInterface getCalendar() {
     return calendar;
   }
 

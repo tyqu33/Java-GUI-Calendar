@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -462,5 +463,15 @@ public class Calendar implements CalendarInterface {
     List<Event> sortedEvents = new ArrayList<>(calendar.values());
     sortedEvents.sort((e1, e2) -> e1.getStartDateTime().compareTo(e2.getStartDateTime()));
     return ICalExporter.exportToICal(sortedEvents, calendarName, timezone);
+  }
+
+  @Override
+  public Collection<Event> getEvents() {
+    return this.calendar.values();
+  }
+
+  @Override
+  public EventSeries getEventSeries(String seriesId) {
+    return this.seriesManager.get(seriesId);
   }
 }

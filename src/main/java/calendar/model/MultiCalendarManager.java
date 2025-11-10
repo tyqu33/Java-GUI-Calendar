@@ -80,7 +80,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       CalendarEntityInterface newEntity = new CalendarEntity.CalendarEntityBuilder()
           .calendarName(propertyValue.trim())
           .timezone(oldEntity.getTimeZone())
-          .calendar(oldEntity.getCalendar())
+          .calendar((Calendar)oldEntity.getCalendar())
           .build();
       this.calendarManager.put(propertyValue.trim(), newEntity);
       this.calendarManager.remove(calendarName);
@@ -98,7 +98,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       CalendarEntityInterface newEntity = new CalendarEntity.CalendarEntityBuilder()
           .calendarName(calendarName)
           .timezone(newZoneId)
-          .calendar(oldEntity.getCalendar())
+          .calendar((Calendar)oldEntity.getCalendar())
           .build();
 
       this.calendarManager.replace(calendarName, newEntity);
@@ -155,7 +155,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
 
     LocalDateTime targetStart = LocalDateTime.parse(targetDateTime);
 
-    for (Event event : this.calendarEntity.getCalendar().calendar.values()) {
+    for (Event event : this.calendarEntity.getCalendar().getEvents()) {
       if (event.getSubject().equals(subject)
           && event.getStartDateTime().toString().equals(startDateTime)) {
         Duration duration = Duration.between(event.getStartDateTime(), event.getEndDateTime());
@@ -203,11 +203,11 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
 
     ZoneId oldZoneId = this.calendarEntity.getTimeZone();
     ZoneId newZoneId = this.getCalendarTimeZone(targetCalendarName);
-    Calendar newCalendar = this.getCalendarEntity(targetCalendarName).getCalendar();
+    CalendarInterface newCalendar = this.getCalendarEntity(targetCalendarName).getCalendar();
     LocalDateTime oldStart = LocalDateTime.parse(specificDate + "T00:00");
     LocalDateTime oldEnd = LocalDateTime.parse(specificDate + "T23:59");
 
-    for (Event event : this.calendarEntity.getCalendar().calendar.values()) { // 20251107T19:00
+    for (Event event : this.calendarEntity.getCalendar().getEvents()) { // 20251107T19:00
       LocalDateTime eventStart = event.getStartDateTime();
       LocalDateTime eventEnd = event.getEndDateTime();
 
@@ -261,11 +261,11 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
 
     ZoneId oldZoneId = this.calendarEntity.getTimeZone();
     ZoneId newZoneId = this.getCalendarTimeZone(targetCalendarName);
-    Calendar newCalendar = this.getCalendarEntity(targetCalendarName).getCalendar();
+    CalendarInterface newCalendar = this.getCalendarEntity(targetCalendarName).getCalendar();
     LocalDateTime oldStart = LocalDateTime.parse(startDate + "T00:00");
     LocalDateTime oldEnd = LocalDateTime.parse(endDate + "T23:59");
     Map<String, String> mappedSeriesIds = new HashMap<>();
-    for (Event event : this.calendarEntity.getCalendar().calendar.values()) {
+    for (Event event : this.calendarEntity.getCalendar().getEvents()) {
       LocalDateTime eventStart = event.getStartDateTime();
       LocalDateTime eventEnd = event.getEndDateTime();
 
@@ -299,7 +299,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
         } else {
 
           String oldSeriesId = event.getSeriesId();
-          EventSeries oldSeries = this.calendarEntity.getCalendar().seriesManager.get(oldSeriesId);
+          EventSeries oldSeries = this.calendarEntity.getCalendar().getEventSeries(oldSeriesId);
           // invalid old series id
           if (oldSeries == null) {
             try {

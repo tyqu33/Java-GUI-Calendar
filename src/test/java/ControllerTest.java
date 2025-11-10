@@ -1,6 +1,8 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import calendar.calendarEntity.CalendarEntity;
+import calendar.calendarEntity.CalendarEntityInterface;
 import calendar.controller.CalendarController;
 import calendar.model.Calendar;
 import calendar.model.CalendarInterface;
@@ -20,39 +22,29 @@ import org.junit.Test;
  * Test for ControllerTest Class.
  */
 public class ControllerTest {
-  MultiCalendarManagerInterface manager;
   String premise;
   String use;
 
   @Before
   public void setUp() {
-    // manager = new MultiCalendarManager();
     premise = "create calendar --name Meetings --timezone America/New_York\n";
     use = "use calendar --name Meetings\n";
 
   }
 
-  //  create event Meeting on 2025-10-27
-  //  print events on 2025-10-27
-  //  Events on 2025-10-27:
-  //   • Meeting from 8:00 AM to 5:00 PM
   @Test
   public void testGoExamineOutput() throws IOException {
     PrintStream originalOut = System.out;
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
     System.setOut(out);
-    // Appendable out = new StringBuffer();
-    // System.out.println("testGoExamineOutput STARTING=======\n");
     try {
       Reader in = new StringReader(premise + use
           + "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n");
       MultiCalendarManagerInterface manager = new MultiCalendarManager();
-      // Calendar model = new Calendar();
       CalendarView view = new CalendarView();
       CalendarController controller = new CalendarController(manager, view, in, out);
       controller.go();
-      // System.out.println("testGoExamineOutput ENDING=======\n");
       String allOuts = bytes.toString(StandardCharsets.UTF_8);
       String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
           + "Events on 2025-10-27:\n • Meeting from 8:00 AM to 5:00 PM\n";
@@ -65,21 +57,25 @@ public class ControllerTest {
   @Test
   public void testGoWithMockCreateEvent0() throws IOException {
     System.out.println("testGoWithMockCreateEvent0 STARTING=======\n");
-    Reader in = new StringReader( use
-        + "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n");
+    Reader in = new StringReader(
+        "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n");
     StringBuilder log = new StringBuilder();
     String uniqueResult = "";
     StringBuffer out = new StringBuffer();
-
-    MultiCalendarManagerInterface manager = new MultiCalendarManager();
-    // CalendarInterface model = new MockModel(log, uniqueResult);
     CalendarView view = new CalendarView();
+
+    CalendarInterface model = new MockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
+
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
     System.out.println("testGoWithMockCreateEvent0 ENDING=======\n");
     String expectedOutput =
         "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n";
-    // "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
 
@@ -92,13 +88,16 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new MockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
         "create event Meeting on 2025-10-27 repeats M for 4 times\nexit\n";
-    // "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
 
@@ -111,13 +110,16 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
 
     String expectedOutput =
         "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00\nexit\n";
-    // "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
 
@@ -131,6 +133,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -138,7 +144,6 @@ public class ControllerTest {
     String expectedOutput =
         "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00"
             + " repeats M for 4 times\nexit\n";
-    // "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
 
@@ -152,6 +157,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new ThirdMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -159,7 +168,6 @@ public class ControllerTest {
     String expectedOutput =
         "create event Meeting from 2025-10-27T09:00 to 2025-10-27T12:00 "
             + "repeats M until 2025-11-17\nexit\n";
-    // "Events on 2025-10-27:\n • Meeting from 08:00 to 17:00\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
   }
 
@@ -172,6 +180,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new ForthMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -194,6 +206,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new MockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -214,6 +230,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new MockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -235,6 +255,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new MockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -255,6 +279,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -274,6 +302,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new ThirdMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -292,6 +324,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new ForthMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -311,6 +347,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -329,6 +369,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -345,6 +389,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -361,6 +409,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -378,6 +430,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new ThirdMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -397,6 +453,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new ForthMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -415,6 +475,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
@@ -432,6 +496,10 @@ public class ControllerTest {
     StringBuffer out = new StringBuffer();
 
     CalendarInterface model = new SecondMockModel(log, uniqueResult);
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
     CalendarView view = new CalendarView();
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();

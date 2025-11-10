@@ -1,6 +1,7 @@
 package calendar.calendarEntity;
 
 import calendar.model.Calendar;
+import calendar.model.CalendarInterface;
 import java.time.ZoneId;
 
 /**
@@ -28,7 +29,7 @@ public interface CalendarEntityInterface {
    *
    * @return the calendar object of the calendar entity
    */
-  Calendar getCalendar();
+  CalendarInterface getCalendar();
 
 
 }

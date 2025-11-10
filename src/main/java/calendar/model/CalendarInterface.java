@@ -8,6 +8,7 @@ import calendar.event.EventSeries;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -164,4 +165,19 @@ public interface CalendarInterface {
    * @return an iCal formatted string
    */
   String exportToICal(String calendarName, ZoneId timezone);
+
+  /**
+   * Get all events in the calendar.
+   *
+   * @return the collection of events.
+   */
+  Collection<Event> getEvents();
+
+  /**
+   * Get the event series with given seriesId.
+   *
+   * @param seriesId the seriesId to identify an event series
+   * @return the event series with given seriesId
+   */
+  EventSeries getEventSeries(String seriesId);
 }

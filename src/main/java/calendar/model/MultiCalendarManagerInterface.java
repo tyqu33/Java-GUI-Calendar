@@ -32,7 +32,7 @@ public interface MultiCalendarManagerInterface {
    *
    * @return the current calendar entity
    */
-  public CalendarEntityInterface getCurrentCalendarEntity();
+  CalendarEntityInterface getCurrentCalendarEntity();
 
   /**
    * To get a calendar entity with given name.

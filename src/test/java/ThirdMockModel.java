@@ -5,6 +5,7 @@ import calendar.model.CalendarInterface;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -95,5 +96,15 @@ class ThirdMockModel implements CalendarInterface {
   @Override
   public String exportToICal(String calendarName, ZoneId timezone) {
     return "";
+  }
+
+  @Override
+  public Collection<Event> getEvents() {
+    return List.of();
+  }
+
+  @Override
+  public EventSeries getEventSeries(String seriesId) {
+    return null;
   }
 }
