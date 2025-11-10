@@ -10,6 +10,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -144,11 +146,20 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       throw new IllegalArgumentException(
           "Calendar with name does not exist: " + targetCalendarName);
     }
-    if (this.calendarEntity == null || this.calendarEntity.getCalendar() == null) {
+    if (this.calendarEntity == null) {
       throw new IllegalArgumentException("Current calendar does not exist");
     }
-
-    LocalDateTime targetStart = LocalDateTime.parse(targetDateTime);
+    LocalDateTime targetStart;
+    try {
+      targetStart = LocalDateTime.parse(targetDateTime);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Invalid date/time format: " + targetDateTime);
+    }
+    try {
+      LocalDateTime.parse(startDateTime);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Invalid date/time format: " + startDateTime);
+    }
 
     for (Event event : this.calendarEntity.getCalendar().getEvents()) {
       if (event.getSubject().equals(subject)
@@ -192,7 +203,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       throw new IllegalArgumentException(
           "Calendar with name does not exist: " + targetCalendarName);
     }
-    if (this.calendarEntity == null || this.calendarEntity.getCalendar() == null) {
+    if (this.calendarEntity == null) {
       throw new IllegalArgumentException("Current calendar does not exist");
     }
 
@@ -202,7 +213,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
     LocalDateTime oldStart = LocalDateTime.parse(specificDate + "T00:00");
     LocalDateTime oldEnd = LocalDateTime.parse(specificDate + "T23:59");
 
-    for (Event event : this.calendarEntity.getCalendar().getEvents()) { // 20251107T19:00
+    for (Event event : this.calendarEntity.getCalendar().getEvents()) {
       LocalDateTime eventStart = event.getStartDateTime();
       LocalDateTime eventEnd = event.getEndDateTime();
 
@@ -250,7 +261,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       throw new IllegalArgumentException(
           "Calendar with name does not exist: " + targetCalendarName);
     }
-    if (this.calendarEntity == null || this.calendarEntity.getCalendar() == null) {
+    if (this.calendarEntity == null) {
       throw new IllegalArgumentException("Current calendar does not exist");
     }
 
@@ -259,7 +270,8 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
     CalendarInterface newCalendar = this.getCalendarEntity(targetCalendarName).getCalendar();
     LocalDateTime oldStart = LocalDateTime.parse(startDate + "T00:00");
     LocalDateTime oldEnd = LocalDateTime.parse(endDate + "T23:59");
-    Map<String, String> mappedSeriesIds = new HashMap<>();
+    Collection<String> mappedSeriesIds = new HashSet<>();
+
     for (Event event : this.calendarEntity.getCalendar().getEvents()) {
       LocalDateTime eventStart = event.getStartDateTime();
       LocalDateTime eventEnd = event.getEndDateTime();
@@ -294,6 +306,11 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
         } else {
 
           String oldSeriesId = event.getSeriesId();
+          if (!mappedSeriesIds.contains(oldSeriesId)) {
+            mappedSeriesIds.add(oldSeriesId);
+          } else {
+            continue; // has already processed this series, so skip
+          }
           EventSeries oldSeries = this.calendarEntity.getCalendar().getEventSeries(oldSeriesId);
           // invalid old series id
           if (oldSeries == null) {
@@ -319,9 +336,9 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
             }
           } else {
             if (newStart.isBefore(
-                LocalDateTime.parse(newStart.toString().substring(0, 8) + "T00:00"))
+                LocalDateTime.parse(newStart.toString().substring(0, 10) + "T00:00"))
                 || newEnd.isAfter(
-                LocalDateTime.parse(newEnd.toString().substring(0, 8) + "T23:59"))) {
+                LocalDateTime.parse(newEnd.toString().substring(0, 10) + "T23:59"))) {
               throw new IllegalArgumentException(
                   "New event in a series should not cover more than one day "
                       + "after being copied to the new calendar");

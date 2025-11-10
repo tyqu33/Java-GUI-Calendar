@@ -3,14 +3,40 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import calendar.calendarEntity.CalendarEntity;
 import calendar.calendarEntity.CalendarEntityInterface;
+import calendar.controller.CalendarController;
+import calendar.enums.EventStatus;
+import calendar.event.Event;
 import calendar.model.MultiCalendarManager;
+import calendar.model.MultiCalendarManagerInterface;
+import calendar.view.CalendarView;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test for MultiCalendarManager class.
  */
 public class ManagerModelTest {
+  String premise;
+  String use;
+
+  /**
+   * To set up the context of a calendar.
+   */
+  @Before
+  public void setUp() {
+    premise = "create calendar --name Meetings --timezone America/New_York\n";
+    use = "use calendar --name Meetings\n";
+
+  }
 
   @Test
   public void testModelCreateCalendar0() {
@@ -174,5 +200,723 @@ public class ManagerModelTest {
     assertEquals("America/New_York", manager.getCalendarTimeZone("Meetings").toString());
   }
 
+  @Test
+  public void testModelCopyEvent0() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Chicago");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity0.getCalendar().createSingleEvent("Meeting2", "2025-10-28T13:00",
+        "2025-10-28T15:00", "", "", "", null);
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T13:00",
+        "2025-10-28T17:00", "", "", "", null);
+    manager.copyEvent("Meeting", "2025-10-28T09:00", "Lectures", "2025-10-28T09:00");
+    assertNotNull(entity1.getCalendar().getEvents());
+    for (Event event : entity1.getCalendar().getEvents()) {
+      assertNotNull(event);
+      assertEquals("Meeting", event.getSubject());
+      assertEquals("2025-10-28T09:00", event.getStartDateTime().toString());
+      assertEquals("2025-10-28T12:00", event.getEndDateTime().toString());
+      assertEquals("", event.getDescription());
+      assertEquals("", event.getLocation());
+      assertEquals(EventStatus.PUBLIC, event.getEventStatus());
+    }
+  }
+
+  @Test
+  public void testModelCopyEventExp0() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Chicago");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    try {
+      manager.copyEvent(null, "2025-10-28T09:00", "Lectures", "2025-10-28T09:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEvent("", "2025-10-28T09:00", "Lectures", "2025-10-28T09:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEvent("Meeting", null, "Lectures", "2025-10-28T09:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEvent("Meeting", "", "Lectures", "2025-10-28T09:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEvent("Meeting", "2025-10-28T09:00", null, "2025-10-28T09:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEvent("Meeting", "2025-10-28T09:00", "", "2025-10-28T09:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEvent("Meeting", "2025-10-28T09:00", "Lectures", null);
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEvent("Meeting", "2025-10-28T09:00", "Lectures", "");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+
+    try {
+      manager.copyEvent("Meeting", "2025-10-28T09:00", "Presentations", "2025-10-28T09:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
+
+  @Test
+  public void testModelCopyEventExp1() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Chicago");
+    try {
+      manager.copyEvent("Meeting", "2025-10-28T09:00", "Lectures", "2025-10-28T09:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      if (e.getMessage().equals("Current calendar does not exist")) {
+        assertTrue(true);
+      } else {
+        assert false;
+      }
+    }
+  }
+
+  @Test
+  public void testModelCopyEventExp2() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity1.getCalendar().createSingleEvent("Meeting", "2025-10-28T06:00",
+        "2025-10-28T09:00", "", "", "", null);
+    try {
+      manager.copyEvent("Meeting", "2025-10-28T09:00", "Lectures", "2025-10-28T06:00");
+      //      for(Event e : manager.getCalendarEntity("Lectures").getCalendar().getEvents()) {
+      //        System.out.println(e.getSubject() + " " + e.getStartDateTime() + " " + e.getEndDateTime());
+      //      }
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEvent("Meeting", "2025-10-28T09:00", "Lectures", "20251028t0600");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEvent("Meeting", "20251028t0900", "Lectures", "2025-10-28T06:00");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
+
+  @Test
+  public void testModelCopyEventOnThatDay0() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "", null);
+    manager.copyEventsOnThatDay("2025-10-28", "Lectures", "2025-10-28");
+    assertNotNull(entity1.getCalendar());
+    assertNotNull(entity1.getCalendar().getEvents());
+    assertEquals(2, entity1.getCalendar().getEvents().size());
+    for (Event event : entity1.getCalendar().getEvents()) {
+      assertNotNull(event);
+      assertEquals("Meeting", event.getSubject());
+      assertTrue(event.getStartDateTime().toString().equals("2025-10-28T06:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T15:00") );
+      assertTrue(event.getEndDateTime().toString().equals("2025-10-28T09:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T17:00") );
+      assertEquals("", event.getDescription());
+      assertEquals("", event.getLocation());
+      assertEquals(EventStatus.PUBLIC, event.getEventStatus());
+    }
+  }
+
+
+  @Test
+  public void testModelCopyEventOnThatDayExp0() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T06:00",
+        "2025-10-28T09:00", "", "", "", null);
+    try {
+      manager.copyEventsOnThatDay(null, "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsOnThatDay("", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsOnThatDay("2025-10-28", null, "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsOnThatDay("2025-10-28", "", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsOnThatDay("2025-10-28", "Lectures", null);
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsOnThatDay("2025-10-28", "Lectures", "");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+
+    try {
+      manager.copyEventsOnThatDay("2025-10-28", "Presentations", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
+
+  @Test
+  public void testModelCopyEventOnThatDayExp1() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Chicago");
+    try {
+      manager.copyEventsOnThatDay("2025-10-28", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      if (e.getMessage().equals("Current calendar does not exist")) {
+        assertTrue(true);
+      } else {
+        assert false;
+      }
+    }
+  }
+
+  @Test
+  public void testModelCopyEventOnThatDayExp2() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "", null);
+    entity1.getCalendar().createSingleEvent("Meeting", "2025-10-28T06:00",
+        "2025-10-28T09:00", "", "", "", null);
+    entity1.getCalendar().createSingleEvent("Meeting", "2025-10-28T15:00",
+        "2025-10-28T17:00", "", "", "", null);
+    try {
+      manager.copyEventsOnThatDay("2025-10-28", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDays0() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "", null);
+    assertEquals(2, entity0.getCalendar().getEvents().size());
+
+
+    manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "2025-10-28");
+    assertNotNull(entity1.getCalendar().getEvents());
+    manager.useThisCalendarEntity(entity1);
+    assertEquals(2, entity1.getCalendar().getEvents().size());
+    for (Event event : entity1.getCalendar().getEvents()) {
+      assertNotNull(event);
+      assertEquals("Meeting", event.getSubject());
+      assertTrue(event.getStartDateTime().toString().equals("2025-10-28T06:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T15:00") );
+      assertTrue(event.getEndDateTime().toString().equals("2025-10-28T09:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T17:00") );
+      assertEquals("", event.getDescription());
+      assertEquals("", event.getLocation());
+      assertEquals(EventStatus.PUBLIC, event.getEventStatus());
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDays1() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "", null);
+    entity0.getCalendar().createEventSeries("Business Meeting",
+        "2025-10-29T08:00","2025-10-29T10:00",
+        "", "", "", "WR", 2, null);
+
+    for (Event event : entity0.getCalendar().getEvents()) {
+      assertNotNull(event);
+      assertTrue(event.getSubject().equals("Meeting") || event.getSubject().equals("Business Meeting"));
+      assertTrue(event.getStartDateTime().toString().equals("2025-10-28T09:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T18:00")
+          || event.getStartDateTime().toString().equals("2025-10-29T08:00")
+          || event.getStartDateTime().toString().equals("2025-10-30T08:00")
+          || event.getStartDateTime().toString().equals("2025-11-05T08:00")
+          || event.getStartDateTime().toString().equals("2025-11-06T08:00"));
+      assertTrue(event.getEndDateTime().toString().equals("2025-10-28T12:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T20:00")
+          || event.getEndDateTime().toString().equals("2025-10-29T10:00")
+          || event.getEndDateTime().toString().equals("2025-10-30T10:00")
+          || event.getEndDateTime().toString().equals("2025-11-05T10:00")
+          || event.getEndDateTime().toString().equals("2025-11-06T10:00"));
+      assertEquals("", event.getDescription());
+      assertEquals("", event.getLocation());
+      assertEquals(EventStatus.PUBLIC, event.getEventStatus());
+    }
+
+    manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "2025-10-28");
+    assertNotNull(entity1.getCalendar().getEvents());
+    manager.useThisCalendarEntity(entity1);
+    for (Event event : entity1.getCalendar().getEvents()) {
+      assertNotNull(event);
+      assertTrue(event.getSubject().equals("Meeting") || event.getSubject().equals("Business Meeting"));
+      assertTrue(event.getStartDateTime().toString().equals("2025-10-28T06:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T15:00")
+          || event.getStartDateTime().toString().equals("2025-10-29T05:00")
+          || event.getStartDateTime().toString().equals("2025-10-30T05:00")
+          || event.getStartDateTime().toString().equals("2025-11-05T05:00")
+          || event.getStartDateTime().toString().equals("2025-11-06T05:00"));
+      assertTrue(event.getEndDateTime().toString().equals("2025-10-28T09:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T17:00")
+          || event.getEndDateTime().toString().equals("2025-10-29T07:00")
+          || event.getEndDateTime().toString().equals("2025-10-30T07:00")
+          || event.getEndDateTime().toString().equals("2025-11-05T07:00")
+          || event.getEndDateTime().toString().equals("2025-11-06T07:00"));
+      assertEquals("", event.getDescription());
+      assertEquals("", event.getLocation());
+      assertEquals(EventStatus.PUBLIC, event.getEventStatus());
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDays2() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "", null);
+    entity0.getCalendar().createEventSeries("Business Meeting",
+        "2025-10-27T08:00","2025-10-27T10:00",
+        "", "", "", "MT", 0, "2025-11-07");
+
+    for (Event event : entity0.getCalendar().getEvents()) {
+      assertNotNull(event);
+      assertTrue(event.getSubject().equals("Meeting") || event.getSubject().equals("Business Meeting"));
+      assertTrue(event.getStartDateTime().toString().equals("2025-10-28T09:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T18:00")
+          || event.getStartDateTime().toString().equals("2025-10-27T08:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T08:00")
+          || event.getStartDateTime().toString().equals("2025-11-03T08:00")
+          || event.getStartDateTime().toString().equals("2025-11-04T08:00"));
+      assertTrue(event.getEndDateTime().toString().equals("2025-10-28T12:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T20:00")
+          || event.getEndDateTime().toString().equals("2025-10-27T10:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T10:00")
+          || event.getEndDateTime().toString().equals("2025-11-03T10:00")
+          || event.getEndDateTime().toString().equals("2025-11-04T10:00"));
+      assertEquals("", event.getDescription());
+      assertEquals("", event.getLocation());
+      assertEquals(EventStatus.PUBLIC, event.getEventStatus());
+    }
+
+    manager.copyEventsBetweenDays("2025-10-27", "2025-11-07", "Lectures", "2025-10-27");
+    assertNotNull(entity1.getCalendar().getEvents());
+    manager.useThisCalendarEntity(entity1);
+    for (Event event : entity1.getCalendar().getEvents()) {
+      assertNotNull(event);
+      assertTrue(event.getSubject().equals("Meeting") || event.getSubject().equals("Business Meeting"));
+      assertTrue(event.getStartDateTime().toString().equals("2025-10-28T06:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T15:00")
+          || event.getStartDateTime().toString().equals("2025-10-27T05:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T05:00")
+          || event.getStartDateTime().toString().equals("2025-11-03T05:00")
+          || event.getStartDateTime().toString().equals("2025-11-04T05:00"));
+      assertTrue(event.getEndDateTime().toString().equals("2025-10-28T09:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T17:00")
+          || event.getEndDateTime().toString().equals("2025-10-27T07:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T07:00")
+          || event.getEndDateTime().toString().equals("2025-11-03T07:00")
+          || event.getEndDateTime().toString().equals("2025-11-04T07:00"));
+      assertEquals("", event.getDescription());
+      assertEquals("", event.getLocation());
+      assertEquals(EventStatus.PUBLIC, event.getEventStatus());
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDays3() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "", null);
+    entity0.getCalendar().createEventSeries("Business Meeting",
+        "2025-10-31T08:00","2025-10-31T10:00",
+        "", "", "", "FSU", 2, null);
+
+    for (Event event : entity0.getCalendar().getEvents()) {
+      assertNotNull(event);
+      assertTrue(event.getSubject().equals("Meeting") || event.getSubject().equals("Business Meeting"));
+      assertTrue(event.getStartDateTime().toString().equals("2025-10-28T09:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T18:00")
+          || event.getStartDateTime().toString().equals("2025-10-31T08:00")
+          || event.getStartDateTime().toString().equals("2025-11-01T08:00")
+          || event.getStartDateTime().toString().equals("2025-11-02T08:00")
+          || event.getStartDateTime().toString().equals("2025-11-07T08:00")
+          || event.getStartDateTime().toString().equals("2025-11-08T08:00")
+          || event.getStartDateTime().toString().equals("2025-11-09T08:00"));
+      assertTrue(event.getEndDateTime().toString().equals("2025-10-28T12:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T20:00")
+          || event.getEndDateTime().toString().equals("2025-10-31T10:00")
+          || event.getEndDateTime().toString().equals("2025-11-01T10:00")
+          || event.getEndDateTime().toString().equals("2025-11-02T10:00")
+          || event.getEndDateTime().toString().equals("2025-11-07T10:00")
+          || event.getEndDateTime().toString().equals("2025-11-08T10:00")
+          || event.getEndDateTime().toString().equals("2025-11-09T10:00"));
+      assertEquals("", event.getDescription());
+      assertEquals("", event.getLocation());
+      assertEquals(EventStatus.PUBLIC, event.getEventStatus());
+    }
+
+    manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "2025-10-28");
+    assertNotNull(entity1.getCalendar().getEvents());
+    manager.useThisCalendarEntity(entity1);
+    for (Event event : entity1.getCalendar().getEvents()) {
+      assertNotNull(event);
+      assertTrue(event.getSubject().equals("Meeting") || event.getSubject().equals("Business Meeting"));
+      assertTrue(event.getStartDateTime().toString().equals("2025-10-28T06:00")
+          || event.getStartDateTime().toString().equals("2025-10-28T15:00")
+          || event.getStartDateTime().toString().equals("2025-10-31T05:00")
+          || event.getStartDateTime().toString().equals("2025-11-01T05:00")
+          || event.getStartDateTime().toString().equals("2025-11-02T05:00")
+          || event.getStartDateTime().toString().equals("2025-11-07T05:00"));
+      assertTrue(event.getEndDateTime().toString().equals("2025-10-28T09:00")
+          || event.getEndDateTime().toString().equals("2025-10-28T17:00")
+          || event.getEndDateTime().toString().equals("2025-10-31T07:00")
+          || event.getEndDateTime().toString().equals("2025-11-01T07:00")
+          || event.getEndDateTime().toString().equals("2025-11-02T07:00")
+          || event.getEndDateTime().toString().equals("2025-11-07T07:00"));
+      assertEquals("", event.getDescription());
+      assertEquals("", event.getLocation());
+      assertEquals(EventStatus.PUBLIC, event.getEventStatus());
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDaysExp0() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    try {
+      manager.copyEventsBetweenDays(null, "2025-11-07", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsBetweenDays("", "2025-11-07", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", null, "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", null, "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", null);
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Presentation", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDaysExp1() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+    }
+  }
+
+
+
+
+
+  @Test
+  public void testWithoutUseCalendarExp0() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader( "create event Meeting on 2025-10-27\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      String expectedOutput =
+          "No current calendar. Please specify which calendar you want to use\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testWithoutUseCalendarExp1() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create event Meeting on 2025-10-27\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "No current calendar. Please specify which calendar you want to use\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyOneEventAcrossDays0() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event Meeting from 2025-10-27T01:00 to 2025-10-27T02:00\n"
+          + "print events on 2025-10-27\n"
+          + "copy event Meeting on 2025-10-27T01:00 --target Lectures to 2025-10-26T22:00\n"
+          + "use calendar --name Lectures\n"
+          + "print events on 2025-10-26\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events on 2025-10-27:\n • Meeting from 1:00 AM to 2:00 AM\n"
+          + "Events on 2025-10-26:\n • Meeting from 10:00 PM to 11:00 PM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyOneEventAcrossDays1() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event Meeting from 2025-10-27T01:00 to 2025-10-27T02:00\n"
+          + "print events on 2025-10-27\n"
+          + "copy event Meeting on 2025-10-27T01:00 --target Lectures to 2025-10-28T13:00\n"
+          + "use calendar --name Lectures\n"
+          + "print events on 2025-10-28\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events on 2025-10-27:\n • Meeting from 1:00 AM to 2:00 AM\n"
+          + "Events on 2025-10-28:\n • Meeting from 1:00 PM to 2:00 PM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyOneEventAcrossDays2() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event Meeting from 2025-10-27T01:00 to 2025-10-29T09:00\n"
+          + "print events on 2025-10-27\n"
+          + "copy event Meeting on 2025-10-27T01:00 --target Lectures to 2025-10-28T17:00\n"
+          + "use calendar --name Lectures\n"
+          + "print events on 2025-10-28\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events on 2025-10-27:\n • Meeting from 1:00 AM to 9:00 AM\n"
+          + "Events on 2025-10-28:\n • Meeting from 5:00 PM to 1:00 AM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
 
 }
