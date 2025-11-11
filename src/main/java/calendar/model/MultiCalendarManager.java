@@ -9,6 +9,7 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
@@ -182,8 +183,6 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
                 + " already has an event with the name " + subject.trim()
                 + ", the start date/time " + targetStart.toString()
                 + ", the end date/time " + targetEnd.toString() + " existed ");
-          } else {
-            throw e;
           }
         }
       }
@@ -239,8 +238,6 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
                 + " already has an event with the name " + event.getSubject()
                 + ", the start date/time " + newStart.toString()
                 + ", the end date/time " + newEnd.toString() + " existed ");
-          } else {
-            throw e;
           }
         }
       }
@@ -268,21 +265,41 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
     ZoneId oldZoneId = this.calendarEntity.getTimeZone();
     ZoneId newZoneId = this.getCalendarTimeZone(targetCalendarName);
     CalendarInterface newCalendar = this.getCalendarEntity(targetCalendarName).getCalendar();
-    LocalDateTime oldStart = LocalDateTime.parse(startDate + "T00:00");
-    LocalDateTime oldEnd = LocalDateTime.parse(endDate + "T23:59");
+    LocalDateTime oldStart;
+    LocalDateTime oldEnd;
+    try {
+      LocalDate.parse(startDate);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Invalid date format: " + startDate);
+    }
+    oldStart = LocalDateTime.parse(startDate + "T00:00");
+    try {
+      LocalDate.parse(endDate);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Invalid date format: " + endDate);
+    }
+    oldEnd = LocalDateTime.parse(endDate + "T23:59");
     Collection<String> mappedSeriesIds = new HashSet<>();
+    LocalDate intervalStartDate = LocalDate.parse(startDate);
+    LocalDate newTargetDate;
+    try {
+      newTargetDate = LocalDate.parse(targetDay);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Invalid date format: " + targetDay);
+    }
+    long dayOffset = java.time.temporal.ChronoUnit.DAYS.between(intervalStartDate, newTargetDate);
 
     for (Event event : this.calendarEntity.getCalendar().getEvents()) {
       LocalDateTime eventStart = event.getStartDateTime();
       LocalDateTime eventEnd = event.getEndDateTime();
 
       if (!(eventEnd.isBefore(oldStart) || eventStart.isAfter(oldEnd))) {
-        LocalDateTime newStart = eventStart.atZone(oldZoneId)
-            .withZoneSameInstant(newZoneId).toLocalDateTime();
-        LocalDateTime newEnd = eventEnd.atZone(oldZoneId)
-            .withZoneSameInstant(newZoneId).toLocalDateTime();
         // single event that doesn't belong to a series
         if (event.getSeriesId() == null) {
+          LocalDateTime newStart = eventStart.plusDays(dayOffset).atZone(oldZoneId)
+              .withZoneSameInstant(newZoneId).toLocalDateTime();
+          LocalDateTime newEnd = eventEnd.plusDays(dayOffset).atZone(oldZoneId)
+              .withZoneSameInstant(newZoneId).toLocalDateTime();
           try {
             newCalendar.createSingleEvent(
                 event.getSubject(),
@@ -299,8 +316,6 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
                   + " already has an event with the name " + event.getSubject()
                   + ", the start date/time " + newStart.toString()
                   + ", the end date/time " + newEnd.toString() + " existed ");
-            } else {
-              throw e;
             }
           }
         } else {
@@ -313,74 +328,63 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
           }
           EventSeries oldSeries = this.calendarEntity.getCalendar().getEventSeries(oldSeriesId);
           // invalid old series id
-          if (oldSeries == null) {
-            try {
-              newCalendar.createSingleEvent(
-                  event.getSubject(),
-                  newStart.toString(),
-                  newEnd.toString(),
-                  event.getDescription(),
-                  event.getLocation(),
-                  event.getEventStatus().toString(),
-                  null
-              );
-            } catch (IllegalArgumentException e) {
-              if (e.getMessage().equals("Event already exists")) {
-                throw new IllegalArgumentException("Calendar " + targetCalendarName
-                    + " already has an event with the name " + event.getSubject()
-                    + ", the start date/time " + newStart.toString()
-                    + ", the end date/time " + newEnd.toString() + " existed ");
-              } else {
-                throw e;
-              }
-            }
-          } else {
-            if (newStart.isBefore(
-                LocalDateTime.parse(newStart.toString().substring(0, 10) + "T00:00"))
-                || newEnd.isAfter(
-                LocalDateTime.parse(newEnd.toString().substring(0, 10) + "T23:59"))) {
-              throw new IllegalArgumentException(
-                  "New event in a series should not cover more than one day "
-                      + "after being copied to the new calendar");
-            }
-            //            if (mappedSeriesIds.containsKey(oldSeriesId)) {
-            //              String newSeriesId = mappedSeriesIds.get(oldSeriesId);
-            //              newCalendar.createSingleEvent(
-            //                  event.getSubject(),
-            //                  newStart.toString(),
-            //                  newEnd.toString(),
-            //                  event.getDescription(),
-            //                  event.getLocation(),
-            //                  event.getEventStatus().toString(),
-            //                  newSeriesId
-            //              );
-            //            } else {
-            //              // first time encounter this series in this interval
-            //              String newSeriesId = UUID.randomUUID().toString();
-            //              newCalendar.createSingleEvent(
-            //                  event.getSubject(),
-            //                  newStart.toString(),
-            //                  newEnd.toString(),
-            //                  event.getDescription(),
-            //                  event.getLocation(),
-            //                  event.getEventStatus().toString(),
-            //                  newSeriesId
-            //              );
-            //              mappedSeriesIds.put(oldSeriesId, newSeriesId);
-            //            }
+          //          if (oldSeries == null) {
+          //            LocalDateTime newStart = eventStart.plusDays(dayOffset).atZone(oldZoneId)
+          //                .withZoneSameInstant(newZoneId).toLocalDateTime();
+          //            LocalDateTime newEnd = eventEnd.plusDays(dayOffset).atZone(oldZoneId)
+          //                .withZoneSameInstant(newZoneId).toLocalDateTime();
+          //            try {
+          //              newCalendar.createSingleEvent(
+          //                  event.getSubject(),
+          //                  newStart.toString(),
+          //                  newEnd.toString(),
+          //                  event.getDescription(),
+          //                  event.getLocation(),
+          //                  event.getEventStatus().toString(),
+          //                  null
+          //              );
+          //            } catch (IllegalArgumentException e) {
+          //              if (e.getMessage().equals("Event already exists")) {
+          //                throw new IllegalArgumentException("Calendar " + targetCalendarName
+          //                    + " already has an event with the name " + event.getSubject()
+          //                    + ", the start date/time " + newStart.toString()
+          //                    + ", the end date/time " + newEnd.toString() + " existed ");
+          //              } else {
+          //                throw e;
+          //              }
+          //            }
+          //          } else {
 
-            LocalDateTime oldSeriesPrunedStart =
-                oldSeries.getStartDateTime().isBefore(oldStart) ? oldStart :
-                    oldSeries.getStartDateTime();
-            LocalDateTime oldSeriesPrunedEnd =
-                oldSeries.getEndDateTime().isAfter(oldEnd) ? oldEnd : oldSeries.getEndDateTime();
+            LocalTime oldSeriesStart = oldSeries.getStartDateTime().toLocalTime();
+            LocalTime oldSeriesEnd = oldSeries.getEndDateTime().toLocalTime();
+            LocalDate newSeriesFirstDate = LocalDate.parse(targetDay);
+
+            LocalDateTime oldSeriesPrunedStart = LocalDateTime.of(newSeriesFirstDate, oldSeriesStart);
+            LocalDateTime oldSeriesPrunedEnd = LocalDateTime.of(newSeriesFirstDate, oldSeriesEnd);
 
             LocalDateTime newSeriesStart = oldSeriesPrunedStart.atZone(oldZoneId)
                 .withZoneSameInstant(newZoneId).toLocalDateTime();
             LocalDateTime newSeriesEnd = oldSeriesPrunedEnd.atZone(oldZoneId)
                 .withZoneSameInstant(newZoneId).toLocalDateTime();
-            int newOccurrence = calOccurrenceBetweenDays(oldSeries.getStartDateTime(),
-                oldSeries.getEndDateTime(), oldStart, oldEnd, oldSeries.getWeekdays());
+            if (newSeriesStart.isBefore(
+                LocalDateTime.parse(newSeriesEnd.toString().substring(0, 10) + "T00:00"))
+                || newSeriesEnd.isAfter(
+                LocalDateTime.parse(newSeriesStart.toString().substring(0, 10) + "T23:59"))) {
+              throw new IllegalArgumentException(
+                  "New event in a series should not cover more than one day "
+                      + "after being copied to the new calendar");
+            }
+            int newOccurrence = 0;
+            for (EventKey key : oldSeries.getSeriesKeys()) {
+              LocalDateTime eventStartTemp = key.getStartDateTime();
+              LocalDateTime eventEndTemp = key.getEndDateTime();
+              if (!(eventEndTemp.isBefore(oldStart) || eventStartTemp.isAfter(oldEnd))) {
+                newOccurrence++;
+              }
+            }
+            if (newOccurrence == 0) {
+              continue;
+            }
             try {
               newCalendar.createEventSeries(
                   oldSeries.getSubject(),
@@ -403,7 +407,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
               }
             }
 
-          }
+          // }
 
         }
       }
@@ -414,72 +418,4 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
 
   }
 
-
-  private int calOccurrenceBetweenDays(LocalDateTime originalStart, LocalDateTime originalEnd,
-                                       LocalDateTime newStart, LocalDateTime newEnd,
-                                       String weekdays) {
-    if (newStart.isAfter(newEnd) || originalStart.isAfter(originalEnd)) {
-      return 0;
-    }
-    int newOccurrence = 0;
-    Set<DayOfWeek> targetDays = parseWeekdays(weekdays);
-    if (!originalStart.isAfter(newStart) && !originalEnd.isBefore(newEnd)) { // wrap up
-      newOccurrence = countOccurrencesWithTime(newStart, newEnd, targetDays);
-    } else if (originalEnd.isAfter(newStart) && originalEnd.isBefore(newEnd)) {
-      newOccurrence = countOccurrencesWithTime(newStart, originalEnd, targetDays);
-    } else { // else if (originalStart.isAfter(newStart) && originalStart.isBefore(newEnd))
-      newOccurrence = countOccurrencesWithTime(originalStart, newEnd, targetDays);
-    }
-    //    int originalOccurrence = originalOccurrences > 0 ? originalOccurrences :
-    //    calOccurrence(originalStart, originalEnd, targetDays);
-    //    int newOccurrence = calOccurrence(newStart, newEnd, targetDays);
-    return newOccurrence;
-  }
-
-  private int countOccurrencesWithTime(LocalDateTime start, LocalDateTime end,
-                                       Set<DayOfWeek> targetDays) {
-    int count = 0;
-    LocalDate current = start.toLocalDate();
-    LocalDate target = end.toLocalDate();
-
-    while (!current.isAfter(target)) {
-      if (targetDays.contains(current.getDayOfWeek())) {
-        count++;
-      }
-      current = current.plusDays(1);
-    }
-    return count;
-  }
-
-  private Set<DayOfWeek> parseWeekdays(String weekdays) {
-    Set<DayOfWeek> targetDays = new HashSet<>();
-    for (char c : weekdays.toUpperCase().toCharArray()) {
-      switch (c) {
-        case 'M':
-          targetDays.add(DayOfWeek.MONDAY);
-          break;
-        case 'T':
-          targetDays.add(DayOfWeek.TUESDAY);
-          break;
-        case 'W':
-          targetDays.add(DayOfWeek.WEDNESDAY);
-          break;
-        case 'R':
-          targetDays.add(DayOfWeek.THURSDAY);
-          break;
-        case 'F':
-          targetDays.add(DayOfWeek.FRIDAY);
-          break;
-        case 'S':
-          targetDays.add(DayOfWeek.SATURDAY);
-          break;
-        case 'U':
-          targetDays.add(DayOfWeek.SUNDAY);
-          break;
-        default:
-          break;
-      }
-    }
-    return targetDays;
-  }
 }

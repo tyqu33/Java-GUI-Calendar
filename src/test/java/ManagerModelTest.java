@@ -526,7 +526,8 @@ public class ManagerModelTest {
         "2025-10-28T20:00", "", "", "", null);
     entity0.getCalendar().createEventSeries("Business Meeting",
         "2025-10-29T08:00","2025-10-29T10:00",
-        "", "", "", "WR", 2, null);
+        "", "", "", "WR", 4, null);
+    assertEquals(6, entity0.getCalendar().getEvents().size());
 
     for (Event event : entity0.getCalendar().getEvents()) {
       assertNotNull(event);
@@ -551,6 +552,8 @@ public class ManagerModelTest {
     manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "2025-10-28");
     assertNotNull(entity1.getCalendar().getEvents());
     manager.useThisCalendarEntity(entity1);
+    System.out.println(entity1.getCalendar().getEvents().size());
+    assertEquals(6, entity1.getCalendar().getEvents().size());
     for (Event event : entity1.getCalendar().getEvents()) {
       assertNotNull(event);
       assertTrue(event.getSubject().equals("Meeting") || event.getSubject().equals("Business Meeting"));
@@ -559,13 +562,15 @@ public class ManagerModelTest {
           || event.getStartDateTime().toString().equals("2025-10-29T05:00")
           || event.getStartDateTime().toString().equals("2025-10-30T05:00")
           || event.getStartDateTime().toString().equals("2025-11-05T05:00")
-          || event.getStartDateTime().toString().equals("2025-11-06T05:00"));
+          || event.getStartDateTime().toString().equals("2025-11-06T05:00")
+      );
       assertTrue(event.getEndDateTime().toString().equals("2025-10-28T09:00")
           || event.getEndDateTime().toString().equals("2025-10-28T17:00")
           || event.getEndDateTime().toString().equals("2025-10-29T07:00")
           || event.getEndDateTime().toString().equals("2025-10-30T07:00")
           || event.getEndDateTime().toString().equals("2025-11-05T07:00")
-          || event.getEndDateTime().toString().equals("2025-11-06T07:00"));
+          || event.getEndDateTime().toString().equals("2025-11-06T07:00")
+      );
       assertEquals("", event.getDescription());
       assertEquals("", event.getLocation());
       assertEquals(EventStatus.PUBLIC, event.getEventStatus());
@@ -763,6 +768,25 @@ public class ManagerModelTest {
     } catch (IllegalArgumentException e) {
       assertTrue(true);
     }
+
+    try {
+      manager.copyEventsBetweenDays("2025--10--28", "2025-11-07", "Meetings", "2025-10-31");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertEquals("Invalid date format: 2025--10--28", e.getMessage());
+    }
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "20251107", "Meetings", "2025-10-31");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertEquals("Invalid date format: 20251107", e.getMessage());
+    }
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Meetings", "20251031");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertEquals("Invalid date format: 20251031", e.getMessage());
+    }
   }
 
   @Test
@@ -776,6 +800,91 @@ public class ManagerModelTest {
       assert false;
     } catch (IllegalArgumentException e) {
       assertTrue(true);
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDaysExp2() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "", null);
+    entity1.getCalendar().createSingleEvent("Meeting", "2025-10-28T06:00",
+        "2025-10-28T09:00", "", "", "", null);
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertEquals("Calendar Lectures already has an event with the name Meeting, the start date/time 2025-10-28T06:00, the end date/time 2025-10-28T09:00 existed ", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDaysExp3() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createEventSeries("Meeting",
+        "2025-10-29T08:00","2025-10-29T10:00",
+        "", "", "", "WR", 2, null);
+    entity1.getCalendar().createEventSeries("Meeting",
+        "2025-10-29T05:00","2025-10-29T07:00",
+        "", "", "", "WR", 2, null);
+    try {
+      manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertEquals("Calendar Lectures already has an event with the name Meeting in conflict with events to be copied ", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDaysExp4() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/New_York");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/Los_Angeles");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createEventSeries("Meeting",
+        "2025-10-29T01:00","2025-10-29T04:00",
+        "", "", "", "WR", 2, null);
+    try {
+      manager.copyEventsBetweenDays("2025-10-29", "2025-11-06", "Lectures", "2025-10-28");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertEquals("New event in a series should not cover more than one day after being copied to the new calendar", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testModelCopyEventsBetweenDaysExp5() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity0 = manager.createCalendar("Meetings", "America/Los_Angeles");
+    CalendarEntityInterface entity1 = manager.createCalendar("Lectures", "America/New_York");
+    assertNotNull(entity0);
+    assertNotNull(entity1);
+    manager.useThisCalendarEntity(entity0);
+    assertNotNull(entity0.getCalendar());
+    entity0.getCalendar().createEventSeries("Meeting",
+        "2025-10-29T20:00","2025-10-29T23:00",
+        "", "", "", "WR", 4, null);
+    try {
+      manager.copyEventsBetweenDays("2025-10-29", "2025-11-06", "Lectures", "2025-10-29");
+      assert false;
+    } catch (IllegalArgumentException e) {
+      assertTrue(true);
+      assertEquals("New event in a series should not cover more than one day after being copied to the new calendar", e.getMessage());
     }
   }
 
@@ -913,6 +1022,214 @@ public class ManagerModelTest {
           + "Success: Successfully created calendar 'Lectures'\n"
           + "Events on 2025-10-27:\n • Meeting from 1:00 AM to 9:00 AM\n"
           + "Events on 2025-10-28:\n • Meeting from 5:00 PM to 1:00 AM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyPartOfEventsBetweenDays0() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event Meeting from 2025-10-29T09:00 to 2025-10-29T10:00 repeats WR for 4 times\n"
+          + "copy events between 2025-10-28 and 2025-11-07 --target Lectures to 2025-10-29\n"
+          + "use calendar --name Lectures\n"
+          + "print events from 2025-10-29T00:00 to 2025-11-06T23:59\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events from 2025-10-29T00:00 to 2025-11-06T23:59:\n"
+          + " • Meeting starting on 2025-10-29 at 6:00 AM, ending on 2025-10-29 at 7:00 AM\n"
+          + " • Meeting starting on 2025-10-30 at 6:00 AM, ending on 2025-10-30 at 7:00 AM\n"
+          + " • Meeting starting on 2025-11-05 at 6:00 AM, ending on 2025-11-05 at 7:00 AM\n"
+          + " • Meeting starting on 2025-11-06 at 6:00 AM, ending on 2025-11-06 at 7:00 AM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyPartOfEventsBetweenDays1() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event Chat on 2025-10-28\n"
+          + "create event Meeting from 2025-10-29T09:00 to 2025-10-29T10:00 repeats WR for 4 times\n"
+          + "copy events between 2025-10-28 and 2025-11-05 --target Lectures to 2025-10-28\n"
+          + "use calendar --name Lectures\n"
+          + "print events from 2025-10-28T00:00 to 2025-11-06T23:59\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events from 2025-10-28T00:00 to 2025-11-06T23:59:\n"
+          + " • Chat starting on 2025-10-28 at 5:00 AM, ending on 2025-10-28 at 2:00 PM\n"
+          + " • Meeting starting on 2025-10-29 at 6:00 AM, ending on 2025-10-29 at 7:00 AM\n"
+          + " • Meeting starting on 2025-10-30 at 6:00 AM, ending on 2025-10-30 at 7:00 AM\n"
+          + " • Meeting starting on 2025-11-05 at 6:00 AM, ending on 2025-11-05 at 7:00 AM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyPartOfEventsBetweenDays2() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event Chat on 2025-11-01\n"
+          + "create event Meeting from 2025-10-29T09:00 to 2025-10-29T10:00 repeats WR for 4 times\n"
+          + "copy events between 2025-10-29 and 2025-11-07 --target Lectures to 2025-10-30\n"
+          + "use calendar --name Lectures\n"
+          + "print events from 2025-10-28T00:00 to 2025-11-07T23:59\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events from 2025-10-28T00:00 to 2025-11-07T23:59:\n"
+          + " • Meeting starting on 2025-10-30 at 6:00 AM, ending on 2025-10-30 at 7:00 AM\n"
+          + " • Chat starting on 2025-11-02 at 5:00 AM, ending on 2025-11-02 at 2:00 PM\n"
+          + " • Meeting starting on 2025-11-05 at 6:00 AM, ending on 2025-11-05 at 7:00 AM\n"
+          + " • Meeting starting on 2025-11-06 at 6:00 AM, ending on 2025-11-06 at 7:00 AM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyPartOfEventsBetweenDays3() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event Meeting from 2025-09-05T09:50 to 2025-09-05T11:30 repeats TF for 8 times\n"
+          + "copy events between 2025-09-01 and 2025-09-30 --target Lectures to 2026-01-01\n"
+          + "use calendar --name Lectures\n"
+          + "print events from 2026-01-01T00:00 to 2026-01-31T23:59\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events from 2026-01-01T00:00 to 2026-01-31T23:59:\n"
+          + " • Meeting starting on 2026-01-02 at 6:50 AM, ending on 2026-01-02 at 8:30 AM\n"
+          + " • Meeting starting on 2026-01-06 at 6:50 AM, ending on 2026-01-06 at 8:30 AM\n"
+          + " • Meeting starting on 2026-01-09 at 6:50 AM, ending on 2026-01-09 at 8:30 AM\n"
+          + " • Meeting starting on 2026-01-13 at 6:50 AM, ending on 2026-01-13 at 8:30 AM\n"
+          + " • Meeting starting on 2026-01-16 at 6:50 AM, ending on 2026-01-16 at 8:30 AM\n"
+          + " • Meeting starting on 2026-01-20 at 6:50 AM, ending on 2026-01-20 at 8:30 AM\n"
+          + " • Meeting starting on 2026-01-23 at 6:50 AM, ending on 2026-01-23 at 8:30 AM\n"
+          + " • Meeting starting on 2026-01-27 at 6:50 AM, ending on 2026-01-27 at 8:30 AM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyPartOfEventsBetweenDays4() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      // The date string in the target calendar corresponds to the start of the interval
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event Chat on 2025-11-01\n"
+          + "create event Meeting from 2025-10-29T09:00 to 2025-10-29T10:00\n"
+          + "create event Presentation from 2025-10-29T10:30 to 2025-10-29T11:30\n"
+          + "copy events between 2025-10-29 and 2025-11-02 --target Lectures to 2025-12-01\n"
+          + "use calendar --name Lectures\n"
+          + "print events from 2025-12-01T00:00 to 2025-12-15T23:59\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events from 2025-12-01T00:00 to 2025-12-15T23:59:\n"
+          + " • Meeting starting on 2025-12-01 at 6:00 AM, ending on 2025-12-01 at 7:00 AM\n"
+          + " • Presentation starting on 2025-12-01 at 7:30 AM, ending on 2025-12-01 at 8:30 AM\n"
+          + " • Chat starting on 2025-12-04 at 5:00 AM, ending on 2025-12-04 at 2:00 PM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyPartOfEventsBetweenDays5() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      // The date string in the target calendar corresponds to the start of the interval
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event Chat on 2025-11-01\n"
+          + "create event Meeting from 2025-10-29T09:00 to 2025-10-29T10:00\n"
+          + "create event Presentation from 2025-10-29T10:30 to 2025-10-29T11:30\n"
+          + "copy events between 2025-10-27 and 2025-11-01 --target Lectures to 2025-12-01\n"
+          + "use calendar --name Lectures\n"
+          + "print events from 2025-12-01T00:00 to 2025-12-15T23:59\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events from 2025-12-01T00:00 to 2025-12-15T23:59:\n"
+          + " • Meeting starting on 2025-12-03 at 6:00 AM, ending on 2025-12-03 at 7:00 AM\n"
+          + " • Presentation starting on 2025-12-03 at 7:30 AM, ending on 2025-12-03 at 8:30 AM\n"
+          + " • Chat starting on 2025-12-06 at 5:00 AM, ending on 2025-12-06 at 2:00 PM\n";
       assertEquals(expectedOutput.trim(), allOuts.trim());
     } finally {
       System.setOut(originalOut);
