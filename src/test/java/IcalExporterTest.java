@@ -1,14 +1,14 @@
 import static org.junit.Assert.assertTrue;
 
 import calendar.event.Event;
-import calendar.util.ICalExporter;
+import calendar.util.IcalExporter;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 
-public class ICalExporterTest {
+public class IcalExporterTest {
   @Test
   public void testExportToICalBasic() {
     List<Event> events = new ArrayList<>();
@@ -19,7 +19,7 @@ public class ICalExporterTest {
         .status("public")
         .build();
     events.add(event);
-    String ical = ICalExporter.exportToICal(events, "Work Calendar",
+    String ical = IcalExporter.exportToIcal(events, "Work Calendar",
         ZoneId.of("America/New_York"));
 
     assertTrue(ical.contains("BEGIN:VCALENDAR"));
@@ -38,7 +38,7 @@ public class ICalExporterTest {
     events.add(Event.builder("Holiday", LocalDateTime.parse("2025-12-01T08:00"))
         .setAllDayEvent()
         .build());
-    String ical = ICalExporter.exportToICal(events, "Cal", ZoneId.of("America/New_York"));
+    String ical = IcalExporter.exportToIcal(events, "Cal", ZoneId.of("America/New_York"));
     assertTrue(ical.contains("DTSTART;VALUE=DATE:20251201"));
     assertTrue(ical.contains("DTEND;VALUE=DATE:20251202"));
   }
@@ -52,7 +52,7 @@ public class ICalExporterTest {
     events.add(Event.builder("Event2", LocalDateTime.parse("2025-12-02T14:00"))
         .end(LocalDateTime.parse("2025-12-02T15:00"))
         .build());
-    String ical = ICalExporter.exportToICal(events, "Cal", ZoneId.of("UTC"));
+    String ical = IcalExporter.exportToIcal(events, "Cal", ZoneId.of("UTC"));
 
     assertTrue(ical.contains("SUMMARY:Event1"));
     assertTrue(ical.contains("SUMMARY:Event2"));
@@ -66,7 +66,7 @@ public class ICalExporterTest {
         .description("Text with,;\n")
         .location("Office")
         .build());
-    String ical = ICalExporter.exportToICal(events, "Cal", ZoneId.of("UTC"));
+    String ical = IcalExporter.exportToIcal(events, "Cal", ZoneId.of("UTC"));
 
     assertTrue(ical.contains("\\,"));
     assertTrue(ical.contains("\\;"));

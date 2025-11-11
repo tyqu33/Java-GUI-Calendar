@@ -103,7 +103,7 @@ class MockModel implements CalendarInterface {
   }
 
   @Override
-  public String exportToICal(String calendarName, ZoneId timezone) {
+  public String exportToIcal(String calendarName, ZoneId timezone) {
     return "";
   }
 

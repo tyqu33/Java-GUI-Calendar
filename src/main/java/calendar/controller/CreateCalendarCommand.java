@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 /**
  * Command to create a new calendar.
  */
-public class CreateCalendarCommand extends CommandFactory{
+public class CreateCalendarCommand extends CommandFactory {
   private static final Pattern CREATE_CALENDAR = Pattern.compile(
       "^create calendar --name (\\S+) --timezone (.+)$");
 
@@ -21,9 +21,10 @@ public class CreateCalendarCommand extends CommandFactory{
    * Constructor for CreateCalendarCommand.
    *
    * @param commandLine the input command string
-   * @param manager the calendat manager
+   * @param manager the calendar manager
    */
-  public CreateCalendarCommand(String commandLine, MultiCalendarManagerInterface manager, CalendarView view) {
+  public CreateCalendarCommand(String commandLine, MultiCalendarManagerInterface manager,
+                               CalendarView view) {
     this.commandLine = commandLine;
     this.manager = manager;
     this.view = view;

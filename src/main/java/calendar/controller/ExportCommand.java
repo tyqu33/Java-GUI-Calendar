@@ -30,6 +30,13 @@ public class ExportCommand extends CommandFactory {
     this.calendarEntity = null;
   }
 
+  /**
+   * Constructs an ExportCommand instance.
+   *
+   * @param commandLine the input command string
+   * @param calendarEntity the calendarEntity object
+   * @param view the calendar view to display
+   */
   public ExportCommand(String commandLine, CalendarEntityInterface calendarEntity,
                        CalendarView view) {
     this.calendar = calendarEntity != null ? calendarEntity.getCalendar() : null;
@@ -57,7 +64,7 @@ public class ExportCommand extends CommandFactory {
             view.displayError("No calendar entity available.");
             return;
           }
-          content = calendar.exportToICal(
+          content = calendar.exportToIcal(
               calendarEntity.getCalendarName(),
               calendarEntity.getTimeZone()
           );

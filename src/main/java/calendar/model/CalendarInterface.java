@@ -164,7 +164,7 @@ public interface CalendarInterface {
    * @param timezone the timezone of the calendar
    * @return an iCal formatted string
    */
-  String exportToICal(String calendarName, ZoneId timezone);
+  String exportToIcal(String calendarName, ZoneId timezone);
 
   /**
    * Get all events in the calendar.

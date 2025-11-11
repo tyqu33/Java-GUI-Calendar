@@ -10,7 +10,7 @@ import java.util.UUID;
 /**
  * A utility class for exporting calendar events to iCal format.
  */
-public class ICalExporter {
+public class IcalExporter {
   private static final DateTimeFormatter ICAL_DATE_TIME_FORMAT =
       DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
   private static final DateTimeFormatter ICAL_DATE_FORMAT =
@@ -24,14 +24,14 @@ public class ICalExporter {
    * @param timezone the timezone of the calendar
    * @return the iCal formatted string
    */
-  public static String exportToICal(List<Event> events, String calendarName, ZoneId timezone) {
+  public static String exportToIcal(List<Event> events, String calendarName, ZoneId timezone) {
     StringBuilder ical = new StringBuilder();
 
     ical.append("BEGIN:VCALENDAR\r\n");
     ical.append("VERSION:2.0\r\n");
     ical.append("PRODID:-//Calendar App//EN\r\n");
     for (Event event : events) {
-      ical.append(formatEventAsICal(event, timezone));
+      ical.append(formatEventAsIcal(event, timezone));
     }
     ical.append("END:VCALENDAR\r\n");
     return ical.toString();
@@ -44,7 +44,7 @@ public class ICalExporter {
    * @param timezone the timezone of the calendar
    * @return the VEVENT component string
    */
-  private static String formatEventAsICal(Event event, ZoneId timezone) {
+  private static String formatEventAsIcal(Event event, ZoneId timezone) {
     StringBuilder vevent = new StringBuilder();
     vevent.append("BEGIN:VEVENT\r\n");
     String uid = UUID.randomUUID().toString();

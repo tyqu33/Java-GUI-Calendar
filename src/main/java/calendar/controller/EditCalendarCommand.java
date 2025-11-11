@@ -6,7 +6,10 @@ import calendar.view.CalendarView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class EditCalendarCommand extends CommandFactory{
+/**
+ * Command to edit a calendar.
+ */
+public class EditCalendarCommand extends CommandFactory {
   private static final Pattern EDIT_CALENDAR = Pattern.compile(
       "^edit calendar --name (\\S+) --property (\\S+) (.+)$");
 
@@ -14,7 +17,14 @@ public class EditCalendarCommand extends CommandFactory{
   private final CalendarView view;
   private final String commandLine;
 
-  public EditCalendarCommand(String commandLine, MultiCalendarManagerInterface manager, CalendarView view) {
+  /**
+   * Constructor for EditCalendarCommand.
+   *
+   * @param commandLine the input command string
+   * @param manager the calendar manager
+   */
+  public EditCalendarCommand(String commandLine, MultiCalendarManagerInterface manager,
+                             CalendarView view) {
     this.commandLine = commandLine;
     this.manager = manager;
     this.view = view;
@@ -29,8 +39,8 @@ public class EditCalendarCommand extends CommandFactory{
       String value = matcher.group(3).trim();
       try {
         manager.editCalendar(name, property, value);
-        view.displaySuccess("Calendar " + name + " updated: " +
-            property + " = " + value);
+        view.displaySuccess("Calendar " + name + " updated: "
+            + property + " = " + value);
       } catch (IllegalArgumentException e) {
         view.displayError("Fail to edit calendar" + e.getMessage());
       }

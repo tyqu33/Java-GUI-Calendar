@@ -4,7 +4,7 @@ import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
 import calendar.util.CsvExporter;
-import calendar.util.ICalExporter;
+import calendar.util.IcalExporter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -459,10 +459,10 @@ public class Calendar implements CalendarInterface {
   }
 
   @Override
-  public String exportToICal(String calendarName, ZoneId timezone) {
+  public String exportToIcal(String calendarName, ZoneId timezone) {
     List<Event> sortedEvents = new ArrayList<>(calendar.values());
     sortedEvents.sort((e1, e2) -> e1.getStartDateTime().compareTo(e2.getStartDateTime()));
-    return ICalExporter.exportToICal(sortedEvents, calendarName, timezone);
+    return IcalExporter.exportToIcal(sortedEvents, calendarName, timezone);
   }
 
   @Override
