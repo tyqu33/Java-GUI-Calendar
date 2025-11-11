@@ -1,6 +1,6 @@
 package calendar.controller;
 
-import calendar.calendarEntity.CalendarEntityInterface;
+import calendar.calendarentity.CalendarEntityInterface;
 import calendar.model.CalendarInterface;
 import calendar.view.CalendarView;
 import java.util.regex.Matcher;
@@ -15,20 +15,6 @@ public class ExportCommand extends CommandFactory {
   private final CalendarView view;
   private final String commandLine;
   private final CalendarEntityInterface calendarEntity;
-
-  /**
-   * Constructs an ExportCommand instance.
-   *
-   * @param commandLine the input command string
-   * @param calendar the calendar object
-   * @param view the calendar view to display
-   */
-  public ExportCommand(String commandLine, CalendarInterface calendar, CalendarView view) {
-    this.calendar = calendar;
-    this.view = view;
-    this.commandLine = commandLine;
-    this.calendarEntity = null;
-  }
 
   /**
    * Constructs an ExportCommand instance.

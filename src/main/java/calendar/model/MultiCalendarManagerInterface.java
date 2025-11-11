@@ -1,6 +1,6 @@
 package calendar.model;
 
-import calendar.calendarEntity.CalendarEntityInterface;
+import calendar.calendarentity.CalendarEntityInterface;
 import java.time.ZoneId;
 
 /**

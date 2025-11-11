@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 
+/**
+ * Test class for IcalExporter.
+ */
 public class IcalExporterTest {
   @Test
-  public void testExportToICalBasic() {
+  public void testExportToIcalBasic() {
     List<Event> events = new ArrayList<>();
     Event event = Event.builder("Meeting", LocalDateTime.parse("2025-12-01T10:00"))
         .end(LocalDateTime.parse("2025-12-01T11:00"))
@@ -33,7 +36,7 @@ public class IcalExporterTest {
   }
 
   @Test
-  public void testExportToICalAllDay() {
+  public void testExportToIcalAllDay() {
     List<Event> events = new ArrayList<>();
     events.add(Event.builder("Holiday", LocalDateTime.parse("2025-12-01T08:00"))
         .setAllDayEvent()
@@ -44,7 +47,7 @@ public class IcalExporterTest {
   }
 
   @Test
-  public void testExportToICalMulti() {
+  public void testExportToIcalMulti() {
     List<Event> events = new ArrayList<>();
     events.add(Event.builder("Event1", LocalDateTime.parse("2025-12-01T10:00"))
         .end(LocalDateTime.parse("2025-12-01T11:00"))
@@ -59,7 +62,7 @@ public class IcalExporterTest {
   }
 
   @Test
-  public void testExportToICalEscape() {
+  public void testExportToIcalEscape() {
     List<Event> events = new ArrayList<>();
     events.add(Event.builder("Event", LocalDateTime.parse("2025-12-01T10:00"))
         .end(LocalDateTime.parse("2025-12-01T11:00"))

@@ -1,4 +1,4 @@
-import calendar.calendarEntity.CalendarEntityInterface;
+import calendar.calendarentity.CalendarEntityInterface;
 import calendar.model.MultiCalendarManagerInterface;
 import java.time.ZoneId;
 

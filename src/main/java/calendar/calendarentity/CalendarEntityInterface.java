@@ -1,4 +1,4 @@
-package calendar.calendarEntity;
+package calendar.calendarentity;
 
 import calendar.model.CalendarInterface;
 import java.time.ZoneId;

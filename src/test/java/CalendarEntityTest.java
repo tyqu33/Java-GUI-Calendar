@@ -4,9 +4,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import calendar.calendarEntity.CalendarEntity;
+import calendar.calendarentity.CalendarEntity;
 import calendar.model.Calendar;
-import calendar.model.CalendarInterface;
 import java.time.ZoneId;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +16,9 @@ import org.junit.Test;
 public class CalendarEntityTest {
   private Calendar calendar;
 
+  /**
+   * Set up a new Calendar.
+   */
   @Before
   public void setUp() {
     calendar = new Calendar();

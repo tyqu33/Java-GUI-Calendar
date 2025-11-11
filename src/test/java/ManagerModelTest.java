@@ -3,8 +3,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import calendar.calendarEntity.CalendarEntity;
-import calendar.calendarEntity.CalendarEntityInterface;
+import calendar.calendarentity.CalendarEntityInterface;
 import calendar.controller.CalendarController;
 import calendar.enums.EventStatus;
 import calendar.event.Event;
@@ -17,7 +16,6 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
 import org.junit.Before;
 import org.junit.Test;
 

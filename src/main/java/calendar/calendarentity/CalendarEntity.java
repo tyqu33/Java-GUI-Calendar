@@ -1,4 +1,4 @@
-package calendar.calendarEntity;
+package calendar.calendarentity;
 
 import calendar.model.Calendar;
 import calendar.model.CalendarInterface;

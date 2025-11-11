@@ -1,11 +1,10 @@
 package calendar.model;
 
-import calendar.calendarEntity.CalendarEntity;
-import calendar.calendarEntity.CalendarEntityInterface;
+import calendar.calendarentity.CalendarEntity;
+import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
 import calendar.event.EventSeries;
 import java.time.DateTimeException;
-import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,7 +15,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This class implements interface MultiCalendarManagerInterface and offers create, edit a calendar

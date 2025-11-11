@@ -1,6 +1,6 @@
 package calendar.controller;
 
-import calendar.calendarEntity.CalendarEntityInterface;
+import calendar.calendarentity.CalendarEntityInterface;
 import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
 import java.util.regex.Matcher;

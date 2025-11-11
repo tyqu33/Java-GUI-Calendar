@@ -1,6 +1,6 @@
 package calendar.controller;
 
-import calendar.calendarEntity.CalendarEntityInterface;
+import calendar.calendarentity.CalendarEntityInterface;
 import calendar.model.CalendarInterface;
 import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;

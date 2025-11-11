@@ -1,12 +1,11 @@
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import calendar.calendarEntity.CalendarEntityInterface;
+import calendar.calendarentity.CalendarEntityInterface;
 import calendar.controller.CalendarController;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
-import calendar.model.Calendar;
 import calendar.model.CalendarInterface;
 import calendar.model.MultiCalendarManager;
 import calendar.model.MultiCalendarManagerInterface;
@@ -215,7 +214,8 @@ public class ViewCommandsTest {
 
     String result = output.toString();
     assertTrue("Should display error, but got: " + result,
-        result.contains("Invalid command") || result.contains("Error") || result.contains("Invalid"));
+        result.contains("Invalid command") || result.contains("Error")
+            || result.contains("Invalid"));
   }
 
   @Test
@@ -228,7 +228,8 @@ public class ViewCommandsTest {
 
     String result = output.toString();
     assertTrue("Should display error for filename with spaces, but got: " + result,
-        result.contains("Error") || result.contains("Invalid") || result.contains("failed"));
+        result.contains("Error") || result.contains("Invalid")
+            || result.contains("failed"));
   }
 
   @Test
@@ -293,7 +294,8 @@ public class ViewCommandsTest {
     @Override
     public EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
                                          String description, String location, String eventStatus,
-                                         String weekdays, int repeatTimes, String seriesEndDateTime) {
+                                         String weekdays, int repeatTimes,
+                                         String seriesEndDateTime) {
       return null;
     }
 
@@ -380,7 +382,8 @@ public class ViewCommandsTest {
     String input = "export cal test_runtime_fail.csv\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(errorManager, errorView, readable, errorOutput);
+    CalendarController controller = new CalendarController(errorManager, errorView,
+        readable, errorOutput);
     controller.go();
 
     String result = errorOutput.toString();
@@ -405,7 +408,8 @@ public class ViewCommandsTest {
     String input = "print events on 2025-05-01\nexit\n";
     Readable readable = new StringReader(input);
 
-    CalendarController controller = new CalendarController(errorManager, errorView, readable, errorOutput);
+    CalendarController controller = new CalendarController(errorManager, errorView,
+        readable, errorOutput);
     controller.go();
 
     String result = errorOutput.toString();
@@ -416,9 +420,10 @@ public class ViewCommandsTest {
   }
 
   @Test
-  public void testExportCommandICal() throws IOException {
-    calendar.createSingleEvent("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
-        "Description", "Location", "public", null);
+  public void testExportCommandIcal() throws IOException {
+    calendar.createSingleEvent("Meeting", "2025-05-01T10:00",
+        "2025-05-01T11:00", "Description", "Location",
+        "public", null);
     String tempFile = "test" + System.currentTimeMillis() + ".ical";
     String input = "export cal " + tempFile + "\nexit\n";
     Readable readable = new StringReader(input);
