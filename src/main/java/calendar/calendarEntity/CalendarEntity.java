@@ -6,7 +6,7 @@ import java.time.ZoneId;
 import java.util.Objects;
 
 /**
- * Represents a calendar entity with a unique name, timezone, and calendar object.
+ * Represents a calendar entity with a unique name, timezone, and calendar.
  */
 public class CalendarEntity implements CalendarEntityInterface {
   private String calendarName;

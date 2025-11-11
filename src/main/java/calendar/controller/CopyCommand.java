@@ -2,6 +2,7 @@ package calendar.controller;
 
 import calendar.model.CalendarInterface;
 import calendar.model.MultiCalendarManagerInterface;
+import calendar.view.CalendarView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,20 +25,21 @@ public class CopyCommand extends CommandFactory {
 
   private final String commandLine;
   private final MultiCalendarManagerInterface manager;
-  private final CalendarInterface calendar;
+  private final CalendarView view;
+
 
   /**
    * Constructor for CopyCommand Class.
    *
    * @param commandLine the input line of a command
    * @param manager     the calendar manager
-   * @param calendar    the calendar object
+   * @param view        the view for output
    */
   public CopyCommand(String commandLine, MultiCalendarManagerInterface manager,
-                     CalendarInterface calendar) {
+                     CalendarView view) {
     this.commandLine = commandLine;
     this.manager = manager;
-    this.calendar = calendar;
+    this.view = view;
   }
 
   @Override
@@ -81,7 +83,7 @@ public class CopyCommand extends CommandFactory {
       manager.copyEvent(subject, startDateTime, targetCalendarName, targetDateTime);
       return;
     }
-    throw new IllegalArgumentException("Copy event(s) failure. Wrong format: " + commandLine);
+    view.displayError("Copy event(s) failure. Wrong format: " + commandLine);
 
   }
 }

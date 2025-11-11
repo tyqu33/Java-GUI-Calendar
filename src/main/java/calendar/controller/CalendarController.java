@@ -83,7 +83,7 @@ public class CalendarController {
     }
 
     if (commandLine.startsWith("copy")) {
-      CommandFactory copyEvent = new CopyCommand(commandLine, manager, calendar);
+      CommandFactory copyEvent = new CopyCommand(commandLine, manager, view);
       copyEvent.execute();
       return;
     }

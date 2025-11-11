@@ -41,7 +41,9 @@ public class UseCalendarCommand extends CommandFactory {
 
       CalendarEntityInterface entity = manager.getCalendarEntity(calendarName);
       manager.useThisCalendarEntity(entity);
+      return;
     }
+    view.displayError("Copy calendar failure. Wrong format: " + commandLine);
   }
 
   @Override

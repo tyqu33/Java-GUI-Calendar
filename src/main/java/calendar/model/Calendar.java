@@ -85,7 +85,7 @@ public class Calendar implements CalendarInterface {
                                        String description, String location, String eventStatus,
                                        String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException {
-    if (subject == null || subject.isEmpty() || startDateTime == null  || startDateTime.isEmpty()) {
+    if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
     LocalDateTime start;
@@ -256,7 +256,7 @@ public class Calendar implements CalendarInterface {
       }
       // The new inputs clash with existing event, the edition should not occur
       EventKey newKey = new EventKey(finalNewSubject, finalNewStart, finalNewEnd);
-      if (calendar.get(newKey) != null) { // !newKey.equals(oldKey) && calendar.containsKey(newKey)
+      if (calendar.get(newKey) != null) {
         throw new IllegalArgumentException(
             "Event on the new subject, start date/time, end date/time already exists");
       }
@@ -288,15 +288,25 @@ public class Calendar implements CalendarInterface {
       throw new IllegalArgumentException("Invalid start date/time: " + startDateTime);
     }
     LocalDateTime oldEnd = null;
+    boolean hasEnd = false;
     if (endDateTime != null && !endDateTime.isEmpty()) {
       try {
         oldEnd = LocalDateTime.parse(endDateTime);
       } catch (DateTimeParseException e) {
         throw new IllegalArgumentException("Invalid end date/time: " + endDateTime);
       }
-    } else {
-      endDateTime = startDateTime.substring(0, 10) + "T17:00";
-      oldEnd = LocalDateTime.parse(endDateTime);
+      hasEnd = true;
+    }
+
+    if (!hasEnd) {
+      for (Event event : this.getEvents()) {
+        if (event.getSubject().equals(subject)
+            && event.getStartDateTime().toString().equals(startDateTime)) {
+          oldEnd = event.getEndDateTime();
+          endDateTime = oldEnd.toString();
+          break;
+        }
+      }
     }
 
     EventKey oldKey = new EventKey(subject, oldStart, oldEnd);

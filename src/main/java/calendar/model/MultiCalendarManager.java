@@ -61,7 +61,8 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
   }
 
   @Override
-  public CalendarEntityInterface editCalendar(String calendarName, String property, String propertyValue) {
+  public CalendarEntityInterface editCalendar(String calendarName, String property,
+                                              String propertyValue) {
     if (calendarName == null || calendarName.isEmpty()) {
       throw new IllegalArgumentException("calendar name cannot be empty");
     }
@@ -262,17 +263,14 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       throw new IllegalArgumentException("Current calendar does not exist");
     }
 
-    ZoneId oldZoneId = this.calendarEntity.getTimeZone();
-    ZoneId newZoneId = this.getCalendarTimeZone(targetCalendarName);
-    CalendarInterface newCalendar = this.getCalendarEntity(targetCalendarName).getCalendar();
     LocalDateTime oldStart;
-    LocalDateTime oldEnd;
     try {
       LocalDate.parse(startDate);
     } catch (DateTimeParseException e) {
       throw new IllegalArgumentException("Invalid date format: " + startDate);
     }
     oldStart = LocalDateTime.parse(startDate + "T00:00");
+    LocalDateTime oldEnd;
     try {
       LocalDate.parse(endDate);
     } catch (DateTimeParseException e) {
@@ -289,6 +287,9 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
     }
     long dayOffset = java.time.temporal.ChronoUnit.DAYS.between(intervalStartDate, newTargetDate);
 
+    ZoneId oldZoneId = this.calendarEntity.getTimeZone();
+    ZoneId newZoneId = this.getCalendarTimeZone(targetCalendarName);
+    CalendarInterface newCalendar = this.getCalendarEntity(targetCalendarName).getCalendar();
     for (Event event : this.calendarEntity.getCalendar().getEvents()) {
       LocalDateTime eventStart = event.getStartDateTime();
       LocalDateTime eventEnd = event.getEndDateTime();
@@ -355,57 +356,57 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
           //            }
           //          } else {
 
-            LocalTime oldSeriesStart = oldSeries.getStartDateTime().toLocalTime();
-            LocalTime oldSeriesEnd = oldSeries.getEndDateTime().toLocalTime();
-            LocalDate newSeriesFirstDate = LocalDate.parse(targetDay);
+          LocalTime oldSeriesStart = oldSeries.getStartDateTime().toLocalTime();
+          LocalTime oldSeriesEnd = oldSeries.getEndDateTime().toLocalTime();
+          LocalDate newSeriesFirstDate = LocalDate.parse(targetDay);
 
-            LocalDateTime oldSeriesPrunedStart = LocalDateTime.of(newSeriesFirstDate, oldSeriesStart);
-            LocalDateTime oldSeriesPrunedEnd = LocalDateTime.of(newSeriesFirstDate, oldSeriesEnd);
+          LocalDateTime oldSeriesPrunedStart = LocalDateTime.of(newSeriesFirstDate, oldSeriesStart);
+          LocalDateTime oldSeriesPrunedEnd = LocalDateTime.of(newSeriesFirstDate, oldSeriesEnd);
 
-            LocalDateTime newSeriesStart = oldSeriesPrunedStart.atZone(oldZoneId)
-                .withZoneSameInstant(newZoneId).toLocalDateTime();
-            LocalDateTime newSeriesEnd = oldSeriesPrunedEnd.atZone(oldZoneId)
-                .withZoneSameInstant(newZoneId).toLocalDateTime();
-            if (newSeriesStart.isBefore(
-                LocalDateTime.parse(newSeriesEnd.toString().substring(0, 10) + "T00:00"))
-                || newSeriesEnd.isAfter(
-                LocalDateTime.parse(newSeriesStart.toString().substring(0, 10) + "T23:59"))) {
-              throw new IllegalArgumentException(
-                  "New event in a series should not cover more than one day "
-                      + "after being copied to the new calendar");
+          LocalDateTime newSeriesStart = oldSeriesPrunedStart.atZone(oldZoneId)
+              .withZoneSameInstant(newZoneId).toLocalDateTime();
+          LocalDateTime newSeriesEnd = oldSeriesPrunedEnd.atZone(oldZoneId)
+              .withZoneSameInstant(newZoneId).toLocalDateTime();
+          if (newSeriesStart.isBefore(
+              LocalDateTime.parse(newSeriesEnd.toString().substring(0, 10) + "T00:00"))
+              || newSeriesEnd.isAfter(
+              LocalDateTime.parse(newSeriesStart.toString().substring(0, 10) + "T23:59"))) {
+            throw new IllegalArgumentException(
+                "New event in a series should not cover more than one day "
+                    + "after being copied to the new calendar");
+          }
+          int newOccurrence = 0;
+          for (EventKey key : oldSeries.getSeriesKeys()) {
+            LocalDateTime eventStartTemp = key.getStartDateTime();
+            LocalDateTime eventEndTemp = key.getEndDateTime();
+            if (!(eventEndTemp.isBefore(oldStart) || eventStartTemp.isAfter(oldEnd))) {
+              newOccurrence++;
             }
-            int newOccurrence = 0;
-            for (EventKey key : oldSeries.getSeriesKeys()) {
-              LocalDateTime eventStartTemp = key.getStartDateTime();
-              LocalDateTime eventEndTemp = key.getEndDateTime();
-              if (!(eventEndTemp.isBefore(oldStart) || eventStartTemp.isAfter(oldEnd))) {
-                newOccurrence++;
-              }
+          }
+          if (newOccurrence == 0) {
+            continue;
+          }
+          try {
+            newCalendar.createEventSeries(
+                oldSeries.getSubject(),
+                newSeriesStart.toString(),
+                newSeriesEnd.toString(),
+                oldSeries.getDescription(),
+                oldSeries.getLocation(),
+                oldSeries.getEventStatus().toString(),
+                oldSeries.getWeekdays(),
+                newOccurrence,
+                null
+            );
+          } catch (IllegalArgumentException e) {
+            if (e.getMessage().equals("Event already exists")) {
+              throw new IllegalArgumentException("Calendar " + targetCalendarName
+                  + " already has an event with the name " + oldSeries.getSubject()
+                  + " in conflict with events to be copied ");
+            } else {
+              throw e;
             }
-            if (newOccurrence == 0) {
-              continue;
-            }
-            try {
-              newCalendar.createEventSeries(
-                  oldSeries.getSubject(),
-                  newSeriesStart.toString(),
-                  newSeriesEnd.toString(),
-                  oldSeries.getDescription(),
-                  oldSeries.getLocation(),
-                  oldSeries.getEventStatus().toString(),
-                  oldSeries.getWeekdays(),
-                  newOccurrence,
-                  null
-              );
-            } catch (IllegalArgumentException e) {
-              if (e.getMessage().equals("Event already exists")) {
-                throw new IllegalArgumentException("Calendar " + targetCalendarName
-                    + " already has an event with the name " + oldSeries.getSubject()
-                    + " in conflict with events to be copied ");
-              } else {
-                throw e;
-              }
-            }
+          }
 
           // }
 
