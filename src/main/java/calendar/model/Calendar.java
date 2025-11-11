@@ -363,8 +363,15 @@ public class Calendar implements CalendarInterface {
         } else {
 
           series = seriesManager.get(seriesId);
-          for (EventKey keyToDel : series.getEventKeys()) {
-            calendar.remove(keyToDel);
+          //          for (EventKey keyToDel : series.getEventKeys()) {
+          //            calendar.remove(keyToDel);
+          //          }
+          Set<EventKey> keysInOldSeries = series.getEventKeys();
+          for (EventKey keyToDel : keysInOldSeries) {
+            if (!keyToDel.getStartDateTime().isBefore(oldStart)) {
+              calendar.remove(keyToDel);
+              series.removeEventKey(keyToDel);
+            }
           }
           if (series != null) {
             series.removeEventKey(oldKey);

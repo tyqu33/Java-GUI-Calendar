@@ -1307,6 +1307,82 @@ public class ManagerModelTest {
   }
 
   @Test
+  public void testSingleCalendarEditSeriesHalfEvents() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + use
+          + "create event office-hours-cs5010 from 2024-03-11T10:00 to 2024-03-11T12:00"
+          + " repeats MWR until 2024-03-21\n"
+          + "edit events subject office-hours-cs5010 from 2024-03-13T10:00 with newname\n"
+          + "print events from 2024-03-11T09:00 to 2024-03-22T13:00\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Events from 2024-03-11T09:00 to 2024-03-22T13:00:\n"
+          + " • office-hours-cs5010 starting on 2024-03-11 at 10:00 AM, ending on 2024-03-11"
+          + " at 12:00 PM\n"
+          + " • newname starting on 2024-03-13 at 10:00 AM, ending on 2024-03-13 at 12:00 PM\n"
+          + " • newname starting on 2024-03-14 at 10:00 AM, ending on 2024-03-14 at 12:00 PM\n"
+          + " • newname starting on 2024-03-18 at 10:00 AM, ending on 2024-03-18 at 12:00 PM\n"
+          + " • newname starting on 2024-03-20 at 10:00 AM, ending on 2024-03-20 at 12:00 PM\n"
+          + " • newname starting on 2024-03-21 at 10:00 AM, ending on 2024-03-21 at 12:00 PM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyAcrossCalendarEditSeriesHalfEvents() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/Los_Angeles\n"
+          + use
+          + "create event office-hours-cs5010 from 2024-03-11T10:00 to 2024-03-11T12:00"
+          + " repeats MWR until 2024-03-21\n"
+          + "edit events subject office-hours-cs5010 from 2024-03-13T10:00 with newname\n"
+          + "print events from 2024-03-11T09:00 to 2024-03-22T13:00\n"
+          + "copy events on 2024-03-11 --target Lectures to 2024-03-11\n"
+          + "use calendar --name Lectures\n"
+          + "print events from 2024-03-11T09:00 to 2024-03-22T13:00\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events from 2024-03-11T09:00 to 2024-03-22T13:00:\n"
+          + " • office-hours-cs5010 starting on 2024-03-11 at 10:00 AM, ending on 2024-03-11"
+          + " at 12:00 PM\n"
+          + " • newname starting on 2024-03-13 at 10:00 AM, ending on 2024-03-13 at 12:00 PM\n"
+          + " • newname starting on 2024-03-14 at 10:00 AM, ending on 2024-03-14 at 12:00 PM\n"
+          + " • newname starting on 2024-03-18 at 10:00 AM, ending on 2024-03-18 at 12:00 PM\n"
+          + " • newname starting on 2024-03-20 at 10:00 AM, ending on 2024-03-20 at 12:00 PM\n"
+          + " • newname starting on 2024-03-21 at 10:00 AM, ending on 2024-03-21 at 12:00 PM\n"
+          + "Events from 2024-03-11T09:00 to 2024-03-22T13:00:\n"
+          + " • office-hours-cs5010 starting on 2024-03-11 at 7:00 AM, ending on 2024-03-11"
+          + " at 9:00 AM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
   public void editCalendarName() throws IOException {
     PrintStream originalOut = System.out;
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();

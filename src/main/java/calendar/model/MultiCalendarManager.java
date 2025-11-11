@@ -54,7 +54,6 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
         .calendar(calendar)
         .build();
     this.calendarManager.put(calendarName, entity);
-    // this.calendarEntity = entity;
     return entity;
   }
 
@@ -99,7 +98,6 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
           .build();
 
       this.calendarManager.replace(calendarName, newEntity);
-      // this.calendarEntity = newEntity;
       return newEntity;
     } else {
       throw new IllegalArgumentException("Invalid property input: " + property);
@@ -142,13 +140,8 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       throw new IllegalArgumentException("event name, event start date/time, target calendar name,"
           + " and target start date/time cannot be empty");
     }
-    if (this.getCalendarEntity(targetCalendarName) == null) {
-      throw new IllegalArgumentException(
-          "Calendar with name does not exist: " + targetCalendarName);
-    }
-    if (this.calendarEntity == null) {
-      throw new IllegalArgumentException("Current calendar does not exist");
-    }
+    verifyInputAndGetCalendar(targetCalendarName);
+
     LocalDateTime targetStart;
     try {
       targetStart = LocalDateTime.parse(targetDateTime);
@@ -167,23 +160,9 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
         Duration duration = Duration.between(event.getStartDateTime(), event.getEndDateTime());
         LocalDateTime targetEnd = targetStart.plus(duration);
 
-        try {
-          this.getCalendarEntity(targetCalendarName).getCalendar().createSingleEvent(
-              subject.trim(),
-              targetStart.toString(),
-              targetEnd.toString(),
-              event.getDescription(),
-              event.getLocation(),
-              event.getEventStatus().toString(),
-              null);
-        } catch (IllegalArgumentException e) {
-          if (e.getMessage().equals("Event already exists")) {
-            throw new IllegalArgumentException("Calendar " + targetCalendarName
-                + " already has an event with the name " + subject.trim()
-                + ", the start date/time " + targetStart.toString()
-                + ", the end date/time " + targetEnd.toString() + " existed ");
-          }
-        }
+        createSingleEventWithException(event,
+            this.getCalendarEntity(targetCalendarName).getCalendar(),
+            targetStart, targetEnd, targetCalendarName);
       }
     }
 
@@ -197,13 +176,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       throw new IllegalArgumentException("events day, target calendar name and target day"
           + " cannot be empty");
     }
-    if (this.getCalendarEntity(targetCalendarName) == null) {
-      throw new IllegalArgumentException(
-          "Calendar with name does not exist: " + targetCalendarName);
-    }
-    if (this.calendarEntity == null) {
-      throw new IllegalArgumentException("Current calendar does not exist");
-    }
+    verifyInputAndGetCalendar(targetCalendarName);
 
     ZoneId oldZoneId = this.calendarEntity.getTimeZone();
     ZoneId newZoneId = this.getCalendarTimeZone(targetCalendarName);
@@ -221,24 +194,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
         LocalDateTime newEnd = event.getEndDateTime().atZone(oldZoneId)
             .withZoneSameInstant(newZoneId).toLocalDateTime();
 
-        try {
-          newCalendar.createSingleEvent(
-              event.getSubject(),
-              newStart.toString(),
-              newEnd.toString(),
-              event.getDescription(),
-              event.getLocation(),
-              event.getEventStatus().toString(),
-              null
-          );
-        } catch (IllegalArgumentException e) {
-          if (e.getMessage().equals("Event already exists")) {
-            throw new IllegalArgumentException("Calendar " + targetCalendarName
-                + " already has an event with the name " + event.getSubject()
-                + ", the start date/time " + newStart.toString()
-                + ", the end date/time " + newEnd.toString() + " existed ");
-          }
-        }
+        createSingleEventWithException(event, newCalendar, newStart, newEnd, targetCalendarName);
       }
     }
 
@@ -253,13 +209,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       throw new IllegalArgumentException("events start day, events end day, target calendar name"
           + " and target day cannot be empty");
     }
-    if (this.getCalendarEntity(targetCalendarName) == null) {
-      throw new IllegalArgumentException(
-          "Calendar with name does not exist: " + targetCalendarName);
-    }
-    if (this.calendarEntity == null) {
-      throw new IllegalArgumentException("Current calendar does not exist");
-    }
+    verifyInputAndGetCalendar(targetCalendarName);
 
     LocalDateTime oldStart;
     try {
@@ -299,24 +249,8 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
               .withZoneSameInstant(newZoneId).toLocalDateTime();
           LocalDateTime newEnd = eventEnd.plusDays(dayOffset).atZone(oldZoneId)
               .withZoneSameInstant(newZoneId).toLocalDateTime();
-          try {
-            newCalendar.createSingleEvent(
-                event.getSubject(),
-                newStart.toString(),
-                newEnd.toString(),
-                event.getDescription(),
-                event.getLocation(),
-                event.getEventStatus().toString(),
-                null
-            );
-          } catch (IllegalArgumentException e) {
-            if (e.getMessage().equals("Event already exists")) {
-              throw new IllegalArgumentException("Calendar " + targetCalendarName
-                  + " already has an event with the name " + event.getSubject()
-                  + ", the start date/time " + newStart.toString()
-                  + ", the end date/time " + newEnd.toString() + " existed ");
-            }
-          }
+
+          createSingleEventWithException(event, newCalendar, newStart, newEnd, targetCalendarName);
         } else {
 
           String oldSeriesId = event.getSeriesId();
@@ -326,39 +260,13 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
             continue; // has already processed this series, so skip
           }
           EventSeries oldSeries = this.calendarEntity.getCalendar().getEventSeries(oldSeriesId);
-          // invalid old series id
-          //          if (oldSeries == null) {
-          //            LocalDateTime newStart = eventStart.plusDays(dayOffset).atZone(oldZoneId)
-          //                .withZoneSameInstant(newZoneId).toLocalDateTime();
-          //            LocalDateTime newEnd = eventEnd.plusDays(dayOffset).atZone(oldZoneId)
-          //                .withZoneSameInstant(newZoneId).toLocalDateTime();
-          //            try {
-          //              newCalendar.createSingleEvent(
-          //                  event.getSubject(),
-          //                  newStart.toString(),
-          //                  newEnd.toString(),
-          //                  event.getDescription(),
-          //                  event.getLocation(),
-          //                  event.getEventStatus().toString(),
-          //                  null
-          //              );
-          //            } catch (IllegalArgumentException e) {
-          //              if (e.getMessage().equals("Event already exists")) {
-          //                throw new IllegalArgumentException("Calendar " + targetCalendarName
-          //                    + " already has an event with the name " + event.getSubject()
-          //                    + ", the start date/time " + newStart.toString()
-          //                    + ", the end date/time " + newEnd.toString() + " existed ");
-          //              } else {
-          //                throw e;
-          //              }
-          //            }
-          //          } else {
 
           LocalTime oldSeriesStart = oldSeries.getStartDateTime().toLocalTime();
           LocalTime oldSeriesEnd = oldSeries.getEndDateTime().toLocalTime();
           LocalDate newSeriesFirstDate = LocalDate.parse(targetDay);
 
-          LocalDateTime oldSeriesPrunedStart = LocalDateTime.of(newSeriesFirstDate, oldSeriesStart);
+          LocalDateTime oldSeriesPrunedStart =
+              LocalDateTime.of(newSeriesFirstDate, oldSeriesStart);
           LocalDateTime oldSeriesPrunedEnd = LocalDateTime.of(newSeriesFirstDate, oldSeriesEnd);
 
           LocalDateTime newSeriesStart = oldSeriesPrunedStart.atZone(oldZoneId)
@@ -405,16 +313,43 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
               throw e;
             }
           }
-
-          // }
-
         }
       }
-
-
     }
+  }
 
+  private void verifyInputAndGetCalendar(String targetCalendarName)
+      throws IllegalArgumentException {
+    if (this.getCalendarEntity(targetCalendarName) == null) {
+      throw new IllegalArgumentException(
+          "Calendar with name does not exist: " + targetCalendarName);
+    }
+    if (this.calendarEntity == null) {
+      throw new IllegalArgumentException("Current calendar does not exist");
+    }
+  }
 
+  private void createSingleEventWithException(Event event, CalendarInterface targetCalendar,
+                                              LocalDateTime newStart, LocalDateTime newEnd,
+                                              String targetCalendarName)
+      throws IllegalArgumentException {
+    try {
+      this.getCalendarEntity(targetCalendarName).getCalendar().createSingleEvent(
+          event.getSubject().trim(),
+          newStart.toString(),
+          newEnd.toString(),
+          event.getDescription(),
+          event.getLocation(),
+          event.getEventStatus().toString(),
+          null);
+    } catch (IllegalArgumentException e) {
+      if (e.getMessage().equals("Event already exists")) {
+        throw new IllegalArgumentException("Calendar " + targetCalendarName
+            + " already has an event with the name " + event.getSubject().trim()
+            + ", the start date/time " + newStart.toString()
+            + ", the end date/time " + newEnd.toString() + " existed ");
+      }
+    }
   }
 
 }
