@@ -506,4 +506,45 @@ public class ControllerTest {
         "Edit event failure. Wrong format: edit XXXX\n", out.toString());
 
   }
+
+  @Test
+  public void testExitCommand() throws IOException {
+    Reader in = new StringReader(premise + use + "exit\n");
+    StringBuilder log = new StringBuilder();
+    StringBuffer out = new StringBuffer();
+
+    CalendarInterface model = new MockModel(log, "");
+    EntityMockModel entity = new EntityMockModel();
+    entity.useThisCalendar(model);
+    MultiCalendarManagerInterface manager = new MultiCalendarManagerMockModel();
+    manager.useThisCalendarEntity(entity);
+    CalendarView view = new CalendarView();
+    CalendarController controller = new CalendarController(manager, view, in, out);
+    controller.go();
+    String expectedOutput = "";
+
+    assertEquals(expectedOutput.trim(), log.toString().trim());
+  }
+
+  @Test
+  public void testInvalidCommand() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    try {
+      Reader in = new StringReader(premise + use
+          + "invalidcommand\n"
+          + "exit\n");
+      MultiCalendarManagerInterface manager = new MultiCalendarManager();
+      CalendarView view = new CalendarView();
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+
+      assertTrue(allOuts.contains("Invalid command line"));
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
 }

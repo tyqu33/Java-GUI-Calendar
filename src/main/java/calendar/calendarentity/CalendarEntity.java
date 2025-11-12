@@ -131,32 +131,6 @@ public class CalendarEntity implements CalendarEntityInterface {
     return calendar;
   }
 
-  /**
-   * Updates the name of the calendar entity.
-   *
-   * @param calendarName the new name of the calendar entity
-   * @throws IllegalArgumentException if the name is null or empty
-   */
-  void editCalendarName(String calendarName) {
-    if (calendarName == null || calendarName.trim().isEmpty()) {
-      throw new IllegalArgumentException("Calendar name cannot be null or empty");
-    }
-    this.calendarName = calendarName.trim();
-  }
-
-  /**
-   * Updates the timezone of the calendar entity.
-   *
-   * @param zoneId the new timezone of the calendar entity
-   * @throws IllegalArgumentException if timezone is null
-   */
-  void editTimeZone(ZoneId zoneId) {
-    if (zoneId == null) {
-      throw new IllegalArgumentException("Timezone cannot be null");
-    }
-    this.zoneId = zoneId;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {

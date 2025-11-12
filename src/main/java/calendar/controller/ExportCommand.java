@@ -38,19 +38,11 @@ public class ExportCommand extends CommandFactory {
       if (matcher.matches()) {
         String fileName = matcher.group(1).trim();
         String finalFileName = fileName;
-        if (calendar == null) {
-          view.displayError("No calendar available.");
-          return;
-        }
         String content;
         String lowerFileName = fileName.toLowerCase();
         if (lowerFileName.endsWith(".csv")) {
           content = calendar.exportToCsv();
         } else if (lowerFileName.endsWith(".ical")) {
-          if (calendarEntity == null) {
-            view.displayError("No calendar entity available.");
-            return;
-          }
           finalFileName = finalFileName.replace(".ical", ".ics");
           content = calendar.exportToIcal(
               calendarEntity.getCalendarName(),

@@ -283,4 +283,22 @@ public class CalendarEntityTest {
     assertNotNull(entity);
     assertEquals("Chain", entity.getCalendarName());
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBuilder() {
+    CalendarEntity entity = CalendarEntity.builder()
+        .calendarName("")
+        .timezone(ZoneId.of("UTC"))
+        .calendar(calendar)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBuilder2() {
+    CalendarEntity entity = CalendarEntity.builder()
+        .calendarName("  ")
+        .timezone(ZoneId.of("UTC"))
+        .calendar(calendar)
+        .build();
+  }
 }

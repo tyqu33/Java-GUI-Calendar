@@ -1488,4 +1488,148 @@ public class ManagerModelTest {
     }
   }
 
+  @Test
+  public void testEditName() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity = manager.createCalendar("Name", "America/New_York");
+    assertNotNull(entity);
+    assertEquals("Name", entity.getCalendarName());
+
+    CalendarEntityInterface updatedEntity = manager.editCalendar("Name", "name", "NewName");
+
+    assertNotNull(updatedEntity);
+    assertEquals("NewName", updatedEntity.getCalendarName());
+    assertEquals("America/New_York", updatedEntity.getTimeZone().toString());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEditNameNull() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity = manager.createCalendar("Name", "America/New_York");
+    assertNotNull(entity);
+    assertEquals("Name", entity.getCalendarName());
+
+    CalendarEntityInterface updatedEntity = manager.editCalendar("Name", "name", null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEditNameEmpty() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity = manager.createCalendar("Name", "America/New_York");
+    assertNotNull(entity);
+    assertEquals("Name", entity.getCalendarName());
+
+    CalendarEntityInterface updatedEntity = manager.editCalendar("Name", "name", "  ");
+  }
+
+  @Test
+  public void testEditTimeZone() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity = manager.createCalendar("TestCalendar", "America/New_York");
+    assertNotNull(entity);
+    assertEquals("America/New_York", entity.getTimeZone().toString());
+
+    CalendarEntityInterface updatedEntity = manager.editCalendar("TestCalendar",
+        "timezone", "America/Los_Angeles");
+    assertNotNull(updatedEntity);
+    assertEquals("TestCalendar", updatedEntity.getCalendarName());
+    assertEquals("America/Los_Angeles", updatedEntity.getTimeZone().toString());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEditTimeZoneNull() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    CalendarEntityInterface entity = manager.createCalendar("TestCalendar", "America/New_York");
+    assertNotNull(entity);
+    assertEquals("America/New_York", entity.getTimeZone().toString());
+
+    CalendarEntityInterface updatedEntity = manager.editCalendar("TestCalendar", "timezone", null);
+  }
+
+  @Test
+  public void testEditCalendarException() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(
+          "create calendar --name Meetings --timezone America/New_York\n"
+              + "edit calendar --name Meetings --property timezone InvalidTimeZone\n"
+              + "exit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      assertTrue(allOuts.contains("Fail to edit calendar"));
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testEditInvalidFormat() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(
+          "create calendar --name Meetings --timezone America/New_York\n"
+              + "edit calendar invalid\n"
+              + "exit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      assertTrue(allOuts.contains("Invalid command"));
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCreateCalendarException() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(
+          "create calendar --name TestCal --timezone InvalidTimeZone\n"
+              + "exit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      assertTrue(allOuts.contains("Error: Print failed"));
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCreateInvalidFormat() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(
+          "create calendar invalid\n"
+              + "exit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      assertTrue(allOuts.contains("Invalid command"));
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
 }
