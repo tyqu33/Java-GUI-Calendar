@@ -1,8 +1,6 @@
-creeat event "Lecture" from 2025-11-01T10:00 to 2025-11-01T11:00
-create event "Invalid Date" from 2025/11/01T10:00 to 2025-11-01T11:00
-create event "Invalid Repeat" on 2025-11-03 repeats XYZ for 3 times
-edit event location "Missing location" with "New location"
-print 2025-11-01 events
+create calendar --name NoTimezone
+use calendar
+create event Invalid on 2025-12-02
+create event "Invalid End Date" from 2025-12-05T12:00 to 2025-12-05T10:00
 export cal
-show status on 2025-11-01
 exit
