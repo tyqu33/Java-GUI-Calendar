@@ -21,3 +21,7 @@ This mode is used for batch processing. The application reads commands from the 
 Example:
 
 java -jar build/libs/calendar-1.0.jar --mode headless commands.txt
+
+## Justification of Changes over Iterations
+
+See changes.md.
