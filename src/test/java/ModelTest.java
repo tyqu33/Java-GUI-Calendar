@@ -224,20 +224,6 @@ public class ModelTest {
     }
   }
 
-  //  @Test
-  //  public void testModelCreateEventSeriesExp1() {
-  //    Calendar calendar = new Calendar();
-  //    EventSeries series0 = calendar.createEventSeries("Meeting", "2025-10-28T09:00",
-  //        "2025-10-28T12:00", "", "", "", "T", 4, "");
-  //    try {
-  //      EventSeries series1 = calendar.createEventSeries("Meeting", "2025-10-28T09:00",
-  //          "2025-10-28T12:00", "", "", "", "T", 4, "");
-  //      assert false;
-  //    } catch (IllegalArgumentException e) {
-  //      assertTrue(true);
-  //    }
-  //  }
-
   @Test
   public void testModelEditSingleEvent0() {
     Calendar calendar = new Calendar();
@@ -256,7 +242,6 @@ public class ModelTest {
 
   @Test
   public void testModelEditSingleEvent1() {
-    // System.out.println("testModelEditSingleEvent1");
     Calendar calendar = new Calendar();
     Event event1 = calendar.createSingleEvent("Meeting", "2025-10-28T09:00",
         "2025-10-28T12:00", "", "", "", null);
@@ -273,7 +258,6 @@ public class ModelTest {
 
   @Test
   public void testModelEditSingleEvent2() {
-    // System.out.println("testModelEditSingleEvent2");
     Calendar calendar = new Calendar();
     Event event = calendar.createSingleEvent("Meeting", "2025-10-28T09:00",
         "2025-10-28T12:00", "", "", "", null);

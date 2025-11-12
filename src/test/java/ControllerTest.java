@@ -56,7 +56,6 @@ public class ControllerTest {
 
   @Test
   public void testGoWithMockCreateEvent0() throws IOException {
-    System.out.println("testGoWithMockCreateEvent0 STARTING=======\n");
     Reader in = new StringReader(
         "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n");
     StringBuilder log = new StringBuilder();
@@ -73,7 +72,6 @@ public class ControllerTest {
 
     CalendarController controller = new CalendarController(manager, view, in, out);
     controller.go();
-    System.out.println("testGoWithMockCreateEvent0 ENDING=======\n");
     String expectedOutput =
         "create event Meeting on 2025-10-27\nprint events on 2025-10-27\nexit\n";
     assertEquals(expectedOutput.trim(), log.toString().trim());
