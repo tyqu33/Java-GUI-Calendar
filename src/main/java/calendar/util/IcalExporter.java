@@ -105,9 +105,6 @@ public class IcalExporter {
    * @return the escaped text
    */
   private static String escapeText(String text) {
-    if (text == null) {
-      return "";
-    }
     return text.replace("\\", "\\\\")
         .replace(",", "\\,")
         .replace(";", "\\;")

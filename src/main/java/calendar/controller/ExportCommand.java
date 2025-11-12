@@ -37,6 +37,7 @@ public class ExportCommand extends CommandFactory {
     try {
       if (matcher.matches()) {
         String fileName = matcher.group(1).trim();
+        String finalFileName = fileName;
         if (calendar == null) {
           view.displayError("No calendar available.");
           return;
@@ -50,6 +51,7 @@ public class ExportCommand extends CommandFactory {
             view.displayError("No calendar entity available.");
             return;
           }
+          finalFileName = finalFileName.replace(".ical", ".ics");
           content = calendar.exportToIcal(
               calendarEntity.getCalendarName(),
               calendarEntity.getTimeZone()
@@ -58,7 +60,7 @@ public class ExportCommand extends CommandFactory {
           view.displayError("Invalid file name.");
           return;
         }
-        view.exportCalendar(content, fileName);
+        view.exportCalendar(content, finalFileName);
         return;
       }
       view.displayError("Export failed. Invalid command: " + commandLine);

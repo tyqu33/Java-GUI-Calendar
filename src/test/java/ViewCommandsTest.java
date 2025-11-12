@@ -3,6 +3,7 @@ import static org.junit.Assert.assertTrue;
 
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.controller.CalendarController;
+import calendar.controller.ExportCommand;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventSeries;
@@ -56,11 +57,10 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain 'Events on 2025-05-01:', but got: " + result,
-        result.contains("Events on 2025-05-01:"));
-    assertTrue("Should contain 'Meeting'", result.contains("Meeting"));
-    assertTrue("Should contain '10:00'", result.contains("10:00"));
-    assertTrue("Should contain 'Room A'", result.contains("Room A"));
+    assertTrue(result.contains("Events on 2025-05-01:"));
+    assertTrue(result.contains("Meeting"));
+    assertTrue(result.contains("10:00"));
+    assertTrue(result.contains("Room A"));
   }
 
   @Test
@@ -77,10 +77,9 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain 'Events from', but got: " + result,
-        result.contains("Events from"));
-    assertTrue("Should contain 'Event1'", result.contains("Event1"));
-    assertTrue("Should contain 'Event2'", result.contains("Event2"));
+    assertTrue(result.contains("Events from"));
+    assertTrue(result.contains("Event1"));
+    assertTrue(result.contains("Event2"));
   }
 
   @Test
@@ -92,8 +91,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain 'No events on 2025-05-01', but got: " + result,
-        result.contains("No events on 2025-05-01"));
+    assertTrue(result.contains("No events on 2025-05-01"));
   }
 
   @Test
@@ -105,8 +103,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain 'Error' or 'Invalid', but got: " + result,
-        result.contains("Error") || result.contains("Invalid"));
+    assertTrue(result.contains("Error") || result.contains("Invalid"));
   }
 
   @Test
@@ -121,8 +118,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain 'busy', but got: " + result,
-        result.contains("busy"));
+    assertTrue(result.contains("busy"));
   }
 
   @Test
@@ -137,8 +133,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain 'available', but got: " + result,
-        result.contains("available"));
+    assertTrue(result.contains("available"));
   }
 
   @Test
@@ -150,8 +145,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain 'Error' or 'Invalid', but got: " + result,
-        result.contains("Error") || result.contains("Invalid") || result.contains("failed"));
+    assertTrue(result.contains("Error") || result.contains("Invalid") || result.contains("failed"));
   }
 
   @Test
@@ -167,14 +161,13 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain 'Exported to', but got: " + result,
-        result.contains("Exported to"));
+    assertTrue(result.contains("Exported to"));
 
     // Clean up
     try {
       java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(tempFile));
     } catch (Exception e) {
-      // Ignore cleanup errors
+      // Ignore
     }
   }
 
@@ -187,8 +180,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should display error for missing filename, but got: " + result,
-        result.contains("Error") || result.contains("Invalid") || result.contains("failed"));
+    assertTrue(result.contains("Error") || result.contains("Invalid") || result.contains("failed"));
   }
 
   @Test
@@ -200,8 +192,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should display error for missing filename, but got: " + result,
-        result.contains("Error") || result.contains("Invalid") || result.contains("failed"));
+    assertTrue(result.contains("Error") || result.contains("Invalid") || result.contains("failed"));
   }
 
   @Test
@@ -213,8 +204,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should display error, but got: " + result,
-        result.contains("Invalid command") || result.contains("Error")
+    assertTrue(result.contains("Invalid command") || result.contains("Error")
             || result.contains("Invalid"));
   }
 
@@ -227,8 +217,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should display error for filename with spaces, but got: " + result,
-        result.contains("Error") || result.contains("Invalid")
+    assertTrue(result.contains("Error") || result.contains("Invalid")
             || result.contains("failed"));
   }
 
@@ -241,8 +230,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should display error, but got: " + result,
-        result.contains("Show status failed") || result.contains("Invalid command")
+    assertTrue(result.contains("Show status failed") || result.contains("Invalid command")
             || result.contains("Error"));
   }
 
@@ -255,8 +243,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should display error, but got: " + result,
-        result.contains("Show status failed") || result.contains("Invalid command")
+    assertTrue(result.contains("Show status failed") || result.contains("Invalid command")
             || result.contains("Error"));
   }
 
@@ -387,12 +374,9 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = errorOutput.toString();
-    assertTrue("Should contain 'Export failed.' message, but got: " + result,
-        result.contains("Export failed."));
-    assertTrue("Should contain the custom exception message, but got: " + result,
-        result.contains("Force failure for catch coverage."));
-    assertFalse("Success message 'Exported to' should NOT be present, but got: " + result,
-        result.contains("Exported to"));
+    assertTrue(result.contains("Export failed."));
+    assertTrue(result.contains("Force failure for catch coverage."));
+    assertFalse(result.contains("Exported to"));
   }
 
   @Test
@@ -413,10 +397,8 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = errorOutput.toString();
-    assertTrue("Should contain 'Print failed.' message, but got: " + result,
-        result.contains("Print failed."));
-    assertTrue("Should contain the custom exception message, but got: " + result,
-        result.contains("Force failure for PrintCommand coverage."));
+    assertTrue(result.contains("Print failed."));
+    assertTrue(result.contains("Force failure for PrintCommand coverage."));
   }
 
   @Test
@@ -431,12 +413,12 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain 'Exported to'", result.contains("Exported to"));
+    assertTrue(result.contains("Exported to"));
     try {
       java.nio.file.Path path = java.nio.file.Paths.get(tempFile);
       String content = new String(java.nio.file.Files.readAllBytes(path));
-      assertTrue("File should contain iCal format", content.contains("BEGIN:VCALENDAR"));
-      assertTrue("File should contain event", content.contains("SUMMARY:Meeting"));
+      assertTrue(content.contains("BEGIN:VCALENDAR"));
+      assertTrue(content.contains("SUMMARY:Meeting"));
       java.nio.file.Files.deleteIfExists(path);
     } catch (Exception e) {
       // Ignore cleanup errors
@@ -451,8 +433,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should contain error",
-        result.contains("Invalid file name") || result.contains("Error"));
+    assertTrue(result.contains("Invalid file name") || result.contains("Error"));
   }
 
   @Test
@@ -465,7 +446,7 @@ public class ViewCommandsTest {
     controller.go();
 
     String result = output.toString();
-    assertTrue("Should successfully export empty calendar", result.contains("Exported to"));
+    assertTrue(result.contains("Exported to"));
 
     try {
       Files.deleteIfExists(Paths.get(tempFile));
@@ -473,4 +454,35 @@ public class ViewCommandsTest {
       // Ignore
     }
   }
+
+  @Test
+  public void testExportNoCalendar() throws IOException {
+    MultiCalendarManager emptyManager = new MultiCalendarManager();
+    StringBuilder emptyOutput = new StringBuilder();
+    CalendarView emptyView = new CalendarView(emptyOutput);
+    String input = "export cal test.csv\nexit\n";
+    Readable readable = new StringReader(input);
+
+    CalendarController controller = new CalendarController(emptyManager, emptyView,
+        readable, emptyOutput);
+    controller.go();
+    String result = emptyOutput.toString();
+    assertTrue(result.contains("No current calendar"));
+  }
+
+  @Test
+  public void testNoCalendarEntity() throws IOException {
+    MultiCalendarManager emptyManager = new MultiCalendarManager();
+    StringBuilder emptyOutput = new StringBuilder();
+    CalendarView emptyView = new CalendarView(emptyOutput);
+    String input = "export cal test.ical\nexit\n";
+    Readable readable = new StringReader(input);
+    CalendarController controller = new CalendarController(emptyManager, emptyView,
+        readable, emptyOutput);
+    controller.go();
+
+    String result = emptyOutput.toString();
+    assertTrue(result.contains("No current calendar"));
+  }
+
 }
