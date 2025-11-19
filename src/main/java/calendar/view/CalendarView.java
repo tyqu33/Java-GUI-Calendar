@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents the view component for the calendar application.
@@ -40,6 +41,21 @@ public class CalendarView implements CalendarViewInterface {
    */
   public CalendarView() {
     this(System.out);
+  }
+
+  @Override
+  public void displayMonthView(int year, int month, Map<LocalDate, List<Event>> events) {
+
+  }
+
+  @Override
+  public void displayCurrentCalendar(String calendarName, String timezone) {
+
+  }
+
+  @Override
+  public void displayAvailableCalendars(List<String> calendarNames) {
+
   }
 
   @Override
@@ -170,5 +186,15 @@ public class CalendarView implements CalendarViewInterface {
     } catch (IOException e) {
       throw new RuntimeException("Failed to write output", e);
     }
+  }
+
+  @Override
+  public void makeVisible() {
+
+  }
+
+  @Override
+  public void refresh() {
+
   }
 }

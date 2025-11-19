@@ -3,11 +3,15 @@ import calendar.model.Calendar;
 import calendar.model.MultiCalendarManager;
 import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
+import calendar.view.JframeCalendarView;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.HashMap;
 
 /**
  * Program runner.
@@ -50,7 +54,13 @@ public class CalendarRunner {
   }
 
   private static Readable verifyAndGetInput(String[] args) throws FileNotFoundException {
-    if (args.length == 0 || !args[0].equals("--mode") || args.length < 2) {
+
+    if (args.length == 0) {
+      runGuiMode();
+      return null;
+    }
+
+    if (!args[0].equals("--mode") || args.length < 2) {
       System.out.println("Error: Wrong usage of running Calendar. "
           + "Usage: java CalendarRunner --mode [interactive|headless] [command.txt]");
       return null;
@@ -71,6 +81,26 @@ public class CalendarRunner {
     } else {
       System.out.println("Error: Unknown mode " + mode);
       return null;
+    }
+  }
+
+  private static void runGuiMode() {
+    try {
+      MultiCalendarManagerInterface manager = new MultiCalendarManager();
+      JframeCalendarView view = new JframeCalendarView("Calendar Application");
+
+      String defaultTimeZone = ZoneId.systemDefault().getId();
+      manager.createCalendar("Default", defaultTimeZone);
+      manager.useThisCalendarEntity(manager.getCalendarEntity("Default"));
+      LocalDate today = LocalDate.now();
+      view.displayMonthView(today.getYear(), today.getMonthValue(), new HashMap<>());
+      view.displayCurrentCalendar("Default", defaultTimeZone);
+      view.displayWelcome();
+      view.setVisible(true);;
+
+      System.out.println("GUI display successfully.");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }
