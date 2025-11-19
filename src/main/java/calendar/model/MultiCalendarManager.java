@@ -59,7 +59,8 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
 
   @Override
   public CalendarEntityInterface editCalendar(String calendarName, String property,
-                                              String propertyValue) {
+                                              String propertyValue)
+      throws IllegalArgumentException {
     if (calendarName == null || calendarName.isEmpty()) {
       throw new IllegalArgumentException("calendar name cannot be empty");
     }
@@ -119,7 +120,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
   }
 
   @Override
-  public ZoneId getCalendarTimeZone(String calendarName) {
+  public ZoneId getCalendarTimeZone(String calendarName) throws IllegalArgumentException {
     if (!this.calendarManager.containsKey(calendarName.trim())) {
       throw new IllegalArgumentException("Calendar with name does not exist: " + calendarName);
     }
@@ -170,7 +171,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
 
   @Override
   public void copyEventsOnThatDay(String specificDate, String targetCalendarName,
-                                  String targetDay) {
+                                  String targetDay) throws IllegalArgumentException {
     if (specificDate == null || targetCalendarName == null || targetDay == null
         || specificDate.isEmpty() || targetCalendarName.isEmpty() || targetDay.isEmpty()) {
       throw new IllegalArgumentException("events day, target calendar name and target day"
@@ -202,7 +203,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
 
   @Override
   public void copyEventsBetweenDays(String startDate, String endDate, String targetCalendarName,
-                                    String targetDay) {
+                                    String targetDay) throws IllegalArgumentException {
     if (startDate == null || endDate == null || targetCalendarName == null || targetDay == null
         || startDate.isEmpty() || endDate.isEmpty() || targetCalendarName.isEmpty()
         || targetDay.isEmpty()) {

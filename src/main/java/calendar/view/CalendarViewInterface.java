@@ -1,5 +1,6 @@
 package calendar.view;
 
+import calendar.controller.Features;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import java.time.LocalDate;
@@ -105,4 +106,6 @@ public interface CalendarViewInterface {
    * Refresh the view with current data.
    */
   void refresh();
+
+  void addFeatures(Features feature);
 }

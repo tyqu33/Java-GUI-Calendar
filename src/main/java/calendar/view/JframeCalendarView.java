@@ -1,5 +1,6 @@
 package calendar.view;
 
+import calendar.controller.Features;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import java.awt.BorderLayout;
@@ -11,20 +12,24 @@ import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 /**
@@ -281,5 +286,111 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   @Override
   public void refresh() {
 
+  }
+
+  @Override
+  public void addFeatures(Features features) {
+    createCalendarButton.addActionListener(evt -> {
+      CreateCalendarDialog dialog = new CreateCalendarDialog(this, features);
+      dialog.go();
+      dialog.setVisible(true);
+    });
+
+    //    createEventButton.addActionListener(evt -> {
+    //      createSingleEventDialog dialog0 = new CreateSingleEventDialog(this, features);
+    //      dialog0.go();
+    //      dialog0.setVisible(true);
+    //    });
+
+
+  }
+
+  private class CreateCalendarDialog extends JDialog {
+    private JTextField inputCalendarName;
+    private JComboBox<String> inputTimezone;
+
+    public CreateCalendarDialog(JFrame parent, Features features) {
+      super(parent, "Create Calendar", true);
+      setLayout(new BorderLayout(10, 10));
+      JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+      panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+      // panel.setLayout(new GridLayout(3, 2, 10, 10));
+      // setSize(300, 300);
+      // setLocationRelativeTo(parent);
+      //      panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      //      panel.add(inputCalendarName);
+      //      panel.add(inputTimezone);
+      // add(panel, BorderLayout.CENTER);
+
+      panel.add(new JLabel("Calendar Name:"));
+      this.inputCalendarName = new JTextField();
+      panel.add(this.inputCalendarName);
+
+      panel.add(new JLabel("Time Zone:"));
+      Set<String> zoneIdSet = ZoneId.getAvailableZoneIds();
+      String[] zoneIds = zoneIdSet.stream().sorted().toArray(String[]::new);
+      this.inputTimezone = new JComboBox<>(zoneIds);
+      this.inputTimezone.setSelectedItem(ZoneId.systemDefault().getId());
+      panel.add(this.inputTimezone);
+      add(panel, BorderLayout.CENTER);
+
+      JPanel buttonPanel = new JPanel();
+      JButton confirmButton = new JButton("Confirm");
+      JButton cancelButton = new JButton("Cancel");
+
+      confirmButton.addActionListener(ev -> {
+        String calendarName = inputCalendarName.getText();
+        String timeZone = inputTimezone.getSelectedItem().toString();
+        // remember to TEST if calendar name is null or empty!
+        features.createCalendar(calendarName, timeZone);
+        dispose();
+      });
+
+      cancelButton.addActionListener(ev -> {
+        dispose();
+      });
+
+      buttonPanel.add(confirmButton);
+      buttonPanel.add(cancelButton);
+      add(buttonPanel, BorderLayout.SOUTH);
+      setLocationRelativeTo(getParent());
+      pack();
+    }
+
+    private void go() {
+    }
+  }
+
+  private class CreateSingleEventDialog extends JDialog {
+    private JTextField inputEventName;
+    private JTextField inputYear;
+    private JComboBox<String> inputMonth;
+    private JComboBox<String> inputDay;
+
+    public CreateSingleEventDialog(JFrame parent, Features features) {
+      super(parent, "Create Single Event", true);
+      setLayout(new BorderLayout(10, 10));
+      JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+      panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+
+      panel.add(new JLabel("Event Name:"));
+      this.inputEventName = new JTextField();
+      panel.add(this.inputEventName);
+
+
+      JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      datePanel.setBorder(BorderFactory.createTitledBorder("Date"));
+      this.inputYear = new JTextField();
+      datePanel.add(this.inputYear);
+
+      String[] months = {"January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"};
+      inputMonth = new JComboBox<>(months);
+      inputMonth.setSelectedIndex(LocalDateTime.now().getMonthValue() - 1);
+
+      pack();
+    }
+
+    private void go() {}
   }
 }

@@ -1,4 +1,6 @@
 import calendar.controller.CalendarController;
+import calendar.controller.Features;
+import calendar.controller.GuiCalendarController;
 import calendar.model.Calendar;
 import calendar.model.MultiCalendarManager;
 import calendar.model.MultiCalendarManagerInterface;
@@ -89,12 +91,14 @@ public class CalendarRunner {
       MultiCalendarManagerInterface manager = new MultiCalendarManager();
       JframeCalendarView view = new JframeCalendarView("Calendar Application");
 
-      String defaultTimeZone = ZoneId.systemDefault().getId();
-      manager.createCalendar("Default", defaultTimeZone);
-      manager.useThisCalendarEntity(manager.getCalendarEntity("Default"));
-      LocalDate today = LocalDate.now();
-      view.displayMonthView(today.getYear(), today.getMonthValue(), new HashMap<>());
-      view.displayCurrentCalendar("Default", defaultTimeZone);
+      //      String defaultTimeZone = ZoneId.systemDefault().getId();
+      GuiCalendarController calendarController = new GuiCalendarController(manager, view);
+      calendarController.go();
+      //      manager.createCalendar("Default", defaultTimeZone);
+      //      manager.useThisCalendarEntity(manager.getCalendarEntity("Default"));
+      //      LocalDate today = LocalDate.now();
+      //      view.displayMonthView(today.getYear(), today.getMonthValue(), new HashMap<>());
+      //      view.displayCurrentCalendar("Default", defaultTimeZone);
       view.displayWelcome();
       view.setVisible(true);;
 

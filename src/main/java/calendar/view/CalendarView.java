@@ -1,5 +1,6 @@
 package calendar.view;
 
+import calendar.controller.Features;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import java.io.IOException;
@@ -195,6 +196,11 @@ public class CalendarView implements CalendarViewInterface {
 
   @Override
   public void refresh() {
+
+  }
+
+  @Override
+  public void addFeatures(Features feature) {
 
   }
 }
