@@ -1,5 +1,6 @@
 package calendar.controller;
 
+import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.EventInterface;
 import calendar.model.MultiCalendarManagerInterface;
@@ -7,6 +8,8 @@ import calendar.view.CalendarViewInterface;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class GuiCalendarController implements Features {
@@ -48,21 +51,31 @@ public class GuiCalendarController implements Features {
   }
 
   @Override
+  public Collection<String> getAllCalendarNames() {
+    Collection<String> calendarNames = new ArrayList<>();
+    for (CalendarEntityInterface entity : model.getAllCalendars()) {
+      calendarNames.add(entity.getCalendarName());
+    }
+    return calendarNames;
+  }
+
+  @Override
   public void switchCalendar(String calendarName) {
     CalendarEntityInterface entity = model.getCalendarEntity(calendarName);
     if (entity != null) {
       model.useThisCalendarEntity(entity);
+      LocalDate oldToday = LocalDate.now();
+      ZoneId oldZoneId = ZoneId.systemDefault();
+      LocalDate today = oldToday.atStartOfDay(oldZoneId)
+          .withZoneSameInstant(entity.getTimeZone()).toLocalDate();
+      view.displayMonthView(today.getYear(), today.getMonthValue(), new HashMap<>());
+      view.displayCurrentCalendar(entity.getCalendarName(), entity.getTimeZone().toString());
     }
   }
 
   @Override
-  public void editCalendarTimezone(String calendarName, String timeZone) {
-
-  }
-
-  @Override
-  public void editCalendarName(String calendarName, String timeZone) {
-
+  public void editCalendarProperty(String calendarName, String propertyName, String propertyValue) {
+    model.editCalendar(calendarName, propertyName, propertyValue);
   }
 
   @Override

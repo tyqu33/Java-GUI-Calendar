@@ -14,6 +14,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -317,6 +318,11 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
         }
       }
     }
+  }
+
+  @Override
+  public Collection<CalendarEntityInterface> getAllCalendars() {
+    return this.calendarManager.values();
   }
 
   private void verifyInputAndGetCalendar(String targetCalendarName)

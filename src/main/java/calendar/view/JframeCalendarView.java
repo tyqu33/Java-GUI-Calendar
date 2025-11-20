@@ -36,6 +36,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 /**
  * Swing-based graphical user interface for the calendar application.
@@ -59,6 +61,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private JButton exportButton;
   private JTextArea eventDisplayArea;
   //private static final Color LIGHT_BLUE_GRAY = new Color(230, 235, 240);
+  private boolean readingCalendarList = false;
 
   /**
    * Constructor for SwingCalendarView.
@@ -95,8 +98,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
     calendarSelector = new JComboBox<>();
     calendarSelector.addItem("Default");
-    calendarSelector.addItem("Work");
-    calendarSelector.addItem("Personal");
+    // calendarSelector.addItem("Work");
+    // calendarSelector.addItem("Personal");
     createCalendarButton = new JButton("New Calendar");
 
     createEventButton = new JButton("Create Event");
@@ -344,11 +347,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   @Override
   public void displayWelcome() {
     /**JOptionPane.showMessageDialog(this,
-        "Welcome to Virtual Calendar Application!\n\n"
-            + "Select a date to view events\n"
-            + "Click 'Create Event' to add new events",
-        "Welcome",
-        JOptionPane.INFORMATION_MESSAGE);**/
+     "Welcome to Virtual Calendar Application!\n\n"
+     + "Select a date to view events\n"
+     + "Click 'Create Event' to add new events",
+     "Welcome",
+     JOptionPane.INFORMATION_MESSAGE);**/
   }
 
   @Override
@@ -377,6 +380,49 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     //      dialog0.setVisible(true);
     //    });
 
+    // scroll down to show all calendar names
+    calendarSelector.addPopupMenuListener(new PopupMenuListener() {
+      @Override
+      public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+        readingCalendarList = true;
+        try {
+          calendarSelector.removeAllItems();
+          calendarSelector.addItem("Default");
+          for (String calendarName : features.getAllCalendarNames()) {
+            if (!calendarName.equals("Default")) {
+              calendarSelector.addItem(calendarName);
+            }
+          }
+          Object currentSelection = calendarSelector.getSelectedItem();
+          if (currentSelection != null) {
+            calendarSelector.setSelectedItem(currentSelection);
+          }
+        } finally {
+          readingCalendarList = false;
+        }
+      }
+
+      @Override
+      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+
+      }
+
+      @Override
+      public void popupMenuCanceled(PopupMenuEvent e) {
+
+      }
+
+    });
+    // click on the scroll down list and select one calendar name, meaning using this calendar
+    calendarSelector.addActionListener(evt -> {
+      if (readingCalendarList) {
+        return;
+      }
+      String name = (String) calendarSelector.getSelectedItem();
+      if (name != null) {
+        features.switchCalendar(name);
+      }
+    });
 
   }
 
@@ -389,13 +435,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       setLayout(new BorderLayout(10, 10));
       JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
       panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
-      // panel.setLayout(new GridLayout(3, 2, 10, 10));
-      // setSize(300, 300);
-      // setLocationRelativeTo(parent);
-      //      panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      //      panel.add(inputCalendarName);
-      //      panel.add(inputTimezone);
-      // add(panel, BorderLayout.CENTER);
 
       panel.add(new JLabel("Calendar Name:"));
       this.inputCalendarName = new JTextField();
@@ -466,6 +505,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       pack();
     }
 
-    private void go() {}
+    private void go() {
+    }
   }
 }

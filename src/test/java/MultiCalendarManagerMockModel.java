@@ -1,6 +1,8 @@
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.model.MultiCalendarManagerInterface;
 import java.time.ZoneId;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This is a mock model to replace the MultiCalendarManager for testing the controller in isolation.
@@ -63,5 +65,10 @@ public class MultiCalendarManagerMockModel implements MultiCalendarManagerInterf
   public void copyEventsBetweenDays(String startDate, String endDate, String targetCalendarName,
                                     String targetDay) {
 
+  }
+
+  @Override
+  public Collection<CalendarEntityInterface> getAllCalendars() {
+    return List.of();
   }
 }

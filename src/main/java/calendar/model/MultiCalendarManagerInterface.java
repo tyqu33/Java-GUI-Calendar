@@ -1,7 +1,9 @@
 package calendar.model;
 
+import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import java.time.ZoneId;
+import java.util.Collection;
 
 /**
  * This interface contains necessary operations that a Multi Calendar Manager should support.
@@ -90,4 +92,11 @@ public interface MultiCalendarManagerInterface {
    */
   void copyEventsBetweenDays(String startDate, String endDate, String targetCalendarName,
                              String targetDay);
+
+  /**
+   * Get all the calendar entities in the manager.
+   *
+   * @return the collection of calendar entities
+   */
+  Collection<CalendarEntityInterface> getAllCalendars();
 }
