@@ -107,5 +107,10 @@ public interface CalendarViewInterface {
    */
   void refresh();
 
+  /**
+   * Register callback features with the view.
+   *
+   * @param feature the Features implementation handle user interaction callbacks from view
+   */
   void addFeatures(Features feature);
 }

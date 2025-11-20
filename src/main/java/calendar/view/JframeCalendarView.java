@@ -9,6 +9,10 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -26,6 +30,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -49,6 +54,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private JButton prevMonthButton;
   private JButton nextMonthButton;
   private JButton createEventButton;
+  private JButton createEventSeriesButton;
   private JButton createCalendarButton;
   private JButton exportButton;
   private JTextArea eventDisplayArea;
@@ -94,6 +100,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     createCalendarButton = new JButton("New Calendar");
 
     createEventButton = new JButton("Create Event");
+    createEventSeriesButton = new JButton("Create EventSeries");
     exportButton = new JButton("Export");
 
     calendarGridPanel = new JPanel(new GridLayout(7, 7, 5, 5));
@@ -118,17 +125,17 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     topPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
 
     JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    //navigationPanel.setBackground(LIGHT_BLUE_GRAY);
     navigationPanel.add(prevMonthButton);
     navigationPanel.add(monthYearLabel);
     navigationPanel.add(nextMonthButton);
-    //navigationPanel.setBackground(LIGHT_BLUE_GRAY);
     topPanel.add(navigationPanel, BorderLayout.CENTER);
 
     JPanel leftControlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
+    //leftControlPanel.setBackground(LIGHT_BLUE_GRAY);
     leftControlPanel.add(new JLabel("Calendar: Default"));
     leftControlPanel.add(new JLabel("Switch to:"));
     leftControlPanel.add(calendarSelector);
-    //leftControlPanel.setBackground(LIGHT_BLUE_GRAY);
     topPanel.add(leftControlPanel, BorderLayout.WEST);
 
     JPanel rightControlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -138,21 +145,40 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     JPanel leftPanel = new JPanel();
     leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
     leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    //leftPanel.setBackground(LIGHT_BLUE_GRAY);
 
     leftPanel.add(Box.createRigidArea(new Dimension(0, 35)));
 
-    JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    actionPanel.add(createEventButton);
-    actionPanel.add(exportButton);
+    JPanel actionPanel = new JPanel();
+    actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
+    //actionPanel.setBackground(LIGHT_BLUE_GRAY);
 
     actionPanel.setAlignmentX(0.0f);
+
+    createEventButton.setAlignmentX(0.0f);
+    actionPanel.add(createEventButton);
+    actionPanel.add(Box.createVerticalStrut(5));
+
+    createEventSeriesButton.setAlignmentX(0.0f);
+    actionPanel.add(createEventSeriesButton);
+    actionPanel.add(Box.createVerticalStrut(5));
+
+    exportButton.setAlignmentX(0.0f);
+    actionPanel.add(exportButton);
+
     leftPanel.add(actionPanel);
+
+    leftPanel.add(Box.createVerticalStrut(10));
     leftPanel.add(new JScrollPane(eventDisplayArea));
 
     buildCalendarGrid();
+    //calendarGridPanel.setBackground(LIGHT_BLUE_GRAY);
+
     add(topPanel, BorderLayout.NORTH);
     add(leftPanel, BorderLayout.WEST);
     add(calendarGridPanel, BorderLayout.CENTER);
+
+    //this.getContentPane().setBackground(LIGHT_BLUE_GRAY);
 
     updateMonthYearLabel();
   }
@@ -225,67 +251,116 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
   @Override
   public void displayMonthView(int year, int month, Map<LocalDate, List<Event>> events) {
-
+    this.currentYear = year;
+    this.currentMonth = month;
+    updateMonthYearLabel();
+    buildCalendarGrid();
   }
 
   @Override
   public void displayCurrentCalendar(String calendarName, String timezone) {
-
+    currentCalendarLabel.setText("Calendar: " + calendarName + " (" + timezone + ")");
   }
 
   @Override
   public void displayAvailableCalendars(List<String> calendarNames) {
-
+    calendarSelector.removeAllItems();
+    for (String name : calendarNames) {
+      calendarSelector.addItem(name);
+    }
   }
 
   @Override
   public void displayEventsOnDate(List<Event> events, LocalDate date) {
+    if (events == null || events.isEmpty()) {
+      eventDisplayArea.setText("No events on " + date);
+      return;
+    }
 
+    StringBuilder sb = new StringBuilder();
+    sb.append("Events on ").append(date).append(":\n\n");
+    for (Event event : events) {
+      sb.append("• ").append(event.getSubject()).append("\n");
+      sb.append("  Time: ");
+
+      if (event.isAllDayEvent()) {
+        sb.append("All Day");
+      } else {
+        sb.append(event.getStartDateTime().toLocalTime());
+        if (event.getEndDateTime() != null) {
+          sb.append(" - ").append(event.getEndDateTime().toLocalTime());
+        }
+      }
+      sb.append("\n");
+
+      if (event.getLocation() != null && !event.getLocation().isEmpty()) {
+        sb.append("  Location: ").append(event.getLocation()).append("\n");
+      }
+      sb.append("\n");
+    }
+
+    eventDisplayArea.setText(sb.toString());
   }
 
   @Override
   public void displayEventsBetween(List<Event> events, LocalDateTime start, LocalDateTime end) {
-
+    //
   }
 
   @Override
   public void displayUserStatus(UserStatus status) {
-
+    //
   }
 
   @Override
   public void exportCalendar(String content, String fileName) {
-
+    try {
+      Path filePath = Paths.get(fileName);
+      Files.write(filePath, content.getBytes());
+      displaySuccess("Exported to: " + filePath.toAbsolutePath());
+    } catch (IOException e) {
+      displayError("Export failed: " + e.getMessage());
+    }
   }
 
   @Override
   public void displaySuccess(String message) {
-
+    JOptionPane.showMessageDialog(this, message, "Success",
+        JOptionPane.INFORMATION_MESSAGE);
   }
 
   @Override
   public void displayError(String error) {
-
+    JOptionPane.showMessageDialog(this, error, "Error",
+        JOptionPane.ERROR_MESSAGE);
   }
 
   @Override
   public void displayWarning(String warning) {
-
+    JOptionPane.showMessageDialog(this, warning, "Warning",
+        JOptionPane.WARNING_MESSAGE);
   }
 
   @Override
   public void displayWelcome() {
-
+    /**JOptionPane.showMessageDialog(this,
+        "Welcome to Virtual Calendar Application!\n\n"
+            + "Select a date to view events\n"
+            + "Click 'Create Event' to add new events",
+        "Welcome",
+        JOptionPane.INFORMATION_MESSAGE);**/
   }
 
   @Override
   public void makeVisible() {
-
+    setVisible(true);
   }
 
   @Override
   public void refresh() {
-
+    buildCalendarGrid();
+    revalidate();
+    repaint();
   }
 
   @Override
