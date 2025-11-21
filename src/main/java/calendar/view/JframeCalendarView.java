@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
@@ -25,16 +26,21 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
@@ -44,6 +50,7 @@ import javax.swing.event.PopupMenuListener;
  * Provides a month view and interactive controls for managing calendars and events.
  */
 public class JframeCalendarView extends JFrame implements CalendarViewInterface {
+  private Features features;
 
   private int currentYear;
   private int currentMonth;
@@ -154,6 +161,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
     JPanel actionPanel = new JPanel();
     actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
+    actionPanel.setAlignmentX(0.0f);
     //actionPanel.setBackground(LIGHT_BLUE_GRAY);
 
     actionPanel.setAlignmentX(0.0f);
@@ -228,7 +236,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
           if (date.equals(LocalDate.now())) {
             dayButton.setBackground(Color.YELLOW);
           }
-
+          dayButton.addActionListener(e -> {
+            if (this.features != null) {
+              features.viewEventsOnDate(date);
+            }
+          });
 
           dayCounter++;
         }
@@ -368,6 +380,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
   @Override
   public void addFeatures(Features features) {
+    this.features = features;
+
     createCalendarButton.addActionListener(evt -> {
       CreateCalendarDialog dialog = new CreateCalendarDialog(this, features);
       dialog.go();
@@ -402,6 +416,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
         }
       }
 
+
+
       @Override
       public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
 
@@ -413,6 +429,19 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       }
 
     });
+
+    // Create Event button
+    createEventButton.addActionListener(evt -> {
+      CreateSingleEventDialog dialog = new CreateSingleEventDialog(this, features);
+      dialog.setVisible(true);
+    });
+
+    // Create Event Series button
+    createEventSeriesButton.addActionListener(evt -> {
+      CreateEventSeriesDialog dialog = new CreateEventSeriesDialog(this, features);
+      dialog.setVisible(true);
+    });
+
     // click on the scroll down list and select one calendar name, meaning using this calendar
     calendarSelector.addActionListener(evt -> {
       if (readingCalendarList) {
@@ -423,6 +452,54 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
         features.switchCalendar(name);
       }
     });
+
+    // previous month
+    prevMonthButton.addActionListener(evt -> {
+      if (currentMonth == 1) {
+        currentMonth = 12;
+        currentYear--;
+      } else {
+        currentMonth--;
+      }
+      features.navigateToMonth(currentYear, currentMonth);
+    });
+
+    // next month
+    nextMonthButton.addActionListener(evt -> {
+      if (currentMonth == 12) {
+        currentMonth = 1;
+        currentYear++;
+      } else {
+        currentMonth++;
+      }
+      features.navigateToMonth(currentYear, currentMonth);
+    });
+
+    // export
+    exportButton.addActionListener(evt -> {
+      String[] options = {"CSV", "iCal"};
+      int choice = JOptionPane.showOptionDialog(this,
+          "Select export format:",
+          "Export Calendar",
+          JOptionPane.DEFAULT_OPTION,
+          JOptionPane.QUESTION_MESSAGE,
+          null,
+          options,
+          options[0]);
+
+      if (choice == -1) {
+        return; // User cancelled
+      }
+
+      String extension = (choice == 0) ? ".csv" : ".ical";
+      String fileName = JOptionPane.showInputDialog(this,
+          "Enter file name:",
+          "calendar" + extension);
+      if (fileName != null && !fileName.trim().isEmpty()) {
+        features.exportCalendar(fileName.trim());
+      }
+    });
+
 
   }
 
@@ -506,6 +583,238 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     }
 
     private void go() {
+    }
+  }
+
+  /**
+   * Dialog for creating a recurring event series.
+   */
+  private class CreateEventSeriesDialog extends JDialog {
+    private JTextField inputSubject;
+    private JTextField inputStartDate;
+    private JTextField inputStartTime;
+    private JTextField inputEndTime;
+    private JCheckBox allDayCheckbox;
+    private JTextField inputDescription;
+    private JTextField inputLocation;
+    private JComboBox<String> inputStatus;
+
+    // Recurrence fields
+    private JCheckBox[] weekdayCheckboxes;
+    private JRadioButton occurrencesRadio;
+    private JRadioButton endDateRadio;
+    private JSpinner occurrencesSpinner;
+    private JTextField endDateField;
+
+    public CreateEventSeriesDialog(JFrame parent, Features features) {
+      super(parent, "Create Event Series", true);
+      setLayout(new BorderLayout(10, 10));
+
+      JPanel mainPanel = new JPanel();
+      mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+      mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+
+      // Basic Info Panel
+      JPanel basicPanel = new JPanel(new GridLayout(8, 2, 10, 10));
+      basicPanel.setBorder(BorderFactory.createTitledBorder("Event Details"));
+
+      basicPanel.add(new JLabel("Subject:"));
+      inputSubject = new JTextField();
+      basicPanel.add(inputSubject);
+
+      basicPanel.add(new JLabel("Start Date (YYYY-MM-DD):"));
+      inputStartDate = new JTextField(LocalDate.now().toString());
+      basicPanel.add(inputStartDate);
+
+      basicPanel.add(new JLabel("Start Time (HH:MM):"));
+      inputStartTime = new JTextField("09:00");
+      basicPanel.add(inputStartTime);
+
+      basicPanel.add(new JLabel("End Time (HH:MM):"));
+      inputEndTime = new JTextField("10:00");
+      basicPanel.add(inputEndTime);
+
+      basicPanel.add(new JLabel("All Day Event:"));
+      allDayCheckbox = new JCheckBox();
+      allDayCheckbox.addActionListener(e -> {
+        boolean allDay = allDayCheckbox.isSelected();
+        inputStartTime.setEnabled(!allDay);
+        inputEndTime.setEnabled(!allDay);
+      });
+      basicPanel.add(allDayCheckbox);
+
+      basicPanel.add(new JLabel("Description:"));
+      inputDescription = new JTextField();
+      basicPanel.add(inputDescription);
+
+      basicPanel.add(new JLabel("Location:"));
+      inputLocation = new JTextField();
+      basicPanel.add(inputLocation);
+
+      basicPanel.add(new JLabel("Status:"));
+      inputStatus = new JComboBox<>(new String[] {"public", "private"});
+      basicPanel.add(inputStatus);
+
+      mainPanel.add(basicPanel);
+      mainPanel.add(Box.createVerticalStrut(10));
+
+      // Recurrence Panel
+      JPanel recurrencePanel = new JPanel();
+      recurrencePanel.setLayout(new BoxLayout(recurrencePanel, BoxLayout.Y_AXIS));
+      recurrencePanel.setBorder(BorderFactory.createTitledBorder("Recurrence"));
+
+      // Weekdays
+      JPanel weekdaysPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      weekdaysPanel.add(new JLabel("Repeat on:"));
+
+      String[] dayLabels = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+      weekdayCheckboxes = new JCheckBox[7];
+      for (int i = 0; i < 7; i++) {
+        weekdayCheckboxes[i] = new JCheckBox(dayLabels[i]);
+        weekdaysPanel.add(weekdayCheckboxes[i]);
+      }
+      recurrencePanel.add(weekdaysPanel);
+
+      // End condition
+      JPanel endConditionPanel = new JPanel();
+      endConditionPanel.setLayout(new BoxLayout(endConditionPanel, BoxLayout.Y_AXIS));
+
+      ButtonGroup endGroup = new ButtonGroup();
+
+      JPanel occurrencesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      occurrencesRadio = new JRadioButton("End after");
+      occurrencesSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
+      occurrencesPanel.add(occurrencesRadio);
+      occurrencesPanel.add(occurrencesSpinner);
+      occurrencesPanel.add(new JLabel("occurrences"));
+      endGroup.add(occurrencesRadio);
+
+      JPanel endDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      endDateRadio = new JRadioButton("End by date");
+      endDateField = new JTextField(LocalDate.now().plusMonths(1).toString(), 10);
+      endDatePanel.add(endDateRadio);
+      endDatePanel.add(endDateField);
+      endGroup.add(endDateRadio);
+
+      occurrencesRadio.setSelected(true);
+
+      // Enable/disable based on selection
+      occurrencesRadio.addActionListener(e -> {
+        occurrencesSpinner.setEnabled(true);
+        endDateField.setEnabled(false);
+      });
+
+      endDateRadio.addActionListener(e -> {
+        occurrencesSpinner.setEnabled(false);
+        endDateField.setEnabled(true);
+      });
+
+      endDateField.setEnabled(false);
+
+      endConditionPanel.add(occurrencesPanel);
+      endConditionPanel.add(endDatePanel);
+      recurrencePanel.add(endConditionPanel);
+
+      mainPanel.add(recurrencePanel);
+
+      JScrollPane scrollPane = new JScrollPane(mainPanel);
+      add(scrollPane, BorderLayout.CENTER);
+
+      // Buttons
+      JPanel buttonPanel = new JPanel();
+      JButton confirmButton = new JButton("Create");
+      JButton cancelButton = new JButton("Cancel");
+
+      confirmButton.addActionListener(ev -> {
+        try {
+          // Validate subject
+          String subject = inputSubject.getText().trim();
+          if (subject.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Subject cannot be empty!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+
+          // Get weekdays
+          StringBuilder weekdays = new StringBuilder();
+          String[] weekdayCodes = {"M", "T", "W", "R", "F", "S", "U"};
+          for (int i = 0; i < 7; i++) {
+            if (weekdayCheckboxes[i].isSelected()) {
+              weekdays.append(weekdayCodes[i]);
+            }
+          }
+
+          if (weekdays.length() == 0) {
+            JOptionPane.showMessageDialog(this,
+                "Please select at least one day!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+
+          // Get dates and times
+          LocalDate startDate = LocalDate.parse(inputStartDate.getText().trim());
+
+          String startDateTime;
+          String endDateTime;
+
+          if (allDayCheckbox.isSelected()) {
+            startDateTime = startDate.toString();
+            endDateTime = null;
+          } else {
+            LocalTime startTime = LocalTime.parse(inputStartTime.getText().trim());
+            LocalTime endTime = LocalTime.parse(inputEndTime.getText().trim());
+
+            startDateTime = startDate.atTime(startTime).toString();
+            endDateTime = startDate.atTime(endTime).toString();
+          }
+
+          String description = inputDescription.getText().trim();
+          String location = inputLocation.getText().trim();
+          String status = inputStatus.getSelectedItem().toString();
+
+          // Get recurrence end condition
+          int occurrences = 0;
+          String seriesEndDate = null;
+          if (occurrencesRadio.isSelected()) {
+            occurrences = (Integer) occurrencesSpinner.getValue();
+          } else {
+            seriesEndDate = endDateField.getText().trim();
+            // Validate end date format
+            LocalDate.parse(seriesEndDate);
+          }
+
+          // Call controller method to create event series
+          features.createEventSeries(
+              subject,
+              startDateTime,
+              endDateTime,
+              description.isEmpty() ? null : description,
+              location.isEmpty() ? null : location,
+              status,
+              weekdays.toString(),
+              occurrences,
+              seriesEndDate
+          );
+          dispose();
+
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(this,
+              "Invalid input: " + ex.getMessage(),
+              "Error",
+              JOptionPane.ERROR_MESSAGE);
+        }
+      });
+      cancelButton.addActionListener(ev -> dispose());
+
+      buttonPanel.add(confirmButton);
+      buttonPanel.add(cancelButton);
+      add(buttonPanel, BorderLayout.SOUTH);
+
+      setLocationRelativeTo(getParent());
+      setSize(500, 600);
     }
   }
 }
