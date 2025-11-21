@@ -1,6 +1,7 @@
 package calendar.view;
 
 import calendar.controller.Features;
+import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import java.awt.BorderLayout;
@@ -19,6 +20,8 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,6 +43,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.PopupMenuEvent;
@@ -69,6 +73,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private JTextArea eventDisplayArea;
   //private static final Color LIGHT_BLUE_GRAY = new Color(230, 235, 240);
   private boolean readingCalendarList = false;
+
+  public static final String[] months = {"January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"};
+  public static final int START_YEAR = 1950;
+  public static final int END_YEAR = 2150;
 
   /**
    * Constructor for SwingCalendarView.
@@ -417,7 +426,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       }
 
 
-
       @Override
       public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
 
@@ -554,9 +562,14 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
   private class CreateSingleEventDialog extends JDialog {
     private JTextField inputEventName;
-    private JTextField inputYear;
+    private JComboBox<Integer> inputYear;
     private JComboBox<String> inputMonth;
-    private JComboBox<String> inputDay;
+    private JComboBox<Integer> inputDay;
+    private JSpinner startTimeSpinner;
+    private JSpinner endTimeSpinner;
+    private JTextField inputDescription;
+    private JTextField inputLocation;
+    private JComboBox<String> inputEventStatus;
 
     public CreateSingleEventDialog(JFrame parent, Features features) {
       super(parent, "Create Single Event", true);
@@ -571,19 +584,132 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
       JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
       datePanel.setBorder(BorderFactory.createTitledBorder("Date"));
-      this.inputYear = new JTextField();
+      int currentYear = LocalDate.now().getYear();
+      Integer[] years = new Integer[END_YEAR - START_YEAR];
+      for (int i = 0; i < END_YEAR - START_YEAR; i++) {
+        years[i] = i + START_YEAR;
+      }
+      this.inputYear = new JComboBox<>(years);
+      this.inputYear.setSelectedItem(currentYear);
+
+      this.inputMonth = new JComboBox<>(months);
+      this.inputMonth.setSelectedIndex(LocalDateTime.now().getMonthValue() - 1);
+
+      this.inputDay = new JComboBox<>();
+      getDayOptions(this.inputYear, this.inputMonth, this.inputDay);
+      inputYear.addActionListener(
+          e -> getDayOptions(this.inputYear, this.inputMonth, this.inputDay));
+      inputMonth.addActionListener(
+          e -> getDayOptions(this.inputYear, this.inputMonth, this.inputDay));
+
       datePanel.add(this.inputYear);
+      datePanel.add(this.inputMonth);
+      datePanel.add(this.inputDay);
+      panel.add(datePanel);
 
-      String[] months = {"January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"};
-      inputMonth = new JComboBox<>(months);
-      inputMonth.setSelectedIndex(LocalDateTime.now().getMonthValue() - 1);
+      JPanel startPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      startPanel.setBorder(BorderFactory.createTitledBorder("Start Time:"));
+      startTimeSpinner = createTimeSpinner();
+      startPanel.add(startTimeSpinner);
+      panel.add(startPanel);
 
+      JPanel endPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      endPanel.setBorder(BorderFactory.createTitledBorder("End Time:"));
+      endTimeSpinner = createTimeSpinner();
+      endPanel.add(endTimeSpinner);
+      panel.add(endPanel);
+
+      panel.add(new JLabel("Description:"));
+      this.inputDescription = new JTextField();
+      panel.add(this.inputDescription);
+
+      panel.add(new JLabel("Location::"));
+      this.inputLocation = new JTextField();
+      panel.add(this.inputLocation);
+
+      String[] eventStatusList = new String[EventStatus.values().length];
+      for (int index = 0; index < EventStatus.values().length; index++) {
+        eventStatusList[index] = EventStatus.values()[index].toString();
+      }
+      this.inputEventStatus = new JComboBox<>(eventStatusList);
+      this.inputEventStatus.setSelectedItem("PUBLIC");
+
+
+      add(panel, BorderLayout.CENTER);
+
+      JPanel buttonPanel = new JPanel();
+      JButton createButton = new JButton("Create");
+      JButton cancelButton = new JButton("Cancel");
+
+      createButton.addActionListener(e -> {
+        String eventName = this.inputEventName.getText();
+        LocalDateTime startDateTime =
+            getInputDateTime(this.startTimeSpinner, this.inputYear, this.inputMonth, this.inputDay);
+        LocalDateTime endDateTime =
+            getInputDateTime(this.endTimeSpinner, this.inputYear, this.inputMonth, this.inputDay);
+        String description = this.inputDescription.getText();
+        String location = this.inputLocation.getText();
+        String eventStatus = this.inputEventStatus.getSelectedItem().toString();
+        features.createEvent(eventName, startDateTime.toString(), endDateTime.toString(),
+            description, location, eventStatus);
+        dispose();
+      });
+      cancelButton.addActionListener(e -> dispose());
+
+      buttonPanel.add(createButton);
+      buttonPanel.add(cancelButton);
+      add(buttonPanel, BorderLayout.SOUTH);
+      setLocationRelativeTo(getParent());
       pack();
     }
 
     private void go() {
     }
+  }
+
+  private void getDayOptions(JComboBox<Integer> inputYear,
+                             JComboBox<String> inputMonth,
+                             JComboBox<Integer> inputDay) {
+    Integer year = (Integer) inputYear.getSelectedItem();
+    int month = inputMonth.getSelectedIndex() + 1;
+
+    Object defaultDay = inputDay.getSelectedItem();
+    int daysInThisMonth = YearMonth.of(year, month).lengthOfMonth();
+    inputDay.removeAllItems();
+    for (int i = 1; i <= daysInThisMonth; i++) {
+      inputDay.addItem(i);
+    }
+    if (defaultDay != null && (Integer) defaultDay <= daysInThisMonth) {
+      inputDay.setSelectedItem(defaultDay);
+    }
+  }
+
+  private JSpinner createTimeSpinner() {
+    SpinnerDateModel model = new SpinnerDateModel();
+    model.setCalendarField(Calendar.MINUTE);
+
+    JSpinner spinner = new JSpinner(model);
+    JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, "HH:mm");
+    spinner.setEditor(editor);
+
+    spinner.setPreferredSize(new Dimension(80, 30));
+    return spinner;
+  }
+
+  private LocalDateTime getInputDateTime(JSpinner spinner,
+                                         JComboBox<Integer> inputYear,
+                                         JComboBox<String> inputMonth,
+                                         JComboBox<Integer> inputDay) {
+    int year = (Integer) inputYear.getSelectedItem();
+    int month = (Integer) inputMonth.getSelectedIndex() + 1;
+    int day = (Integer) inputDay.getSelectedItem();
+
+    Date date = (Date) spinner.getValue();
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(date);
+    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+    int minute = calendar.get(Calendar.MINUTE);
+    return LocalDateTime.of(year, month, day, hour, minute);
   }
 
   /**
