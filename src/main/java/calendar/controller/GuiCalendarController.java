@@ -4,6 +4,7 @@ import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
 import calendar.event.EventInterface;
+import calendar.model.Calendar;
 import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarViewInterface;
 import java.io.IOException;
@@ -52,11 +53,23 @@ public class GuiCalendarController implements Features {
   @Override
   public void createEvent(String subject, String startDateTime, String endDateTime,
                           String description, String location, String eventStatus) {
-    EventInterface event = model.getCurrentCalendarEntity().getCalendar().createSingleEvent(
-        subject, startDateTime, endDateTime, description, location, eventStatus, null);
-    event.editDescription(description);
-    event.editLocation(location);
-    event.editEventStatus(eventStatus);
+
+    CalendarEntityInterface entity = model.getCurrentCalendarEntity();
+    if (entity == null) {
+      view.displayError("No calendar selected. Please select or create a calendar first.");
+      return;
+    }
+    try {
+      EventInterface event = entity.getCalendar().createSingleEvent(
+          subject, startDateTime, endDateTime, description, location, eventStatus, null);
+      event.editDescription(description);
+      event.editLocation(location);
+      event.editEventStatus(eventStatus);
+      view.displaySuccess("Event series '" + subject + "' created successfully!");
+      refreshCurrentMonth();
+    } catch (IllegalArgumentException e) {
+      view.displayError("Failed to create single event: " + e.getMessage());
+    }
   }
 
   @Override

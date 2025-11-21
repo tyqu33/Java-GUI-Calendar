@@ -6,6 +6,7 @@ import calendar.enums.UserStatus;
 import calendar.event.Event;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -574,16 +575,19 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     public CreateSingleEventDialog(JFrame parent, Features features) {
       super(parent, "Create Single Event", true);
       setLayout(new BorderLayout(10, 10));
-      JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+      JPanel panel = new JPanel();
+      panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
       panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
 
-      panel.add(new JLabel("Event Name:"));
+      JPanel namePanel = new JPanel(new BorderLayout());
+      namePanel.setBorder(BorderFactory.createTitledBorder("Event Name:"));
       this.inputEventName = new JTextField();
-      panel.add(this.inputEventName);
+      namePanel.add(this.inputEventName);
+      panel.add(namePanel);
 
 
       JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-      datePanel.setBorder(BorderFactory.createTitledBorder("Date"));
+      datePanel.setBorder(BorderFactory.createTitledBorder("Date:"));
       int currentYear = LocalDate.now().getYear();
       Integer[] years = new Integer[END_YEAR - START_YEAR];
       for (int i = 0; i < END_YEAR - START_YEAR; i++) {
@@ -619,21 +623,28 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       endPanel.add(endTimeSpinner);
       panel.add(endPanel);
 
-      panel.add(new JLabel("Description:"));
+      JPanel descriptionPanel = new JPanel(new BorderLayout());
+      descriptionPanel.setBorder(BorderFactory.createTitledBorder("Description:"));
       this.inputDescription = new JTextField();
-      panel.add(this.inputDescription);
+      descriptionPanel.add(this.inputDescription);
+      panel.add(descriptionPanel);
 
-      panel.add(new JLabel("Location::"));
+      JPanel locationPanel = new JPanel(new BorderLayout());
+      locationPanel.setBorder(BorderFactory.createTitledBorder("Location:"));
       this.inputLocation = new JTextField();
-      panel.add(this.inputLocation);
+      locationPanel.add(this.inputLocation);
+      panel.add(locationPanel);
 
+      JPanel eventStatusPanel = new JPanel(new BorderLayout());
+      eventStatusPanel.setBorder(BorderFactory.createTitledBorder("Event Status:"));
       String[] eventStatusList = new String[EventStatus.values().length];
       for (int index = 0; index < EventStatus.values().length; index++) {
         eventStatusList[index] = EventStatus.values()[index].toString();
       }
       this.inputEventStatus = new JComboBox<>(eventStatusList);
       this.inputEventStatus.setSelectedItem("PUBLIC");
-
+      eventStatusPanel.add(this.inputEventStatus);
+      panel.add(eventStatusPanel);
 
       add(panel, BorderLayout.CENTER);
 
