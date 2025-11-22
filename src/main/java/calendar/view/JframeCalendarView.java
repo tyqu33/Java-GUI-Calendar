@@ -62,6 +62,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
   private JLabel monthYearLabel;
   private JLabel currentCalendarLabel;
+  private JLabel currentTimezoneLabel;
   private JPanel calendarGridPanel;
   private JButton[][] dayButtons;
   private JComboBox<String> calendarSelector;
@@ -72,7 +73,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private JButton createCalendarButton;
   private JButton exportButton;
   private JTextArea eventDisplayArea;
-  //private static final Color LIGHT_BLUE_GRAY = new Color(230, 235, 240);
   private boolean readingCalendarList = false;
 
   public static final String[] months = {"January", "February", "March", "April", "May", "June",
@@ -113,10 +113,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     currentCalendarLabel = new JLabel("Calendar: Default");
     currentCalendarLabel.setFont(new Font("Arial", Font.PLAIN, 14));
 
+    currentTimezoneLabel = new JLabel("Timezone: " + ZoneId.systemDefault().getId());
+    currentTimezoneLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+
     calendarSelector = new JComboBox<>();
     calendarSelector.addItem("Default");
-    // calendarSelector.addItem("Work");
-    // calendarSelector.addItem("Personal");
     createCalendarButton = new JButton("New Calendar");
 
     createEventButton = new JButton("Create Event");
@@ -141,21 +142,37 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private void layoutComponents() {
     // Top panel
     JPanel topPanel = new JPanel(new BorderLayout());
-    //topPanel.setBackground(LIGHT_BLUE_GRAY);
     topPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
 
     JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-    //navigationPanel.setBackground(LIGHT_BLUE_GRAY);
     navigationPanel.add(prevMonthButton);
     navigationPanel.add(monthYearLabel);
     navigationPanel.add(nextMonthButton);
     topPanel.add(navigationPanel, BorderLayout.CENTER);
 
-    JPanel leftControlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
-    //leftControlPanel.setBackground(LIGHT_BLUE_GRAY);
-    leftControlPanel.add(new JLabel("Calendar: Default"));
-    leftControlPanel.add(new JLabel("Switch to:"));
-    leftControlPanel.add(calendarSelector);
+    JPanel leftControlPanel = new JPanel();
+    leftControlPanel.setLayout(new BoxLayout(leftControlPanel, BoxLayout.Y_AXIS));
+    leftControlPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+    JPanel calendarInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+    calendarInfoPanel.add(currentCalendarLabel);
+    calendarInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+    JPanel timezonePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+    currentTimezoneLabel = new JLabel("Timezone: " + ZoneId.systemDefault().getId());
+    currentTimezoneLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+    timezonePanel.add(currentTimezoneLabel);
+    timezonePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+    JPanel switchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+    switchPanel.add(new JLabel("Switch to:"));
+    switchPanel.add(calendarSelector);
+    switchPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+    leftControlPanel.add(calendarInfoPanel);
+    leftControlPanel.add(timezonePanel);
+    leftControlPanel.add(switchPanel);
+
     topPanel.add(leftControlPanel, BorderLayout.WEST);
 
     JPanel rightControlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -284,7 +301,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
   @Override
   public void displayCurrentCalendar(String calendarName, String timezone) {
-    currentCalendarLabel.setText("Calendar: " + calendarName + " (" + timezone + ")");
+    currentCalendarLabel.setText("Calendar: " + calendarName);
+    currentTimezoneLabel.setText("Timezone: " + timezone);
   }
 
   @Override
@@ -728,20 +746,22 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
    */
   private class CreateEventSeriesDialog extends JDialog {
     private JTextField inputSubject;
-    private JTextField inputStartDate;
-    private JTextField inputStartTime;
-    private JTextField inputEndTime;
+    private JComboBox<Integer> inputYear;
+    private JComboBox<String> inputMonth;
+    private JComboBox<Integer> inputDay;
+    private JSpinner startTimeSpinner;
+    private JSpinner endTimeSpinner;
     private JCheckBox allDayCheckbox;
     private JTextField inputDescription;
     private JTextField inputLocation;
     private JComboBox<String> inputStatus;
-
-    // Recurrence fields
     private JCheckBox[] weekdayCheckboxes;
     private JRadioButton occurrencesRadio;
     private JRadioButton endDateRadio;
     private JSpinner occurrencesSpinner;
-    private JTextField endDateField;
+    private JComboBox<Integer> endYearComboBox;
+    private JComboBox<String> endMonthComboBox;
+    private JComboBox<Integer> endDayComboBox;
 
     public CreateEventSeriesDialog(JFrame parent, Features features) {
       super(parent, "Create Event Series", true);
@@ -751,56 +771,97 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
       mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
 
-      // Basic Info Panel
-      JPanel basicPanel = new JPanel(new GridLayout(8, 2, 10, 10));
+      JPanel basicPanel = new JPanel();
+      basicPanel.setLayout(new BoxLayout(basicPanel, BoxLayout.Y_AXIS));
       basicPanel.setBorder(BorderFactory.createTitledBorder("Event Details"));
 
-      basicPanel.add(new JLabel("Subject:"));
+      JPanel subjectPanel = new JPanel(new BorderLayout());
+      subjectPanel.setBorder(BorderFactory.createTitledBorder("Event Name:"));
       inputSubject = new JTextField();
-      basicPanel.add(inputSubject);
+      subjectPanel.add(inputSubject);
+      basicPanel.add(subjectPanel);
 
-      basicPanel.add(new JLabel("Start Date (YYYY-MM-DD):"));
-      inputStartDate = new JTextField(LocalDate.now().toString());
-      basicPanel.add(inputStartDate);
+      JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      datePanel.setBorder(BorderFactory.createTitledBorder("Date:"));
 
-      basicPanel.add(new JLabel("Start Time (HH:MM):"));
-      inputStartTime = new JTextField("09:00");
-      basicPanel.add(inputStartTime);
+      int currentYear = LocalDate.now().getYear();
+      Integer[] years = new Integer[END_YEAR - START_YEAR];
+      for (int i = 0; i < END_YEAR - START_YEAR; i++) {
+        years[i] = i + START_YEAR;
+      }
+      this.inputYear = new JComboBox<>(years);
+      this.inputYear.setSelectedItem(currentYear);
 
-      basicPanel.add(new JLabel("End Time (HH:MM):"));
-      inputEndTime = new JTextField("10:00");
-      basicPanel.add(inputEndTime);
+      this.inputMonth = new JComboBox<>(months);
+      this.inputMonth.setSelectedIndex(LocalDateTime.now().getMonthValue() - 1);
 
-      basicPanel.add(new JLabel("All Day Event:"));
-      allDayCheckbox = new JCheckBox();
+      this.inputDay = new JComboBox<>();
+      getDayOptions(this.inputYear, this.inputMonth, this.inputDay);
+
+      inputYear.addActionListener(
+          e -> getDayOptions(this.inputYear, this.inputMonth, this.inputDay));
+      inputMonth.addActionListener(
+          e -> getDayOptions(this.inputYear, this.inputMonth, this.inputDay));
+
+      datePanel.add(this.inputYear);
+      datePanel.add(this.inputMonth);
+      datePanel.add(this.inputDay);
+      basicPanel.add(datePanel);
+
+      JPanel startPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      startPanel.setBorder(BorderFactory.createTitledBorder("Start Time:"));
+      startTimeSpinner = createTimeSpinner();
+      startPanel.add(startTimeSpinner);
+      basicPanel.add(startPanel);
+
+      JPanel endPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      endPanel.setBorder(BorderFactory.createTitledBorder("End Time:"));
+      endTimeSpinner = createTimeSpinner();
+      endPanel.add(endTimeSpinner);
+      basicPanel.add(endPanel);
+
+      // All Day Event checkbox
+      JPanel allDayPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      allDayPanel.setBorder(BorderFactory.createTitledBorder("All Day Event:"));
+      allDayCheckbox = new JCheckBox("This is an all-day event");
       allDayCheckbox.addActionListener(e -> {
         boolean allDay = allDayCheckbox.isSelected();
-        inputStartTime.setEnabled(!allDay);
-        inputEndTime.setEnabled(!allDay);
+        startTimeSpinner.setEnabled(!allDay);
+        endTimeSpinner.setEnabled(!allDay);
       });
-      basicPanel.add(allDayCheckbox);
+      allDayPanel.add(allDayCheckbox);
+      basicPanel.add(allDayPanel);
 
-      basicPanel.add(new JLabel("Description:"));
+      JPanel descriptionPanel = new JPanel(new BorderLayout());
+      descriptionPanel.setBorder(BorderFactory.createTitledBorder("Description:"));
       inputDescription = new JTextField();
-      basicPanel.add(inputDescription);
+      descriptionPanel.add(inputDescription);
+      basicPanel.add(descriptionPanel);
 
-      basicPanel.add(new JLabel("Location:"));
+      JPanel locationPanel = new JPanel(new BorderLayout());
+      locationPanel.setBorder(BorderFactory.createTitledBorder("Location:"));
       inputLocation = new JTextField();
-      basicPanel.add(inputLocation);
+      locationPanel.add(inputLocation);
+      basicPanel.add(locationPanel);
 
-      basicPanel.add(new JLabel("Status:"));
-      inputStatus = new JComboBox<>(new String[] {"public", "private"});
-      basicPanel.add(inputStatus);
+      JPanel statusPanel = new JPanel(new BorderLayout());
+      statusPanel.setBorder(BorderFactory.createTitledBorder("Event Status:"));
+      String[] eventStatusList = new String[EventStatus.values().length];
+      for (int index = 0; index < EventStatus.values().length; index++) {
+        eventStatusList[index] = EventStatus.values()[index].toString();
+      }
+      inputStatus = new JComboBox<>(eventStatusList);
+      inputStatus.setSelectedItem("PUBLIC");
+      statusPanel.add(inputStatus);
+      basicPanel.add(statusPanel);
 
       mainPanel.add(basicPanel);
       mainPanel.add(Box.createVerticalStrut(10));
 
-      // Recurrence Panel
       JPanel recurrencePanel = new JPanel();
       recurrencePanel.setLayout(new BoxLayout(recurrencePanel, BoxLayout.Y_AXIS));
       recurrencePanel.setBorder(BorderFactory.createTitledBorder("Recurrence"));
 
-      // Weekdays
       JPanel weekdaysPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
       weekdaysPanel.add(new JLabel("Repeat on:"));
 
@@ -812,12 +873,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       }
       recurrencePanel.add(weekdaysPanel);
 
-      // End condition
       JPanel endConditionPanel = new JPanel();
       endConditionPanel.setLayout(new BoxLayout(endConditionPanel, BoxLayout.Y_AXIS));
 
       ButtonGroup endGroup = new ButtonGroup();
 
+      // End after N occurrences
       JPanel occurrencesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
       occurrencesRadio = new JRadioButton("End after");
       occurrencesSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
@@ -826,45 +887,69 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       occurrencesPanel.add(new JLabel("occurrences"));
       endGroup.add(occurrencesRadio);
 
+      // End by date
       JPanel endDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-      endDateRadio = new JRadioButton("End by date");
-      endDateField = new JTextField(LocalDate.now().plusMonths(1).toString(), 10);
+      endDateRadio = new JRadioButton("End by date:");
+
+      LocalDate futureDate = LocalDate.now().plusMonths(1);
+
+      Integer[] endYears = new Integer[END_YEAR - START_YEAR];
+      for (int i = 0; i < END_YEAR - START_YEAR; i++) {
+        endYears[i] = i + START_YEAR;
+      }
+      endYearComboBox = new JComboBox<>(endYears);
+      endYearComboBox.setSelectedItem(futureDate.getYear());
+
+      endMonthComboBox = new JComboBox<>(months);
+      endMonthComboBox.setSelectedIndex(futureDate.getMonthValue() - 1);
+
+      endDayComboBox = new JComboBox<>();
+      getDayOptions(endYearComboBox, endMonthComboBox, endDayComboBox);
+
+      endYearComboBox.addActionListener(
+          e -> getDayOptions(endYearComboBox, endMonthComboBox, endDayComboBox));
+      endMonthComboBox.addActionListener(
+          e -> getDayOptions(endYearComboBox, endMonthComboBox, endDayComboBox));
+
       endDatePanel.add(endDateRadio);
-      endDatePanel.add(endDateField);
+      endDatePanel.add(endYearComboBox);
+      endDatePanel.add(endMonthComboBox);
+      endDatePanel.add(endDayComboBox);
       endGroup.add(endDateRadio);
 
       occurrencesRadio.setSelected(true);
-
-      // Enable/disable based on selection
       occurrencesRadio.addActionListener(e -> {
         occurrencesSpinner.setEnabled(true);
-        endDateField.setEnabled(false);
+        endYearComboBox.setEnabled(false);
+        endMonthComboBox.setEnabled(false);
+        endDayComboBox.setEnabled(false);
       });
 
       endDateRadio.addActionListener(e -> {
         occurrencesSpinner.setEnabled(false);
-        endDateField.setEnabled(true);
+        endYearComboBox.setEnabled(true);
+        endMonthComboBox.setEnabled(true);
+        endDayComboBox.setEnabled(true);
       });
 
-      endDateField.setEnabled(false);
+      endYearComboBox.setEnabled(false);
+      endMonthComboBox.setEnabled(false);
+      endDayComboBox.setEnabled(false);
 
       endConditionPanel.add(occurrencesPanel);
       endConditionPanel.add(endDatePanel);
       recurrencePanel.add(endConditionPanel);
-
       mainPanel.add(recurrencePanel);
 
       JScrollPane scrollPane = new JScrollPane(mainPanel);
       add(scrollPane, BorderLayout.CENTER);
 
-      // Buttons
       JPanel buttonPanel = new JPanel();
       JButton confirmButton = new JButton("Create");
       JButton cancelButton = new JButton("Cancel");
 
       confirmButton.addActionListener(ev -> {
         try {
-          // Validate subject
           String subject = inputSubject.getText().trim();
           if (subject.isEmpty()) {
             JOptionPane.showMessageDialog(this,
@@ -873,8 +958,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
                 JOptionPane.ERROR_MESSAGE);
             return;
           }
-
-          // Get weekdays
           StringBuilder weekdays = new StringBuilder();
           String[] weekdayCodes = {"M", "T", "W", "R", "F", "S", "U"};
           for (int i = 0; i < 7; i++) {
@@ -882,7 +965,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
               weekdays.append(weekdayCodes[i]);
             }
           }
-
           if (weekdays.length() == 0) {
             JOptionPane.showMessageDialog(this,
                 "Please select at least one day!",
@@ -890,9 +972,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
                 JOptionPane.ERROR_MESSAGE);
             return;
           }
-
-          // Get dates and times
-          LocalDate startDate = LocalDate.parse(inputStartDate.getText().trim());
+          int year = (Integer) inputYear.getSelectedItem();
+          int month = inputMonth.getSelectedIndex() + 1;
+          int day = (Integer) inputDay.getSelectedItem();
+          LocalDate startDate = LocalDate.of(year, month, day);
 
           String startDateTime;
           String endDateTime;
@@ -901,29 +984,31 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
             startDateTime = startDate.toString();
             endDateTime = null;
           } else {
-            LocalTime startTime = LocalTime.parse(inputStartTime.getText().trim());
-            LocalTime endTime = LocalTime.parse(inputEndTime.getText().trim());
+            LocalDateTime startDT = getInputDateTime(startTimeSpinner, inputYear,
+                inputMonth, inputDay);
+            LocalDateTime endDT = getInputDateTime(endTimeSpinner, inputYear,
+                inputMonth, inputDay);
 
-            startDateTime = startDate.atTime(startTime).toString();
-            endDateTime = startDate.atTime(endTime).toString();
+            startDateTime = startDT.toString();
+            endDateTime = endDT.toString();
           }
 
           String description = inputDescription.getText().trim();
           String location = inputLocation.getText().trim();
           String status = inputStatus.getSelectedItem().toString();
 
-          // Get recurrence end condition
           int occurrences = 0;
           String seriesEndDate = null;
           if (occurrencesRadio.isSelected()) {
             occurrences = (Integer) occurrencesSpinner.getValue();
           } else {
-            seriesEndDate = endDateField.getText().trim();
-            // Validate end date format
-            LocalDate.parse(seriesEndDate);
+            int endYear = (Integer) endYearComboBox.getSelectedItem();
+            int endMonth = endMonthComboBox.getSelectedIndex() + 1;
+            int endDay = (Integer) endDayComboBox.getSelectedItem();
+            LocalDate endDateObj = LocalDate.of(endYear, endMonth, endDay);
+            seriesEndDate = endDateObj.toString();
           }
 
-          // Call controller method to create event series
           features.createEventSeries(
               subject,
               startDateTime,
@@ -935,6 +1020,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
               occurrences,
               seriesEndDate
           );
+
           dispose();
 
         } catch (Exception ex) {
@@ -944,14 +1030,14 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
               JOptionPane.ERROR_MESSAGE);
         }
       });
-      cancelButton.addActionListener(ev -> dispose());
 
+      cancelButton.addActionListener(ev -> dispose());
       buttonPanel.add(confirmButton);
       buttonPanel.add(cancelButton);
       add(buttonPanel, BorderLayout.SOUTH);
 
       setLocationRelativeTo(getParent());
-      setSize(500, 600);
+      setSize(550, 700);
     }
   }
 }
