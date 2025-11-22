@@ -1383,6 +1383,108 @@ public class ManagerModelTest {
   }
 
   @Test
+  public void testCopyEventsInSameCalendar() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise + use
+      + "create event Lecture from 2024-03-11T10:00 to 2024-03-11T12:00"
+          + " repeats MWR until 2024-03-21\n"
+      + "copy events between 2024-03-11 and 2024-03-21 --target Meetings to 2025-03-10\n"
+      + "print events from 2025-03-10T09:00 to 2025-03-20T13:00\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Events from 2025-03-10T09:00 to 2025-03-20T13:00:\n"
+          + " • Lecture starting on 2025-03-10 at 10:00 AM, ending on 2025-03-10 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-12 at 10:00 AM, ending on 2025-03-12 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-13 at 10:00 AM, ending on 2025-03-13 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-17 at 10:00 AM, ending on 2025-03-17 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-19 at 10:00 AM, ending on 2025-03-19 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-20 at 10:00 AM, ending on 2025-03-20 at 12:00 PM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyEventsAcrossCalendarSameTimezone() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/New_York\n"
+          + use
+          + "create event Lecture from 2024-03-11T10:00 to 2024-03-11T12:00"
+          + " repeats MWR until 2024-03-21\n"
+          + "copy events between 2024-03-11 and 2024-03-21 --target Lectures to 2025-03-10\n"
+          + "use calendar --name Lectures\n"
+          + "print events from 2025-03-10T09:00 to 2025-03-20T13:00\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events from 2025-03-10T09:00 to 2025-03-20T13:00:\n"
+          + " • Lecture starting on 2025-03-10 at 10:00 AM, ending on 2025-03-10 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-12 at 10:00 AM, ending on 2025-03-12 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-13 at 10:00 AM, ending on 2025-03-13 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-17 at 10:00 AM, ending on 2025-03-17 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-19 at 10:00 AM, ending on 2025-03-19 at 12:00 PM\n"
+          + " • Lecture starting on 2025-03-20 at 10:00 AM, ending on 2025-03-20 at 12:00 PM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
+  public void testCopyEventsOverlappingTimeRange() throws IOException {
+    PrintStream originalOut = System.out;
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+    System.setOut(out);
+    MultiCalendarManagerInterface manager = new MultiCalendarManager();
+    CalendarView view = new CalendarView();
+    try {
+      Reader in = new StringReader(premise
+          + "create calendar --name Lectures --timezone America/New_York\n"
+          + use
+          + "create event Lab from 2024-03-10T10:00 to 2024-03-11T09:00\n"
+          + "create event Lecture from 2024-03-11T10:00 to 2024-03-12T09:00\n"
+          + "create event Finals from 2024-03-11T22:00 to 2024-03-13T12:00\n"
+          + "copy events between 2024-03-11 and 2024-03-12 --target Lectures to 2025-03-10\n"
+          + "use calendar --name Lectures\n"
+          + "print events from 2025-03-10T09:00 to 2025-03-20T13:00\nexit\n");
+      CalendarController controller = new CalendarController(manager, view, in, out);
+      controller.go();
+      String allOuts = bytes.toString(StandardCharsets.UTF_8);
+      System.out.println(allOuts.trim());
+      String expectedOutput = "Success: Successfully created calendar 'Meetings'\n"
+          + "Success: Successfully created calendar 'Lectures'\n"
+          + "Events from 2025-03-10T09:00 to 2025-03-20T13:00:\n"
+          + " • Lab starting on 2025-03-09 at 10:00 AM, ending on 2025-03-10 at 9:00 AM\n"
+          + " • Lecture starting on 2025-03-10 at 10:00 AM, ending on 2025-03-11 at 9:00 AM\n"
+          + " • Finals starting on 2025-03-10 at 10:00 PM, ending on 2025-03-12 at 12:00 PM\n";
+      assertEquals(expectedOutput.trim(), allOuts.trim());
+    } finally {
+      System.setOut(originalOut);
+    }
+  }
+
+  @Test
   public void editCalendarName() throws IOException {
     PrintStream originalOut = System.out;
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();

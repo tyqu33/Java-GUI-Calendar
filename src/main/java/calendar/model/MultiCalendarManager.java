@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -186,7 +187,8 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
     LocalDateTime oldStart = LocalDateTime.parse(specificDate + "T00:00");
     LocalDateTime oldEnd = LocalDateTime.parse(specificDate + "T23:59");
 
-    for (Event event : this.calendarEntity.getCalendar().getEvents()) {
+    List<Event> oldEventsCopy = new ArrayList<>(this.calendarEntity.getCalendar().getEvents());
+    for (Event event : oldEventsCopy) {
       LocalDateTime eventStart = event.getStartDateTime();
       LocalDateTime eventEnd = event.getEndDateTime();
 
@@ -240,7 +242,8 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
     ZoneId oldZoneId = this.calendarEntity.getTimeZone();
     ZoneId newZoneId = this.getCalendarTimeZone(targetCalendarName);
     CalendarInterface newCalendar = this.getCalendarEntity(targetCalendarName).getCalendar();
-    for (Event event : this.calendarEntity.getCalendar().getEvents()) {
+    List<Event> oldEventsCopy = new ArrayList<>(this.calendarEntity.getCalendar().getEvents());
+    for (Event event : oldEventsCopy) {
       LocalDateTime eventStart = event.getStartDateTime();
       LocalDateTime eventEnd = event.getEndDateTime();
 

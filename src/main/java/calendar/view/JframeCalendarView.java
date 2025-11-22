@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -35,6 +37,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -49,6 +52,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.text.DateFormatter;
 
 /**
  * Swing-based graphical user interface for the calendar application.
@@ -720,6 +724,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     JSpinner spinner = new JSpinner(model);
     JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, "HH:mm");
     spinner.setEditor(editor);
+
+    JFormattedTextField field = editor.getTextField();
+    DateFormatter dateFormat = (DateFormatter) field.getFormatter();
+    dateFormat.setAllowsInvalid(false);
+    dateFormat.setOverwriteMode(true);
 
     spinner.setPreferredSize(new Dimension(80, 30));
     return spinner;

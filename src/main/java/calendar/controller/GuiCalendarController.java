@@ -68,7 +68,11 @@ public class GuiCalendarController implements Features {
       view.displaySuccess("Event series '" + subject + "' created successfully!");
       refreshCurrentMonth();
     } catch (IllegalArgumentException e) {
-      view.displayError("Failed to create single event: " + e.getMessage());
+      if (e.getMessage().equals("subject or startDateTime cannot be empty")) {
+        view.displayError("Failed to create single event: " + "Event Name cannot be empty");
+      } else {
+        view.displayError("Failed to create single event: " + e.getMessage());
+      }
     }
   }
 
