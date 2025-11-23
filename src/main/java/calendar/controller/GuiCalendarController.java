@@ -5,6 +5,7 @@ import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
 import calendar.event.EventInterface;
 import calendar.model.Calendar;
+import calendar.model.CalendarInterface;
 import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarViewInterface;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * The controller implementation for GUI mode supporting Features.
@@ -179,8 +181,8 @@ public class GuiCalendarController implements Features {
   }
 
   @Override
-  public void searchAcrossCalendar(String keyword) {
-
+  public Collection<EventInterface> getEventsAcrossCalendar(String keyword) {
+    return model.getEventsAcrossCalendar(keyword);
   }
 
   @Override

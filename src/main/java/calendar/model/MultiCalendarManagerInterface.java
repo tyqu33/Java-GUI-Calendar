@@ -2,6 +2,7 @@ package calendar.model;
 
 import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
+import calendar.event.EventInterface;
 import java.time.ZoneId;
 import java.util.Collection;
 
@@ -99,4 +100,12 @@ public interface MultiCalendarManagerInterface {
    * @return the collection of calendar entities
    */
   Collection<CalendarEntityInterface> getAllCalendars();
+
+  /**
+   * Get the event collection of events with subject matching the given keyword.
+   *
+   * @param keyword the searching keyword for matching the event subject
+   * @return a collection of events with subject matching the given keyword
+   */
+  Collection<EventInterface> getEventsAcrossCalendar(String keyword);
 }

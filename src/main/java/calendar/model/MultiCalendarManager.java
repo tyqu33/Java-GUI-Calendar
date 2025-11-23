@@ -3,6 +3,7 @@ package calendar.model;
 import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
+import calendar.event.EventInterface;
 import calendar.event.EventSeries;
 import java.time.DateTimeException;
 import java.time.Duration;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * This class implements interface MultiCalendarManagerInterface and offers create, edit a calendar
@@ -326,6 +328,24 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
   @Override
   public Collection<CalendarEntityInterface> getAllCalendars() {
     return this.calendarManager.values();
+  }
+
+  @Override
+  public Collection<EventInterface> getEventsAcrossCalendar(String keyword) {
+    Collection<EventInterface> eventResult = new ArrayList<>();
+    Collection<CalendarEntityInterface> calendarList = this.getAllCalendars();
+    for (CalendarEntityInterface calendarEntity : calendarList) {
+      Collection<Event> eventList = calendarEntity.getCalendar().getEvents();
+      for (EventInterface event : eventList) {
+        if (event.getSubject().equals(keyword)) {
+          eventResult.add(event);
+        }
+      }
+    }
+    if (!eventResult.isEmpty()) {
+      return eventResult;
+    }
+    return null;
   }
 
   private void verifyInputAndGetCalendar(String targetCalendarName)

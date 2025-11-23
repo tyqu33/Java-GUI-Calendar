@@ -1,7 +1,10 @@
 package calendar.controller;
 
+import calendar.event.EventInterface;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * The features for GUI functions.
@@ -47,8 +50,8 @@ public interface Features {
   void manipulateCalendar();
 
   void backToCalendarToday();
-
-  void searchAcrossCalendar(String keyword);
+  
+  Collection<EventInterface> getEventsAcrossCalendar(String keyword);
 
   /**
    * Navigate to a specific month and year.
