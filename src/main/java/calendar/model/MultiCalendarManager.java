@@ -3,6 +3,7 @@ package calendar.model;
 import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
+import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import calendar.event.EventSeries;
 import java.time.DateTimeException;
@@ -331,14 +332,14 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
   }
 
   @Override
-  public Collection<EventInterface> getEventsAcrossCalendar(String keyword) {
-    Collection<EventInterface> eventResult = new ArrayList<>();
+  public Collection<EventDecorator> getEventsAcrossCalendar(String keyword) {
+    Collection<EventDecorator> eventResult = new ArrayList<>();
     Collection<CalendarEntityInterface> calendarList = this.getAllCalendars();
     for (CalendarEntityInterface calendarEntity : calendarList) {
       Collection<Event> eventList = calendarEntity.getCalendar().getEvents();
       for (EventInterface event : eventList) {
         if (event.getSubject().equals(keyword)) {
-          eventResult.add(event);
+          eventResult.add(new EventDecorator(calendarEntity.getCalendarName(), calendarEntity.getTimeZone().toString(), event));
         }
       }
     }

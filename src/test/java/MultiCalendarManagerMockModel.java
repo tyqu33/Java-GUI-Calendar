@@ -1,4 +1,5 @@
 import calendar.calendarentity.CalendarEntityInterface;
+import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import calendar.model.MultiCalendarManagerInterface;
 import java.time.ZoneId;
@@ -75,7 +76,7 @@ public class MultiCalendarManagerMockModel implements MultiCalendarManagerInterf
   }
 
   @Override
-  public Collection<EventInterface> getEventsAcrossCalendar(String keyword) {
+  public Collection<EventDecorator> getEventsAcrossCalendar(String keyword) {
     return null;
   }
 }

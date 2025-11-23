@@ -4,6 +4,7 @@ import calendar.controller.Features;
 import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
+import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -390,6 +391,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   }
 
   private JPanel createSingleEventPanel(Event event) {
+    return createSingleEventPanel(event, null);
+  }
+
+  private JPanel createSingleEventPanel(Event event, String calendarName) {
     JPanel row = new JPanel(new BorderLayout(5, 5));
     row.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
     row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
@@ -412,7 +417,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
         //        LocalDateTime oldStart = event.getStartDateTime();
         //        LocalDateTime oldEnd = event.getEndDateTime();
         EditSingleEventDialog dialog = new EditSingleEventDialog(this, features,
-            event);
+            event, calendarName);
         dialog.setVisible(true);
       });
 
@@ -723,7 +728,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private class EditSingleEventDialog extends JDialog {
     private SingleEventPanel panel;
 
-    public EditSingleEventDialog(JFrame parent, Features features, Event oldEvent) {
+    public EditSingleEventDialog(JFrame parent, Features features, Event oldEvent, String calendarName) {
       super(parent, "Edit Single Event", true);
       setLayout(new BorderLayout(10, 10));
       panel = new SingleEventPanel();
@@ -743,7 +748,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
         String eventStatus = this.panel.getEventStatus();
         features.editEvent(oldEvent.getSubject(), oldEvent.getStartDateTime().toString(),
             oldEvent.getEndDateTime().toString(), newEventName,
-            startDateTime.toString(), endDateTime.toString(), description, location, eventStatus);
+            startDateTime.toString(), endDateTime.toString(), description, location, eventStatus,
+            calendarName);
         dispose();
       });
       cancelButton.addActionListener(e -> dispose());
@@ -1281,13 +1287,15 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
         String keyword = inputKeyword.getText();
         if (keyword != null && !keyword.isEmpty()) {
           resultPanel.removeAll();
-          List<EventInterface> events =
-              (List<EventInterface>) features.getEventsAcrossCalendar(keyword);
+          List<EventDecorator> events =
+              (List<EventDecorator>) features.getEventsAcrossCalendar(keyword);
           if (events == null || events.isEmpty()) {
             resultPanel.add(new JLabel("No events found."));
           } else {
-            for (EventInterface event : events) {
-              JPanel row = createSingleEventPanel((Event) event);
+            for (EventDecorator eventDecorator : events) {
+              String calendarName = eventDecorator.getCalendarName();
+              JPanel row = createSingleEventPanel((Event) eventDecorator.getEvent(), calendarName);
+              row.setBorder(BorderFactory.createTitledBorder("Calendar: " + calendarName));
               row.setAlignmentX(Component.LEFT_ALIGNMENT);
               row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 

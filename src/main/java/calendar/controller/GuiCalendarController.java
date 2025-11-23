@@ -3,6 +3,7 @@ package calendar.controller;
 import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
+import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import calendar.model.Calendar;
 import calendar.model.CalendarInterface;
@@ -142,8 +143,13 @@ public class GuiCalendarController implements Features {
   @Override
   public void editEvent(String subject, String startDateTime, String endDateTime, String newSubject,
                         String newStartDateTime, String newEndDateTime, String newDescription,
-                        String newLocation, String newEventStatus) {
-    CalendarEntityInterface entity = model.getCurrentCalendarEntity();
+                        String newLocation, String newEventStatus, String calendarName) {
+    CalendarEntityInterface entity;
+    if (calendarName == null) {
+      entity = model.getCurrentCalendarEntity();
+    } else {
+      entity = model.getCalendarEntity(calendarName);
+    }
     if (entity == null) {
       view.displayError("No calendar selected. Please select or create a calendar first.");
       return;
@@ -181,7 +187,7 @@ public class GuiCalendarController implements Features {
   }
 
   @Override
-  public Collection<EventInterface> getEventsAcrossCalendar(String keyword) {
+  public Collection<EventDecorator> getEventsAcrossCalendar(String keyword) {
     return model.getEventsAcrossCalendar(keyword);
   }
 

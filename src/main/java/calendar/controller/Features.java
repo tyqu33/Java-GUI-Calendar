@@ -1,5 +1,6 @@
 package calendar.controller;
 
+import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -43,15 +44,15 @@ public interface Features {
   void editEvent(String subject, String startDateTime, String endDateTime,
                  String newSubject, String newStartDateTime, String newEndDateTime,
                  String newDescription, String newLocation,
-                 String newEventStatus);
+                 String newEventStatus, String calendarName);
 
   void editCalendarProperty(String calendarName, String propertyName, String propertyValue);
 
   void manipulateCalendar();
 
   void backToCalendarToday();
-  
-  Collection<EventInterface> getEventsAcrossCalendar(String keyword);
+
+  Collection<EventDecorator> getEventsAcrossCalendar(String keyword);
 
   /**
    * Navigate to a specific month and year.
