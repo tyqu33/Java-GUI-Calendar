@@ -16,12 +16,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The controller implementation for GUI mode supporting Features.
+ */
 public class GuiCalendarController implements Features {
   private MultiCalendarManagerInterface model;
   private CalendarViewInterface view;
   private int currentYear;
   private int currentMonth;
 
+  /**
+   * The Constructor for GuiCalendarController.
+   *
+   * @param model the calendar manager
+   * @param view the calendar view
+   */
   public GuiCalendarController(MultiCalendarManagerInterface model, CalendarViewInterface view) {
     this.model = model;
     this.view = view;
@@ -65,7 +74,7 @@ public class GuiCalendarController implements Features {
       event.editDescription(description);
       event.editLocation(location);
       event.editEventStatus(eventStatus);
-      view.displaySuccess("Event series '" + subject + "' created successfully!");
+      view.displaySuccess("Event '" + subject + "' created successfully!");
       refreshCurrentMonth();
     } catch (IllegalArgumentException e) {
       if (e.getMessage().equals("subject or startDateTime cannot be empty")) {
@@ -125,6 +134,32 @@ public class GuiCalendarController implements Features {
           .withZoneSameInstant(entity.getTimeZone()).toLocalDate();
       view.displayMonthView(today.getYear(), today.getMonthValue(), new HashMap<>());
       view.displayCurrentCalendar(entity.getCalendarName(), entity.getTimeZone().toString());
+    }
+  }
+
+  @Override
+  public void editEvent(String subject, String startDateTime, String endDateTime, String newSubject,
+                        String newStartDateTime, String newEndDateTime, String newDescription,
+                        String newLocation, String newEventStatus) {
+    CalendarEntityInterface entity = model.getCurrentCalendarEntity();
+    if (entity == null) {
+      view.displayError("No calendar selected. Please select or create a calendar first.");
+      return;
+    }
+    try {
+      EventInterface event = entity.getCalendar().editSingleEvent(
+          subject, startDateTime, endDateTime, newSubject,
+          newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
+      view.displaySuccess("Event '" + subject + "' updated successfully!");
+      refreshCurrentMonth();
+    } catch (IllegalArgumentException e) {
+      if (e.getMessage().equals("Event on the new subject, start date/time,"
+          + " end date/time already exists")) {
+        view.displayError("Failed to edit single event: "
+            + "Event after edition conflicts with existing event");
+      } else {
+        view.displayError("Failed to edit single event: " + e.getMessage());
+      }
     }
   }
 

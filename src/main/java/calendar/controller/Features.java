@@ -3,8 +3,17 @@ package calendar.controller;
 import java.time.LocalDate;
 import java.util.Collection;
 
+/**
+ * The features for GUI functions.
+ */
 public interface Features {
 
+  /**
+   * To create a calendar for GUI.
+   *
+   * @param calendarName the calendar name
+   * @param timeZone the timezone of the calendar
+   */
   void createCalendar(String calendarName, String timeZone);
 
   void createEvent(String subject, String startDateTime, String endDateTime,
@@ -14,9 +23,24 @@ public interface Features {
                          String description, String location, String eventStatus,
                          String weekdays, int occurrences, String seriesEndDate);
 
+  /**
+   * To get a collection of all existing calendar names.
+   *
+   * @return the collection of all existing calendar names
+   */
   Collection<String> getAllCalendarNames();
 
+  /**
+   * To switch to the designated calendar.
+   *
+   * @param calendarName the aimed calendar name
+   */
   void switchCalendar(String calendarName);
+
+  void editEvent(String subject, String startDateTime, String endDateTime,
+                 String newSubject, String newStartDateTime, String newEndDateTime,
+                 String newDescription, String newLocation,
+                 String newEventStatus);
 
   void editCalendarProperty(String calendarName, String propertyName, String propertyValue);
 

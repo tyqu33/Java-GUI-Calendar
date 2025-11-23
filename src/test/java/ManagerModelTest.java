@@ -1393,7 +1393,7 @@ public class ManagerModelTest {
     try {
       Reader in = new StringReader(premise + use
       + "create event Lecture from 2024-03-11T10:00 to 2024-03-11T12:00"
-          + " repeats MWR until 2024-03-21\n"
+      + " repeats MWR until 2024-03-21\n"
       + "copy events between 2024-03-11 and 2024-03-21 --target Meetings to 2025-03-10\n"
       + "print events from 2025-03-10T09:00 to 2025-03-20T13:00\nexit\n");
       CalendarController controller = new CalendarController(manager, view, in, out);
