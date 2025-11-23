@@ -555,10 +555,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       }
 
       @Override
-      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+      }
 
       @Override
-      public void popupMenuCanceled(PopupMenuEvent e) {}
+      public void popupMenuCanceled(PopupMenuEvent e) {
+      }
     });
 
     // Create Event button
@@ -728,7 +730,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private class EditSingleEventDialog extends JDialog {
     private SingleEventPanel panel;
 
-    public EditSingleEventDialog(JFrame parent, Features features, Event oldEvent, String calendarName) {
+    public EditSingleEventDialog(JFrame parent, Features features,
+                                 Event oldEvent, String calendarName) {
       super(parent, "Edit Single Event", true);
       setLayout(new BorderLayout(10, 10));
       panel = new SingleEventPanel();
@@ -1312,7 +1315,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       pack();
     }
 
-    private void go() {}
+    private void go() {
+    }
   }
 
   private class CopySingleEventDialog extends JDialog {

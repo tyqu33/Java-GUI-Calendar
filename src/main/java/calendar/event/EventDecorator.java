@@ -1,13 +1,20 @@
 package calendar.event;
 
-import calendar.enums.EventStatus;
-import java.time.LocalDateTime;
-
-public class EventDecorator implements EventInterface{
+/**
+ * To wrap up a class with event and its calendar property.
+ */
+public class EventDecorator {
   String calendarName;
   String calendarTimezone;
   EventInterface event;
 
+  /**
+   * Constructor for class EventDecorator.
+   *
+   * @param calendarName the name of the calendar
+   * @param calendarTimezone the timezone of the calendar
+   * @param event the event
+   */
   public EventDecorator(String calendarName, String calendarTimezone, EventInterface event) {
     this.calendarName = calendarName;
     this.calendarTimezone = calendarTimezone;
@@ -23,52 +30,8 @@ public class EventDecorator implements EventInterface{
   }
 
   @Override
-  public String getSubject() {
-    return "";
+  public String toString() {
+    return "[calendarName = " + calendarName + ", calendarTimezone = " + calendarTimezone + "]";
   }
 
-  @Override
-  public LocalDateTime getStartDateTime() {
-    return null;
-  }
-
-  @Override
-  public LocalDateTime getEndDateTime() {
-    return null;
-  }
-
-  @Override
-  public String getDescription() {
-    return "";
-  }
-
-  @Override
-  public String getLocation() {
-    return "";
-  }
-
-  @Override
-  public EventStatus getEventStatus() {
-    return null;
-  }
-
-  @Override
-  public String getSeriesId() {
-    return "";
-  }
-
-  @Override
-  public void editDescription(String newDescription) {
-
-  }
-
-  @Override
-  public void editLocation(String newLocation) {
-
-  }
-
-  @Override
-  public void editEventStatus(String newEventStatus) {
-
-  }
 }

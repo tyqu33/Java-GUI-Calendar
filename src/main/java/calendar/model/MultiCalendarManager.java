@@ -339,7 +339,8 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       Collection<Event> eventList = calendarEntity.getCalendar().getEvents();
       for (EventInterface event : eventList) {
         if (event.getSubject().equals(keyword)) {
-          eventResult.add(new EventDecorator(calendarEntity.getCalendarName(), calendarEntity.getTimeZone().toString(), event));
+          eventResult.add(new EventDecorator(calendarEntity.getCalendarName(),
+              calendarEntity.getTimeZone().toString(), event));
         }
       }
     }
