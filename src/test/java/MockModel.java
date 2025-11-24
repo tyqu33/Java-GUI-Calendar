@@ -59,35 +59,12 @@ class MockModel implements CalendarInterface {
     return null;
   }
 
-  public Event editSingleEvent(String subject, String startDateTime, String endDateTime,
-                               String newSubject, String newStartDateTime, String newEndDateTime,
-                               String newDescription, String newLocation, String newEventStatus)
-      throws IllegalArgumentException {
-    EventContext newContext =
-        new EventContext(newSubject, newStartDateTime, newEndDateTime, newDescription, newLocation,
-            newEventStatus);
-    editSingleEvent(subject, startDateTime, endDateTime, newContext);
-    return null;
-  }
-
   @Override
   public Event editSingleEvent(String subject, String startDateTime, String endDateTime,
                                EventContext newContext) {
     log.append("edit event subject " + subject
         + " from " + startDateTime + " to " + endDateTime + " with " + newContext.getSubject()
         + "\nprint events on " + startDateTime.substring(0, 10) + "\nexit\n");
-    return null;
-  }
-
-  public EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
-                                     String newSubject, String newStartDateTime,
-                                     String newEndDateTime, String newDescription,
-                                     String newLocation, String newEventStatus)
-      throws IllegalArgumentException {
-    EventContext newContext =
-        new EventContext(newSubject, newStartDateTime, newEndDateTime, newDescription, newLocation,
-            newEventStatus);
-    editEventSeries(subject, startDateTime, endDateTime, newContext);
     return null;
   }
 

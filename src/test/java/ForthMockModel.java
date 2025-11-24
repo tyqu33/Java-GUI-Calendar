@@ -33,16 +33,6 @@ public class ForthMockModel implements CalendarInterface {
     return null;
   }
 
-  public EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
-                                       String description, String location, String eventStatus,
-                                       String weekdays, int repeatTimes, String seriesEndDateTime)
-      throws IllegalArgumentException {
-    EventContext context =
-        new EventContext(subject, startDateTime, endDateTime, description, location, eventStatus);
-    createEventSeries(context, weekdays, repeatTimes, seriesEndDateTime);
-    return null;
-  }
-
   @Override
   public EventSeries createEventSeries(EventContext context, String weekdays, int repeatTimes,
                                        String seriesEndDateTime)
@@ -60,35 +50,12 @@ public class ForthMockModel implements CalendarInterface {
     return null;
   }
 
-  public Event editSingleEvent(String subject, String startDateTime, String endDateTime,
-                               String newSubject, String newStartDateTime, String newEndDateTime,
-                               String newDescription, String newLocation, String newEventStatus)
-      throws IllegalArgumentException {
-    EventContext newContext =
-        new EventContext(newSubject, newStartDateTime, newEndDateTime, newDescription, newLocation,
-            newEventStatus);
-    editSingleEvent(subject, startDateTime, endDateTime, newContext);
-    return null;
-  }
-
   @Override
   public Event editSingleEvent(String subject, String startDateTime, String endDateTime,
                                EventContext newContext)
       throws IllegalArgumentException {
     log.append("edit event description " + subject
         + " from " + startDateTime + " to " + endDateTime + " with " + newContext.getDescription());
-    return null;
-  }
-
-  public EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
-                                     String newSubject, String newStartDateTime,
-                                     String newEndDateTime, String newDescription,
-                                     String newLocation, String newEventStatus)
-      throws IllegalArgumentException {
-    EventContext newContext =
-        new EventContext(newSubject, newStartDateTime, newEndDateTime, newDescription, newLocation,
-            newEventStatus);
-    editEventSeries(subject, startDateTime, endDateTime, newContext);
     return null;
   }
 
