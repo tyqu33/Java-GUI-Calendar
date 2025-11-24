@@ -29,6 +29,7 @@ import java.time.format.TextStyle;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -249,7 +250,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     // leftPanel.add(new JScrollPane(eventDisplayArea));
     leftPanel.add(eventScrollPane);
 
-    buildCalendarGrid();
+    buildCalendarGrid(new HashMap<>());
     //calendarGridPanel.setBackground(LIGHT_BLUE_GRAY);
 
     add(topPanel, BorderLayout.NORTH);
@@ -264,7 +265,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   /**
    * Build the calendar grid with day buttons.
    */
-  private void buildCalendarGrid() {
+  private void buildCalendarGrid(Map<LocalDate, List<Event>> eventsMap) {
     calendarGridPanel.removeAll();
 
     String[] dayNames = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -283,7 +284,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       for (int col = 0; col < 7; col++) {
         JButton dayButton = new JButton();
         dayButton.setPreferredSize(new Dimension(100, 80));
-        //dayButton.setOpaque(true);
+        dayButton.setOpaque(true);
+        dayButton.setBorderPainted(true);
 
         //dayButton.setBorderPainted(false);
         //dayButton.setBackground(Color.WHITE);
@@ -299,10 +301,51 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
           dayButton.setFont(new Font("Arial", Font.PLAIN, 16));
 
           LocalDate date = LocalDate.of(currentYear, currentMonth, day);
+          dayButton.setBackground(Color.WHITE);
 
           if (date.equals(LocalDate.now())) {
-            dayButton.setBackground(Color.YELLOW);
+            dayButton.setBorder(BorderFactory.createLineBorder(new Color(255, 255, 224), 3));
           }
+
+          StringBuilder buttonText = new StringBuilder();
+          buttonText.append("<html><div style='text-align: center; padding-top: 5px;'>");
+          buttonText.append("<b>").append(day).append("</b>");
+
+          boolean hasEvents = eventsMap != null && eventsMap.containsKey(date)
+              && !eventsMap.get(date).isEmpty();
+
+          if (hasEvents) {
+            List<Event> eventsOnDate = eventsMap.get(date);
+            if (!eventsOnDate.isEmpty()) {
+              buttonText.append("<br><span style='font-size: 9px;'>");
+              int count = 0;
+              for (Event event : eventsOnDate) {
+                if (count >= 2) {
+                  buttonText.append("...");
+                  break;
+                }
+                String eventName = event.getSubject();
+                if (eventName.length() > 10) {
+                  eventName = eventName.substring(0, 10) + "...";
+                }
+                buttonText.append(eventName);
+                if (count < eventsOnDate.size() - 1 && count < 1) {
+                  buttonText.append("<br>");
+                }
+                count++;
+              }
+              buttonText.append("</span>");
+            }
+            buttonText.append("</div></html>");
+            dayButton.setText(buttonText.toString());
+            dayButton.setFont(new Font("Arial", Font.PLAIN, 12));
+            dayButton.setVerticalAlignment(SwingConstants.TOP);
+
+            if (hasEvents) {
+              dayButton.setBackground(new Color(230, 240, 255));
+            }
+          }
+
           dayButton.addActionListener(e -> {
             if (this.features != null) {
               features.viewEventsOnDate(date);
@@ -336,7 +379,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     this.currentYear = year;
     this.currentMonth = month;
     updateMonthYearLabel();
-    buildCalendarGrid();
+    buildCalendarGrid(events);
   }
 
   @Override
@@ -412,10 +455,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private JPanel createSingleEventPanel(Event event, String calendarName) {
     JPanel row = new JPanel(new BorderLayout(5, 5));
     row.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-    row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+    row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
 
     String eventInfo = printSingleEventInfo(event).toString();
-    JLabel eventInfoLabel = new JLabel(eventInfo);
+    JLabel eventInfoLabel = new JLabel("<html>" + eventInfo.replace("\n", "<br>") + "</html>");
     eventInfoLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
     row.add(eventInfoLabel, BorderLayout.CENTER);
 
@@ -436,19 +479,18 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
         dialog.setVisible(true);
       });
 
-      JMenuItem copyItem = new JMenuItem("Copy To");
+      /*JMenuItem copyItem = new JMenuItem("Copy To");
       copyItem.addActionListener(evt -> {
         CopySingleEventDialog dialog = new CopySingleEventDialog(this, features);
         dialog.setVisible(true);
-      });
+      });*/
       popup.add(editItem);
-      popup.addSeparator();
-      popup.add(copyItem);
+      //popup.addSeparator();
+      //popup.add(copyItem);
       popup.show(optionsButton, 0, eventInfoLabel.getHeight());
     });
     JPanel btnContainer = new JPanel(new BorderLayout());
     btnContainer.setOpaque(false);
-    btnContainer.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
     btnContainer.add(optionsButton, BorderLayout.CENTER);
 
     row.add(btnContainer, BorderLayout.EAST);
@@ -533,7 +575,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
   @Override
   public void refresh() {
-    buildCalendarGrid();
+    buildCalendarGrid(new HashMap<>());
     revalidate();
     repaint();
   }
@@ -637,7 +679,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
           options[0]);
 
       if (choice == -1) {
-        return; // User cancelled
+        return;
       }
 
       String extension = (choice == 0) ? ".csv" : ".ical";
@@ -1313,7 +1355,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
               JPanel row = createSingleEventPanel((Event) eventDecorator.getEvent(), calendarName);
               row.setBorder(BorderFactory.createTitledBorder("Calendar: " + calendarName));
               row.setAlignmentX(Component.LEFT_ALIGNMENT);
-              row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+              row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
 
               resultPanel.add(row);
               resultPanel.add(Box.createVerticalStrut(5));
