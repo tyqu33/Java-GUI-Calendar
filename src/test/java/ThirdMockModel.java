@@ -1,5 +1,6 @@
 import calendar.enums.UserStatus;
 import calendar.event.Event;
+import calendar.event.EventContext;
 import calendar.event.EventSeries;
 import calendar.model.CalendarInterface;
 import java.time.LocalDate;
@@ -18,7 +19,7 @@ class ThirdMockModel implements CalendarInterface {
   /**
    * Constructor for test class ThirdMockModel.
    *
-   * @param log the record to receive input arguments for commands
+   * @param log          the record to receive input arguments for commands
    * @param uniqueResult the result of output
    */
   public ThirdMockModel(StringBuilder log, String uniqueResult) {
@@ -27,21 +28,27 @@ class ThirdMockModel implements CalendarInterface {
   }
 
   @Override
-  public Event createSingleEvent(String subject, String startDateTime, String endDateTime,
-                                 String description, String location, String eventStatus,
-                                 String seriesId) throws IllegalArgumentException {
+  public Event createSingleEvent(EventContext context, String seriesId)
+      throws IllegalArgumentException {
     return null;
   }
 
-  @Override
   public EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
                                        String description, String location, String eventStatus,
                                        String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException {
-    log.append("create event " + subject
-        + " from " + startDateTime + " to " + endDateTime + " repeats " + weekdays
-        + " until " + seriesEndDateTime + "\nexit\n");
+    EventContext context =
+        new EventContext(subject, startDateTime, endDateTime, description, location, eventStatus);
+    createEventSeries(context, weekdays, repeatTimes, seriesEndDateTime);
+    return null;
+  }
 
+  @Override
+  public EventSeries createEventSeries(EventContext context, String weekdays, int repeatTimes,
+                                       String seriesEndDateTime) {
+    log.append("create event " + context.getSubject()
+        + " from " + context.getStartDateTime() + " to " + context.getEndDateTime() + " repeats "
+        + weekdays + " until " + seriesEndDateTime + "\nexit\n");
     return null;
   }
 
@@ -51,24 +58,44 @@ class ThirdMockModel implements CalendarInterface {
     return null;
   }
 
-  @Override
   public Event editSingleEvent(String subject, String startDateTime, String endDateTime,
                                String newSubject, String newStartDateTime, String newEndDateTime,
                                String newDescription, String newLocation, String newEventStatus)
       throws IllegalArgumentException {
-    log.append("edit event location " + subject
-        + " from " + startDateTime + " to " + endDateTime + " with " + newLocation);
+    EventContext newContext =
+        new EventContext(newSubject, newStartDateTime, newEndDateTime, newDescription, newLocation,
+            newEventStatus);
+    editSingleEvent(subject, startDateTime, endDateTime, newContext);
     return null;
   }
 
   @Override
+  public Event editSingleEvent(String subject, String startDateTime, String endDateTime,
+                               EventContext newContext)
+      throws IllegalArgumentException {
+    log.append("edit event location " + subject
+        + " from " + startDateTime + " to " + endDateTime + " with " + newContext.getLocation());
+    return null;
+  }
+
   public EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
                                      String newSubject, String newStartDateTime,
                                      String newEndDateTime, String newDescription,
                                      String newLocation, String newEventStatus)
       throws IllegalArgumentException {
+    EventContext newContext =
+        new EventContext(newSubject, newStartDateTime, newEndDateTime, newDescription, newLocation,
+            newEventStatus);
+    editEventSeries(subject, startDateTime, endDateTime, newContext);
+    return null;
+  }
+
+  @Override
+  public EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
+                                     EventContext newContext)
+      throws IllegalArgumentException {
     log.append("edit events start " + subject
-        + " from " + startDateTime + " with " + newStartDateTime
+        + " from " + startDateTime + " with " + newContext.getStartDateTime()
         + "\nexit\n");
     return null;
   }

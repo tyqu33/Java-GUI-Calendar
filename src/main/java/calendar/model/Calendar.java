@@ -2,6 +2,7 @@ package calendar.model;
 
 import calendar.enums.UserStatus;
 import calendar.event.Event;
+import calendar.event.EventContext;
 import calendar.event.EventSeries;
 import calendar.util.CsvExporter;
 import calendar.util.IcalExporter;
@@ -34,10 +35,10 @@ public class Calendar implements CalendarInterface {
   }
 
   @Override
-  public Event createSingleEvent(String subject, String startDateTime, String endDateTime,
-                                 String description, String location, String eventStatus,
-                                 String seriesId)
+  public Event createSingleEvent(EventContext context, String seriesId)
       throws IllegalArgumentException {
+    String subject = context.getSubject();
+    String startDateTime = context.getStartDateTime();
     if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
@@ -52,6 +53,7 @@ public class Calendar implements CalendarInterface {
     }
     LocalDateTime end = null;
     boolean isAllDay = false;
+    String endDateTime = context.getEndDateTime();
     if (endDateTime == null || endDateTime.isEmpty()) {
       isAllDay = true;
       LocalDate date = start.toLocalDate();
@@ -64,7 +66,9 @@ public class Calendar implements CalendarInterface {
         throw new IllegalArgumentException("Invalid end date/time: " + endDateTime);
       }
     }
-
+    String description = context.getDescription();
+    String location = context.getLocation();
+    String eventStatus = context.getEventStatus();
     Event event = new Event.EventBuilder(subject, start)
         .end(end)
         .description(description)
@@ -81,10 +85,11 @@ public class Calendar implements CalendarInterface {
   }
 
   @Override
-  public EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
-                                       String description, String location, String eventStatus,
+  public EventSeries createEventSeries(EventContext context,
                                        String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException {
+    String subject = context.getSubject();
+    String startDateTime = context.getStartDateTime();
     if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
@@ -98,6 +103,7 @@ public class Calendar implements CalendarInterface {
       throw new IllegalArgumentException("Invalid start date/time: " + startDateTime);
     }
     LocalDateTime end = null;
+    String endDateTime = context.getEndDateTime();
     if (endDateTime != null && !endDateTime.isEmpty()) {
       try {
         end = LocalDateTime.parse(endDateTime);
@@ -117,6 +123,9 @@ public class Calendar implements CalendarInterface {
         throw new IllegalArgumentException("Invalid series end date/time: " + seriesEndDateTime);
       }
     }
+    String description = context.getDescription();
+    String location = context.getLocation();
+    String eventStatus = context.getEventStatus();
 
     EventSeries.EventSeriesBuilder seriesBuilder = EventSeries.builder(subject, start, weekdays)
         .description(description)
@@ -183,9 +192,7 @@ public class Calendar implements CalendarInterface {
 
   @Override
   public Event editSingleEvent(String subject, String startDateTime, String endDateTime,
-                               String newSubject, String newStartDateTime, String newEndDateTime,
-                               String newDescription, String newLocation,
-                               String newEventStatus) throws IllegalArgumentException {
+                               EventContext context) throws IllegalArgumentException {
     if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
@@ -211,11 +218,18 @@ public class Calendar implements CalendarInterface {
       throw new IllegalArgumentException("Event does not exist, subject: " + subject
           + ", start: " + startDateTime + ", end: " + endDateTime);
     }
+
+    String newSubject = context.getSubject();
+    String newStartDateTime = context.getStartDateTime();
+    String newEndDateTime = context.getEndDateTime();
     boolean isKeyChanged =
         (newSubject != null && !newSubject.isEmpty())
             || (newStartDateTime != null && !newStartDateTime.isEmpty())
             || (newEndDateTime != null && !newEndDateTime.isEmpty());
 
+    String newDescription = context.getDescription();
+    String newLocation = context.getLocation();
+    String newEventStatus = context.getEventStatus();
     if (!isKeyChanged) {
       if (newDescription != null && !newDescription.isEmpty()) {
         oldEvent.editDescription(newDescription);
@@ -260,10 +274,11 @@ public class Calendar implements CalendarInterface {
         throw new IllegalArgumentException(
             "Event on the new subject, start date/time, end date/time already exists");
       }
+      EventContext newContext =
+          new EventContext(finalNewSubject, finalNewStart.toString(), finalNewEnd.toString(),
+              newDescription, newLocation, newEventStatus);
       Event newEvent =
-          createSingleEvent(finalNewSubject, finalNewStart.toString(), finalNewEnd.toString(),
-              newDescription,
-              newLocation, newEventStatus, null);
+          createSingleEvent(newContext, null);
       calendar.remove(oldKey);
       calendar.put(newKey, newEvent);
 
@@ -274,10 +289,9 @@ public class Calendar implements CalendarInterface {
 
   @Override
   public EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
-                                     String newSubject, String newStartDateTime,
-                                     String newEndDateTime,
-                                     String newDescription, String newLocation,
-                                     String newEventStatus) throws IllegalArgumentException {
+                                     EventContext context) throws IllegalArgumentException {
+
+
     if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
@@ -315,16 +329,25 @@ public class Calendar implements CalendarInterface {
       throw new IllegalArgumentException("Event does not exist, subject: "
           + subject + ", start: " + startDateTime + ", end: " + endDateTime);
     }
+
+    String newSubject = context.getSubject();
+    String newStartDateTime = context.getStartDateTime();
+    String newEndDateTime = context.getEndDateTime();
     boolean isKeyChanged =
         (newSubject != null && !newSubject.isEmpty())
             || (newStartDateTime != null && !newStartDateTime.isEmpty())
             || (newEndDateTime != null && !newEndDateTime.isEmpty());
     String seriesId = oldEvent.getSeriesId();
+
+    String newDescription = context.getDescription();
+    String newLocation = context.getLocation();
+    String newEventStatus = context.getEventStatus();
     // This event does not belong to any series
     if (seriesId == null) {
-      editSingleEvent(subject, startDateTime, endDateTime, newSubject, newStartDateTime,
-          newEndDateTime,
-          newDescription, newLocation, newEventStatus);
+      EventContext newContext =
+          new EventContext(newSubject, newStartDateTime, newEndDateTime, newDescription,
+              newLocation, newEventStatus);
+      editSingleEvent(subject, startDateTime, endDateTime, newContext);
     } else {
       EventSeries series = seriesManager.get(seriesId);
       if (series == null) {
@@ -410,9 +433,10 @@ public class Calendar implements CalendarInterface {
               (series.getOccurrences() == null ? 0 : series.getOccurrences().intValue());
           String newSeriesEndDate =
               series.getEndDate() == null ? "" : series.getEndDate().toString();
-          EventSeries newSeries = createEventSeries(finalNewSubject,
-              finalNewStart.toString(), finalNewEnd.toString(), newDescription, newLocation,
-              newEventStatus,
+          EventContext newContext =
+              new EventContext(finalNewSubject, finalNewStart.toString(), finalNewEnd.toString(),
+                  newDescription, newLocation, newEventStatus);
+          EventSeries newSeries = createEventSeries(newContext,
               newWeekdays, newRepeatTimes, newSeriesEndDate);
           return newSeries;
         }

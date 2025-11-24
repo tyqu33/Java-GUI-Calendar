@@ -2,19 +2,27 @@
 
 We have added functions in CalendarInterface (initially created in HW4) to support operations needed in HW5.
 
-# 2 Bug fix for Calendar Implementation
+# 2 Code Smell Fix from HW5 Feedback
 
-We have fixed some abysmal bugs from the feedback of HW4 and added tests to HW5. In detail, we have fixed the bug where
-editing an event series given the start date/time and no end date/time will now locate the series correctly without
-error of taking the end date/time as 17:00. And We have fixed the bug where editing part of an event series given the
-edit start date/time after the first event and leave some events unchanged to work correctly.
+We have fixed some code smells from the feedback of HW5 and added tests to HW6.
+
+1) We have fixed the code smell that methods in CalendarInterface have a too long argument list. In detail, we added
+EventContext to incorporate the 6 event properties, and replaced regarding argument lists in methods with it.
+
+a) CalendarInterface and Calendar applies EventContext.
+b) Parsing command using regex (CreateCommand, EditCommand) in controller applies EventContext.
+c) MultiCalendarManager and JframeCalendarView applies EventContext.
+
+d) regarding test files: mock models (MockModel, SecondMockModel, ThirdMockModel, ForthMockModel)
+tests (CalendarTest, ModelTest, CalendarEntityTest, ManagerModelTest, ViewCommandsTest) 
+In these test files, calls to according methods using EventContext have been justified.
+
+2) We added tests missing from HW5 self evaluation.
 
 # 3 Stick to MVC Design Pattern
 
-We still stick to the basic pattern of MVC as we put the command parsing and operation designation in the controller,
-the new CalendarEntityInterface and MultiCalendarManagerInterface as the model part, and the view as the output channel.
+We still stick to the basic pattern of MVC. For GUI, We apply a Features interface for clarification of what function
+GUI needs. We have added another controller GuiCalendarController to manage the designation between JframeCalendarView
+and model (MultiCalendarManager).
 
-# 4 Composition to Reuse
 
-We apply the CalendarInterface as a member in our new implementation to support sublevel operations in a calendar, on
-top of which we apply name and timezone to wrap it up as a calendar entity at the main level of HW5.

@@ -1,5 +1,6 @@
 package calendar.controller;
 
+import calendar.event.EventContext;
 import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import java.time.LocalDate;
@@ -20,11 +21,9 @@ public interface Features {
    */
   void createCalendar(String calendarName, String timeZone);
 
-  void createEvent(String subject, String startDateTime, String endDateTime,
-                   String description, String location, String eventStatus);
+  void createEvent(EventContext context);
 
-  void createEventSeries(String subject, String startDateTime, String endDateTime,
-                         String description, String location, String eventStatus,
+  void createEventSeries(EventContext context,
                          String weekdays, int occurrences, String seriesEndDate);
 
   /**
@@ -42,9 +41,7 @@ public interface Features {
   void switchCalendar(String calendarName);
 
   void editEvent(String subject, String startDateTime, String endDateTime,
-                 String newSubject, String newStartDateTime, String newEndDateTime,
-                 String newDescription, String newLocation,
-                 String newEventStatus, String calendarName);
+                 EventContext newContext, String calendarName);
 
   void editCalendarProperty(String calendarName, String propertyName, String propertyValue);
 

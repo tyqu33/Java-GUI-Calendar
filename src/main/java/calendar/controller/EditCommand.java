@@ -1,5 +1,6 @@
 package calendar.controller;
 
+import calendar.event.EventContext;
 import calendar.model.CalendarInterface;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,8 +68,9 @@ public class EditCommand extends CommandFactory {
       } catch (IllegalArgumentException e) {
         throw new IllegalArgumentException(e.getMessage());
       }
-      this.calendar.editSingleEvent(subject, startDateTime, endDateTime, newSubject,
-          newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
+      EventContext newContext = new EventContext(newSubject, newStartDateTime, newEndDateTime,
+          newDescription, newLocation, newEventStatus);
+      this.calendar.editSingleEvent(subject, startDateTime, endDateTime, newContext);
       return;
     }
 
@@ -84,8 +86,9 @@ public class EditCommand extends CommandFactory {
       } catch (IllegalArgumentException e) {
         throw new IllegalArgumentException(e.getMessage());
       }
-      this.calendar.editEventSeries(subject, startDateTime, endDateTime, newSubject,
-          newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
+      EventContext newContext = new EventContext(newSubject, newStartDateTime, newEndDateTime,
+          newDescription, newLocation, newEventStatus);
+      this.calendar.editEventSeries(subject, startDateTime, endDateTime, newContext);
       return;
     }
 
@@ -101,8 +104,9 @@ public class EditCommand extends CommandFactory {
       } catch (IllegalArgumentException e) {
         throw new IllegalArgumentException(e.getMessage());
       }
-      this.calendar.editEventSeries(subject, startDateTime, endDateTime, newSubject,
-          newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
+      EventContext newContext = new EventContext(newSubject, newStartDateTime, newEndDateTime,
+          newDescription, newLocation, newEventStatus);
+      this.calendar.editEventSeries(subject, startDateTime, endDateTime, newContext);
       return;
     }
     throw new IllegalArgumentException("Edit event failure. Wrong format: " + commandLine);

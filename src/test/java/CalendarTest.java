@@ -8,6 +8,7 @@ import calendar.controller.ExportCommand;
 import calendar.controller.PrintCommand;
 import calendar.controller.ShowCommand;
 import calendar.event.Event;
+import calendar.event.EventContext;
 import calendar.event.EventSeries;
 import calendar.model.Calendar;
 import calendar.model.EventKey;
@@ -56,15 +57,15 @@ public class CalendarTest {
 
   @Test
   public void testCreateEvent() {
-    Event event = calendar.createSingleEvent(
+    EventContext context = new EventContext(
         "Team Meeting",
         "2025-05-01T10:00",
         "2025-05-01T11:00",
         "Weekly sync meeting",
         "Conference Room A",
-        "public",
-        null
+        "public"
     );
+    Event event = calendar.createSingleEvent(context, null);
     assertNotNull(event);
     assertEquals("Team Meeting", event.getSubject());
     assertEquals(LocalDateTime.parse("2025-05-01T10:00"), event.getStartDateTime());
@@ -75,17 +76,15 @@ public class CalendarTest {
 
   @Test
   public void testCeateEventSeries() {
-    EventSeries series = calendar.createEventSeries(
+    EventContext context = new EventContext(
         "Lecture",
         "2025-05-05T10:00",
         "2025-05-05T11:00",
         "Java",
         "Room 101",
-        "public",
-        "MW",
-        6,
-        ""
+        "public"
     );
+    EventSeries series = calendar.createEventSeries(context, "MW", 6, "");
     Set<EventKey> keys = series.getSeriesKeys();
     assertEquals(6, keys.size());
     List<LocalDate> dates = keys.stream()

@@ -6,6 +6,7 @@ import calendar.controller.CalendarController;
 import calendar.controller.ExportCommand;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
+import calendar.event.EventContext;
 import calendar.event.EventSeries;
 import calendar.model.CalendarInterface;
 import calendar.model.MultiCalendarManager;
@@ -47,8 +48,9 @@ public class ViewCommandsTest {
 
   @Test
   public void testPrintCommandOnDate() throws IOException {
-    calendar.createSingleEvent("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
-        "Team meeting", "Room A", "public", null);
+    EventContext context = new EventContext("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
+        "Team meeting", "Room A", "public");
+    calendar.createSingleEvent(context, null);
 
     String input = "print events on 2025-05-01\nexit\n";
     Readable readable = new StringReader(input);
@@ -65,10 +67,14 @@ public class ViewCommandsTest {
 
   @Test
   public void testPrintCommandBetween() throws IOException {
-    calendar.createSingleEvent("Event1", "2025-05-01T10:00", "2025-05-01T11:00",
-        null, null, "public", null);
-    calendar.createSingleEvent("Event2", "2025-05-02T14:00", "2025-05-02T15:00",
-        null, null, "public", null);
+    EventContext context0 = new EventContext("Event1", "2025-05-01T10:00", "2025-05-01T11:00",
+        null, null, "public");
+    calendar.createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Event2", "2025-05-02T14:00", "2025-05-02T15:00",
+        null, null, "public");
+    calendar.createSingleEvent(context1, null);
+
 
     String input = "print events from 2025-05-01T00:00 to 2025-05-03T00:00\nexit\n";
     Readable readable = new StringReader(input);
@@ -108,8 +114,9 @@ public class ViewCommandsTest {
 
   @Test
   public void testShowCommand1() throws IOException {
-    calendar.createSingleEvent("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
-        null, null, "public", null);
+    EventContext context = new EventContext("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
+        null, null, "public");
+    calendar.createSingleEvent(context, null);
 
     String input = "show status on 2025-05-01T10:30\nexit\n";
     Readable readable = new StringReader(input);
@@ -123,8 +130,9 @@ public class ViewCommandsTest {
 
   @Test
   public void testShowCommand2() throws IOException {
-    calendar.createSingleEvent("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
-        null, null, "public", null);
+    EventContext context = new EventContext("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
+        null, null, "public");
+    calendar.createSingleEvent(context, null);
 
     String input = "show status on 2025-05-01T09:00\nexit\n";
     Readable readable = new StringReader(input);
@@ -150,8 +158,9 @@ public class ViewCommandsTest {
 
   @Test
   public void testExportCommand() throws IOException {
-    calendar.createSingleEvent("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
-        "Description", "Location", "public", null);
+    EventContext context = new EventContext("Meeting", "2025-05-01T10:00", "2025-05-01T11:00",
+        "Description", "Location", "public");
+    calendar.createSingleEvent(context, null);
 
     String tempFile = "test_export_" + System.currentTimeMillis() + ".csv";
     String input = "export cal " + tempFile + "\nexit\n";
@@ -205,7 +214,7 @@ public class ViewCommandsTest {
 
     String result = output.toString();
     assertTrue(result.contains("Invalid command") || result.contains("Error")
-            || result.contains("Invalid"));
+        || result.contains("Invalid"));
   }
 
   @Test
@@ -218,7 +227,7 @@ public class ViewCommandsTest {
 
     String result = output.toString();
     assertTrue(result.contains("Error") || result.contains("Invalid")
-            || result.contains("failed"));
+        || result.contains("failed"));
   }
 
   @Test
@@ -231,7 +240,7 @@ public class ViewCommandsTest {
 
     String result = output.toString();
     assertTrue(result.contains("Show status failed") || result.contains("Invalid command")
-            || result.contains("Error"));
+        || result.contains("Error"));
   }
 
   @Test
@@ -244,7 +253,7 @@ public class ViewCommandsTest {
 
     String result = output.toString();
     assertTrue(result.contains("Show status failed") || result.contains("Invalid command")
-            || result.contains("Error"));
+        || result.contains("Error"));
   }
 
   /**
@@ -273,14 +282,12 @@ public class ViewCommandsTest {
     }
 
     @Override
-    public Event createSingleEvent(String subject, String start, String end, String desc,
-                                   String loc, String status, String seriesId) {
+    public Event createSingleEvent(EventContext context, String seriesId) {
       return null;
     }
 
     @Override
-    public EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
-                                         String description, String location, String eventStatus,
+    public EventSeries createEventSeries(EventContext context,
                                          String weekdays, int repeatTimes,
                                          String seriesEndDateTime) {
       return null;
@@ -293,16 +300,13 @@ public class ViewCommandsTest {
 
     @Override
     public Event editSingleEvent(String subject, String startDateTime, String endDateTime,
-                                 String newSubject, String newStartDateTime, String newEndDateTime,
-                                 String newDescription, String newLocation, String newEventStatus) {
+                                 EventContext newContext) {
       return null;
     }
 
     @Override
     public EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
-                                       String newSubject, String newStartDateTime,
-                                       String newEndDateTime, String newDescription,
-                                       String newLocation, String newEventStatus) {
+                                       EventContext newContext) {
       return null;
     }
 
@@ -403,9 +407,10 @@ public class ViewCommandsTest {
 
   @Test
   public void testExportCommandIcal() throws IOException {
-    calendar.createSingleEvent("Meeting", "2025-05-01T10:00",
+    EventContext context = new EventContext("Meeting", "2025-05-01T10:00",
         "2025-05-01T11:00", "Description", "Location",
-        "public", null);
+        "public");
+    calendar.createSingleEvent(context, null);
     String tempFile = "test" + System.currentTimeMillis() + ".ical";
     String input = "export cal " + tempFile + "\nexit\n";
     Readable readable = new StringReader(input);

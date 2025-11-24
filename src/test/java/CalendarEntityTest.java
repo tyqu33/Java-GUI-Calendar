@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import calendar.calendarentity.CalendarEntity;
+import calendar.event.EventContext;
 import calendar.model.Calendar;
 import java.time.ZoneId;
 import org.junit.Before;
@@ -259,9 +260,9 @@ public class CalendarEntityTest {
   @Test
   public void testProvidedCalendar() {
     Calendar customCalendar = new Calendar();
-    customCalendar.createSingleEvent("Test Event", "2025-11-01T10:00",
-        "2025-11-01T11:00", "", "", "public", null);
-
+    EventContext context = new EventContext("Test Event", "2025-11-01T10:00",
+        "2025-11-01T11:00", "", "", "public");
+    customCalendar.createSingleEvent(context, null);
     CalendarEntity entity = CalendarEntity.builder()
         .calendarName("TestCal")
         .timezone(ZoneId.of("UTC"))

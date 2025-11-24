@@ -3,6 +3,7 @@ package calendar.model;
 import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
+import calendar.event.EventContext;
 import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import calendar.event.EventSeries;
@@ -166,9 +167,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
         Duration duration = Duration.between(event.getStartDateTime(), event.getEndDateTime());
         LocalDateTime targetEnd = targetStart.plus(duration);
 
-        createSingleEventWithException(event,
-            this.getCalendarEntity(targetCalendarName).getCalendar(),
-            targetStart, targetEnd, targetCalendarName);
+        createSingleEventWithException(event, targetStart, targetEnd, targetCalendarName);
       }
     }
 
@@ -201,7 +200,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
         LocalDateTime newEnd = event.getEndDateTime().atZone(oldZoneId)
             .withZoneSameInstant(newZoneId).toLocalDateTime();
 
-        createSingleEventWithException(event, newCalendar, newStart, newEnd, targetCalendarName);
+        createSingleEventWithException(event, newStart, newEnd, targetCalendarName);
       }
     }
 
@@ -258,7 +257,7 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
           LocalDateTime newEnd = eventEnd.plusDays(dayOffset).atZone(oldZoneId)
               .withZoneSameInstant(newZoneId).toLocalDateTime();
 
-          createSingleEventWithException(event, newCalendar, newStart, newEnd, targetCalendarName);
+          createSingleEventWithException(event, newStart, newEnd, targetCalendarName);
         } else {
 
           String oldSeriesId = event.getSeriesId();
@@ -301,13 +300,11 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
             continue;
           }
           try {
+            EventContext context = new EventContext(oldSeries.getSubject(),
+                newSeriesStart.toString(), newSeriesEnd.toString(), oldSeries.getDescription(),
+                oldSeries.getLocation(), oldSeries.getEventStatus().toString());
             newCalendar.createEventSeries(
-                oldSeries.getSubject(),
-                newSeriesStart.toString(),
-                newSeriesEnd.toString(),
-                oldSeries.getDescription(),
-                oldSeries.getLocation(),
-                oldSeries.getEventStatus().toString(),
+                context,
                 oldSeries.getWeekdays(),
                 newOccurrence,
                 null
@@ -361,19 +358,16 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
     }
   }
 
-  private void createSingleEventWithException(Event event, CalendarInterface targetCalendar,
+  private void createSingleEventWithException(Event event,
                                               LocalDateTime newStart, LocalDateTime newEnd,
                                               String targetCalendarName)
       throws IllegalArgumentException {
     try {
+      EventContext context = new EventContext(event.getSubject().trim(),
+          newStart.toString(), newEnd.toString(), event.getDescription(),
+          event.getLocation(), event.getEventStatus().toString());
       this.getCalendarEntity(targetCalendarName).getCalendar().createSingleEvent(
-          event.getSubject().trim(),
-          newStart.toString(),
-          newEnd.toString(),
-          event.getDescription(),
-          event.getLocation(),
-          event.getEventStatus().toString(),
-          null);
+          context, null);
     } catch (IllegalArgumentException e) {
       if (e.getMessage().equals("Event already exists")) {
         throw new IllegalArgumentException("Calendar " + targetCalendarName

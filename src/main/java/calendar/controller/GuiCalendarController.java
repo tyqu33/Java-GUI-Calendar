@@ -3,6 +3,7 @@ package calendar.controller;
 import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
+import calendar.event.EventContext;
 import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import calendar.model.Calendar;
@@ -63,8 +64,7 @@ public class GuiCalendarController implements Features {
   }
 
   @Override
-  public void createEvent(String subject, String startDateTime, String endDateTime,
-                          String description, String location, String eventStatus) {
+  public void createEvent(EventContext context) {
 
     CalendarEntityInterface entity = model.getCurrentCalendarEntity();
     if (entity == null) {
@@ -72,12 +72,11 @@ public class GuiCalendarController implements Features {
       return;
     }
     try {
-      EventInterface event = entity.getCalendar().createSingleEvent(
-          subject, startDateTime, endDateTime, description, location, eventStatus, null);
-      event.editDescription(description);
-      event.editLocation(location);
-      event.editEventStatus(eventStatus);
-      view.displaySuccess("Event '" + subject + "' created successfully!");
+      EventInterface event = entity.getCalendar().createSingleEvent(context, null);
+      event.editDescription(context.getDescription());
+      event.editLocation(context.getLocation());
+      event.editEventStatus(context.getEventStatus());
+      view.displaySuccess("Event '" + context.getSubject() + "' created successfully!");
       refreshCurrentMonth();
     } catch (IllegalArgumentException e) {
       if (e.getMessage().equals("subject or startDateTime cannot be empty")) {
@@ -89,8 +88,7 @@ public class GuiCalendarController implements Features {
   }
 
   @Override
-  public void createEventSeries(String subject, String startDateTime, String endDateTime,
-                                String description, String location, String eventStatus,
+  public void createEventSeries(EventContext context,
                                 String weekdays, int occurrences, String seriesEndDate) {
     try {
       CalendarEntityInterface currentEntity = model.getCurrentCalendarEntity();
@@ -99,13 +97,11 @@ public class GuiCalendarController implements Features {
         view.displayError("No calendar selected. Please select or create a calendar first.");
         return;
       }
-      currentEntity.getCalendar().createEventSeries(
-          subject, startDateTime, endDateTime,
-          description, location, eventStatus,
+      currentEntity.getCalendar().createEventSeries(context,
           weekdays, occurrences, seriesEndDate
       );
 
-      view.displaySuccess("Event series '" + subject + "' created successfully!");
+      view.displaySuccess("Event series '" + context.getSubject() + "' created successfully!");
 
       // Refresh current month view
       refreshCurrentMonth();
@@ -141,9 +137,8 @@ public class GuiCalendarController implements Features {
   }
 
   @Override
-  public void editEvent(String subject, String startDateTime, String endDateTime, String newSubject,
-                        String newStartDateTime, String newEndDateTime, String newDescription,
-                        String newLocation, String newEventStatus, String calendarName) {
+  public void editEvent(String subject, String startDateTime, String endDateTime,
+                        EventContext newContext, String calendarName) {
     CalendarEntityInterface entity;
     if (calendarName == null) {
       entity = model.getCurrentCalendarEntity();
@@ -156,8 +151,7 @@ public class GuiCalendarController implements Features {
     }
     try {
       EventInterface event = entity.getCalendar().editSingleEvent(
-          subject, startDateTime, endDateTime, newSubject,
-          newStartDateTime, newEndDateTime, newDescription, newLocation, newEventStatus);
+          subject, startDateTime, endDateTime, newContext);
       view.displaySuccess("Event '" + subject + "' updated successfully!");
       refreshCurrentMonth();
     } catch (IllegalArgumentException e) {

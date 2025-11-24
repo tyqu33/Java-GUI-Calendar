@@ -4,6 +4,7 @@ import calendar.controller.Features;
 import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
+import calendar.event.EventContext;
 import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import java.awt.BorderLayout;
@@ -723,14 +724,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       JButton cancelButton = new JButton("Cancel");
 
       createButton.addActionListener(e -> {
-        String eventName = this.panel.getEventName();
-        LocalDateTime startDateTime = this.panel.getStartTime();
-        LocalDateTime endDateTime = this.panel.getEndTime();
-        String description = this.panel.getDescription();
-        String location = this.panel.getEventLocation();
-        String eventStatus = this.panel.getEventStatus();
-        features.createEvent(eventName, startDateTime.toString(), endDateTime.toString(),
-            description, location, eventStatus);
+        EventContext context = new EventContext(this.panel.getEventName(),
+            this.panel.getStartTime().toString(), this.panel.getEndTime().toString(),
+            this.panel.getDescription(), this.panel.getEventLocation(), this.panel.getEventStatus()
+            );
+        features.createEvent(context);
         dispose();
       });
       cancelButton.addActionListener(e -> dispose());
@@ -762,16 +760,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       JButton cancelButton = new JButton("Cancel");
 
       confirmButton.addActionListener(e -> {
-        String newEventName = this.panel.getEventName();
-        LocalDateTime startDateTime = this.panel.getStartTime();
-        LocalDateTime endDateTime = this.panel.getEndTime();
-        String description = this.panel.getDescription();
-        String location = this.panel.getEventLocation();
-        String eventStatus = this.panel.getEventStatus();
+        EventContext newContext = new EventContext(this.panel.getEventName(),
+            this.panel.getStartTime().toString(), this.panel.getEndTime().toString(),
+            this.panel.getDescription(), this.panel.getEventLocation(), this.panel.getEventStatus());
         features.editEvent(oldEvent.getSubject(), oldEvent.getStartDateTime().toString(),
-            oldEvent.getEndDateTime().toString(), newEventName,
-            startDateTime.toString(), endDateTime.toString(), description, location, eventStatus,
-            calendarName);
+            oldEvent.getEndDateTime().toString(), newContext, calendarName);
         dispose();
       });
       cancelButton.addActionListener(e -> dispose());
@@ -1244,13 +1237,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
             seriesEndDate = endDateObj.toString();
           }
 
+          EventContext context = new EventContext(subject, startDateTime, endDateTime,
+              description.isEmpty() ? null : description, location.isEmpty() ? null : location,
+              status);
           features.createEventSeries(
-              subject,
-              startDateTime,
-              endDateTime,
-              description.isEmpty() ? null : description,
-              location.isEmpty() ? null : location,
-              status,
+              context,
               weekdays.toString(),
               occurrences,
               seriesEndDate

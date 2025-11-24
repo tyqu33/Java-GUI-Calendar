@@ -7,6 +7,7 @@ import calendar.calendarentity.CalendarEntityInterface;
 import calendar.controller.CalendarController;
 import calendar.enums.EventStatus;
 import calendar.event.Event;
+import calendar.event.EventContext;
 import calendar.model.MultiCalendarManager;
 import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
@@ -207,12 +208,19 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity0.getCalendar().createSingleEvent("Meeting2", "2025-10-28T13:00",
-        "2025-10-28T15:00", "", "", "", null);
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T13:00",
-        "2025-10-28T17:00", "", "", "", null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting2", "2025-10-28T13:00",
+        "2025-10-28T15:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context1, null);
+
+    EventContext context2 = new EventContext("Meeting", "2025-10-28T13:00",
+        "2025-10-28T17:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context2, null);
+
     manager.copyEvent("Meeting", "2025-10-28T09:00", "Lectures", "2025-10-28T09:00");
     assertNotNull(entity1.getCalendar().getEvents());
     for (Event event : entity1.getCalendar().getEvents()) {
@@ -235,8 +243,11 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
+
+    EventContext context = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context, null);
+
     try {
       manager.copyEvent(null, "2025-10-28T09:00", "Lectures", "2025-10-28T09:00");
       assert false;
@@ -319,10 +330,15 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity1.getCalendar().createSingleEvent("Meeting", "2025-10-28T06:00",
-        "2025-10-28T09:00", "", "", "", null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-28T06:00",
+        "2025-10-28T09:00", "", "", "");
+    entity1.getCalendar().createSingleEvent(context1, null);
+
     try {
       manager.copyEvent("Meeting", "2025-10-28T09:00", "Lectures", "2025-10-28T06:00");
       assert false;
@@ -352,10 +368,15 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
-        "2025-10-28T20:00", "", "", "", null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context1, null);
+
     manager.copyEventsOnThatDay("2025-10-28", "Lectures", "2025-10-28");
     assertNotNull(entity1.getCalendar());
     assertNotNull(entity1.getCalendar().getEvents());
@@ -383,10 +404,15 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T06:00",
-        "2025-10-28T09:00", "", "", "", null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-28T06:00",
+        "2025-10-28T09:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context1, null);
+
     try {
       manager.copyEventsOnThatDay(null, "Lectures", "2025-10-28");
       assert false;
@@ -457,14 +483,23 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
-        "2025-10-28T20:00", "", "", "", null);
-    entity1.getCalendar().createSingleEvent("Meeting", "2025-10-28T06:00",
-        "2025-10-28T09:00", "", "", "", null);
-    entity1.getCalendar().createSingleEvent("Meeting", "2025-10-28T15:00",
-        "2025-10-28T17:00", "", "", "", null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context1, null);
+
+    EventContext context2 = new EventContext("Meeting", "2025-10-28T06:00",
+        "2025-10-28T09:00", "", "", "");
+    entity1.getCalendar().createSingleEvent(context2, null);
+
+    EventContext context3 = new EventContext("Meeting", "2025-10-28T15:00",
+        "2025-10-28T17:00", "", "", "");
+    entity1.getCalendar().createSingleEvent(context3, null);
+
     try {
       manager.copyEventsOnThatDay("2025-10-28", "Lectures", "2025-10-28");
       assert false;
@@ -482,10 +517,15 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
-        "2025-10-28T20:00", "", "", "", null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context1, null);
+
     assertEquals(2, entity0.getCalendar().getEvents().size());
 
 
@@ -515,13 +555,19 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
-        "2025-10-28T20:00", "", "", "", null);
-    entity0.getCalendar().createEventSeries("Business Meeting",
-        "2025-10-29T08:00", "2025-10-29T10:00",
-        "", "", "", "WR", 4, null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context1, null);
+
+    EventContext context2 = new EventContext("Business Meeting",
+        "2025-10-29T08:00", "2025-10-29T10:00", "", "", "");
+    entity0.getCalendar().createEventSeries(context2, "WR", 4, null);
+
     assertEquals(6, entity0.getCalendar().getEvents().size());
 
     for (Event event : entity0.getCalendar().getEvents()) {
@@ -582,13 +628,18 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
-        "2025-10-28T20:00", "", "", "", null);
-    entity0.getCalendar().createEventSeries("Business Meeting",
-        "2025-10-27T08:00", "2025-10-27T10:00",
-        "", "", "", "MT", 0, "2025-11-07");
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context1, null);
+
+    EventContext context2 = new EventContext("Business Meeting",
+        "2025-10-27T08:00", "2025-10-27T10:00", "", "", "");
+    entity0.getCalendar().createEventSeries(context2, "MT", 0, "2025-11-07");
 
     for (Event event : entity0.getCalendar().getEvents()) {
       assertNotNull(event);
@@ -645,13 +696,18 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T18:00",
-        "2025-10-28T20:00", "", "", "", null);
-    entity0.getCalendar().createEventSeries("Business Meeting",
-        "2025-10-31T08:00", "2025-10-31T10:00",
-        "", "", "", "FSU", 2, null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-28T18:00",
+        "2025-10-28T20:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context1, null);
+
+    EventContext context2 = new EventContext("Business Meeting",
+        "2025-10-31T08:00", "2025-10-31T10:00", "", "", "");
+    entity0.getCalendar().createEventSeries(context2, "FSU", 2, null);
 
     for (Event event : entity0.getCalendar().getEvents()) {
       assertNotNull(event);
@@ -711,8 +767,11 @@ public class ManagerModelTest {
     assertNotNull(entity0);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
+
+    EventContext context = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context, null);
+
     try {
       manager.copyEventsBetweenDays(null, "2025-11-07", "Lectures", "2025-10-28");
       assert false;
@@ -812,10 +871,15 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createSingleEvent("Meeting", "2025-10-28T09:00",
-        "2025-10-28T12:00", "", "", "", null);
-    entity1.getCalendar().createSingleEvent("Meeting", "2025-10-28T06:00",
-        "2025-10-28T09:00", "", "", "", null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-28T09:00",
+        "2025-10-28T12:00", "", "", "");
+    entity0.getCalendar().createSingleEvent(context0, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-28T06:00",
+        "2025-10-28T09:00", "", "", "");
+    entity1.getCalendar().createSingleEvent(context1, null);
+
     try {
       manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "2025-10-28");
       assert false;
@@ -836,12 +900,15 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createEventSeries("Meeting",
-        "2025-10-29T08:00", "2025-10-29T10:00",
-        "", "", "", "WR", 2, null);
-    entity1.getCalendar().createEventSeries("Meeting",
-        "2025-10-29T05:00", "2025-10-29T07:00",
-        "", "", "", "WR", 2, null);
+
+    EventContext context0 = new EventContext("Meeting", "2025-10-29T08:00",
+        "2025-10-29T10:00", "", "", "");
+    entity0.getCalendar().createEventSeries(context0, "WR", 2, null);
+
+    EventContext context1 = new EventContext("Meeting", "2025-10-29T05:00",
+        "2025-10-29T07:00", "", "", "");
+    entity1.getCalendar().createEventSeries(context1, "WR", 2, null);
+
     try {
       manager.copyEventsBetweenDays("2025-10-28", "2025-11-07", "Lectures", "2025-10-28");
       assert false;
@@ -862,9 +929,11 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createEventSeries("Meeting",
-        "2025-10-29T01:00", "2025-10-29T04:00",
-        "", "", "", "WR", 2, null);
+
+    EventContext context = new EventContext("Meeting", "2025-10-29T01:00",
+        "2025-10-29T04:00", "", "", "");
+    entity0.getCalendar().createEventSeries(context, "WR", 2, null);
+
     try {
       manager.copyEventsBetweenDays("2025-10-29", "2025-11-06", "Lectures", "2025-10-28");
       assert false;
@@ -885,9 +954,11 @@ public class ManagerModelTest {
     assertNotNull(entity1);
     manager.useThisCalendarEntity(entity0);
     assertNotNull(entity0.getCalendar());
-    entity0.getCalendar().createEventSeries("Meeting",
-        "2025-10-29T20:00", "2025-10-29T23:00",
-        "", "", "", "WR", 4, null);
+
+    EventContext context = new EventContext("Meeting", "2025-10-29T20:00",
+        "2025-10-29T23:00", "", "", "");
+    entity0.getCalendar().createEventSeries(context, "WR", 4, null);
+
     try {
       manager.copyEventsBetweenDays("2025-10-29", "2025-11-06", "Lectures", "2025-10-29");
       assert false;

@@ -4,6 +4,7 @@ package calendar.model;
 import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
+import calendar.event.EventContext;
 import calendar.event.EventSeries;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,21 +24,13 @@ public interface CalendarInterface {
    * A single event may span across days.
    * Two events cannot have the same subject, start date/time and end date/time.
    *
-   * @param subject       the theme of the event on calendar (must specify)
-   * @param startDateTime the start date and/or time of the event (must specify)
-   * @param endDateTime   the end date and/or time of the event (must specify) if input is null,
-   *                      note this event as an all-day event with default time from 8am to 5pm
-   * @param description   a longer description of the event (optional)
-   * @param location      the location of the event (optional)
-   * @param eventStatus   the eventStatus (public/private) (optional)
-   * @param seriesId      null by default; if this event is a single independent event, then null;
-   *                      if belongs to a series, then not null
+   * @param context  the parameter object to pass event properties
+   * @param seriesId null by default; if this event is a single independent event, then null;
+   *                 if belongs to a series, then not null
    * @return the single event that is created; if fail to create, return null
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
-  Event createSingleEvent(String subject, String startDateTime, String endDateTime,
-                          String description, String location, String eventStatus,
-                          String seriesId)
+  Event createSingleEvent(EventContext context, String seriesId)
       throws IllegalArgumentException;
 
   /**
@@ -48,14 +41,7 @@ public interface CalendarInterface {
    * A single event in a series can only span one day (it must start and finish on the same day).
    * Two events in the calendar cannot have the same subject, start date/time and end date/time.
    *
-   * @param subject           the theme of the event series on calendar (must specify)
-   * @param startDateTime     the start date and/or time of the event series (must specify)
-   * @param endDateTime       the end date and/or time of the event series (must specify)
-   *                          if input is null, note every event in this series as an all-day event
-   *                          with default time range from 8am to 5pm
-   * @param description       a longer description of the event series (optional)
-   * @param location          the location of the event series (optional)
-   * @param eventStatus       the eventStatus (public/private) (optional)
+   * @param context           the parameter object to pass event properties
    * @param weekdays          (optional) a sequence of characters where each character denotes a day
    *                          of the event's occurrence e.g., MRU. 'M' is Monday, 'T' is Tuesday,
    *                          'W' is Wednesday, 'R' is Thursday, 'F' is Friday, 'S' is Saturday,
@@ -65,8 +51,7 @@ public interface CalendarInterface {
    * @return the event series that is created; if fail to create, return null
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
-  EventSeries createEventSeries(String subject, String startDateTime, String endDateTime,
-                                String description, String location, String eventStatus,
+  EventSeries createEventSeries(EventContext context,
                                 String weekdays, int repeatTimes, String seriesEndDateTime)
       throws IllegalArgumentException;
 
@@ -87,42 +72,30 @@ public interface CalendarInterface {
    * To edit a single event given subject, startDateTime and endDateTime.
    * Error will show if the event to be edited does not exist.
    *
-   * @param subject          the theme of the event to be edited on calendar
-   * @param startDateTime    the start date and/or time of the event to be edited
-   * @param endDateTime      the end date and/or time of the event to be edited
-   * @param newSubject       the new theme of the event on calendar
-   * @param newStartDateTime the new start date and/or time of the event on calendar
-   * @param newEndDateTime   the new end date and/or time of the event on calendar
-   * @param newDescription   the new description of the event
-   * @param newLocation      the new location of the event
-   * @param newEventStatus   the new eventStatus (public/private) of the event
+   * @param subject       the theme of the event to be edited on calendar
+   * @param startDateTime the start date and/or time of the event to be edited
+   * @param endDateTime   the end date and/or time of the event to be edited
+   * @param newContext    the parameter object to pass new event properties
    * @return the event that has been updated; null if edition fails
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
   Event editSingleEvent(String subject, String startDateTime, String endDateTime,
-                        String newSubject, String newStartDateTime, String newEndDateTime,
-                        String newDescription, String newLocation, String newEventStatus)
+                        EventContext newContext)
       throws IllegalArgumentException;
 
   /**
    * To edit an event series given subject, startDateTime and endDateTime.
    * Error will show if the event series to be edited does not exist.
    *
-   * @param subject          the theme of the event series to be edited on calendar
-   * @param startDateTime    the start date and/or time of the event series to be edited
-   * @param endDateTime      the end date and/or time of the event series to be edited
-   * @param newSubject       the new theme of the event series on calendar
-   * @param newStartDateTime the new start date and/or time of the event series on calendar
-   * @param newEndDateTime   the new end date and/or time of the event series on calendar
-   * @param newDescription   the new description of the event series
-   * @param newLocation      the new location of the event series
-   * @param newEventStatus   the new eventStatus (public/private) of the event series
+   * @param subject       the theme of the event series to be edited on calendar
+   * @param startDateTime the start date and/or time of the event series to be edited
+   * @param endDateTime   the end date and/or time of the event series to be edited
+   * @param newContext    the parameter object to pass new event properties
    * @return the event series that has been updated; null if edition fails
    * @throws IllegalArgumentException if inputs are not illegally formatted
    */
   EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
-                              String newSubject, String newStartDateTime, String newEndDateTime,
-                              String newDescription, String newLocation, String newEventStatus)
+                              EventContext newContext)
       throws IllegalArgumentException;
 
   /**
@@ -137,7 +110,7 @@ public interface CalendarInterface {
    * Retrieves all events within the given time range.
    *
    * @param start the start date & time of the query range
-   * @param end the end date & time of the query range
+   * @param end   the end date & time of the query range
    * @return a List of Event objects within the range, sorted by start time
    */
   List<Event> getEventsBetween(LocalDateTime start, LocalDateTime end);
@@ -161,7 +134,7 @@ public interface CalendarInterface {
    * Exports all events in the calendar to iCal format.
    *
    * @param calendarName the name of the calendar
-   * @param timezone the timezone of the calendar
+   * @param timezone     the timezone of the calendar
    * @return an iCal formatted string
    */
   String exportToIcal(String calendarName, ZoneId timezone);

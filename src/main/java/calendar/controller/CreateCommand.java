@@ -1,5 +1,6 @@
 package calendar.controller;
 
+import calendar.event.EventContext;
 import calendar.model.CalendarInterface;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,9 +62,9 @@ public class CreateCommand extends CommandFactory {
       weekdays = matcher.group(5).trim();
       repeatTimes = Integer.parseInt(matcher.group(6));
 
-      this.calendar.createEventSeries(subject, startDateTime, endDateTime,
-          description, location, eventStatus,
-          weekdays, repeatTimes, null);
+      EventContext context = new EventContext(subject, startDateTime, endDateTime,
+          description, location, eventStatus);
+      this.calendar.createEventSeries(context, weekdays, repeatTimes, null);
       return;
     }
 
@@ -75,9 +76,9 @@ public class CreateCommand extends CommandFactory {
       weekdays = matcher.group(5).trim();
       seriesEndDateTime = matcher.group(6).trim();
 
-      this.calendar.createEventSeries(subject, startDateTime, endDateTime,
-          description, location, eventStatus,
-          weekdays, 0, seriesEndDateTime);
+      EventContext context = new EventContext(subject, startDateTime, endDateTime,
+          description, location, eventStatus);
+      this.calendar.createEventSeries(context, weekdays, 0, seriesEndDateTime);
       return;
     }
 
@@ -87,8 +88,9 @@ public class CreateCommand extends CommandFactory {
       startDateTime = matcher.group(3).trim();
       endDateTime = matcher.group(4).trim();
 
-      this.calendar.createSingleEvent(subject, startDateTime, endDateTime,
-          description, location, eventStatus, null);
+      EventContext context = new EventContext(subject, startDateTime, endDateTime,
+          description, location, eventStatus);
+      this.calendar.createSingleEvent(context, null);
       return;
     }
 
@@ -99,9 +101,9 @@ public class CreateCommand extends CommandFactory {
       weekdays = matcher.group(4).trim();
       repeatTimes = Integer.parseInt(matcher.group(5));
 
-      this.calendar.createEventSeries(subject, startDateTime, null,
-          description, location, eventStatus,
-          weekdays, repeatTimes, null);
+      EventContext context = new EventContext(subject, startDateTime, null,
+          description, location, eventStatus);
+      this.calendar.createEventSeries(context, weekdays, repeatTimes, null);
       return;
     }
 
@@ -112,9 +114,9 @@ public class CreateCommand extends CommandFactory {
       weekdays = matcher.group(4).trim();
       seriesEndDateTime = matcher.group(5).trim();
 
-      this.calendar.createEventSeries(subject, startDateTime, null,
-          description, location, eventStatus,
-          weekdays, 0, seriesEndDateTime);
+      EventContext context = new EventContext(subject, startDateTime, null,
+          description, location, eventStatus);
+      this.calendar.createEventSeries(context, weekdays, 0, seriesEndDateTime);
       return;
     }
 
@@ -122,8 +124,9 @@ public class CreateCommand extends CommandFactory {
     if (matcher.matches()) {
       subject = ((matcher.group(1) != null) ? matcher.group(1) : matcher.group(2)).trim();
       startDateTime = matcher.group(3).trim();
-      this.calendar.createSingleEvent(subject, startDateTime, null,
-          description, location, eventStatus, null);
+      EventContext context = new EventContext(subject, startDateTime, null,
+          description, location, eventStatus);
+      this.calendar.createSingleEvent(context, null);
       return;
     }
     throw new IllegalArgumentException("Create event failure. Wrong format: " + commandLine);
