@@ -466,6 +466,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     optionsButton.setPreferredSize(new Dimension(30, 20));
     optionsButton.setFocusable(false);
 
+    boolean ifSeries = event.getSeriesId() != null;
+
     optionsButton.addActionListener(e -> {
       JPopupMenu popup = new JPopupMenu();
 
@@ -480,6 +482,16 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
             event, calendarName, false);
         dialog.setVisible(true);
       });
+
+      if (ifSeries) {
+        //        JMenuItem editSeriesItem = new JMenuItem("Edit Series");
+        //        editSeriesItem.addActionListener(evt -> {
+        //          EditEventSeriesDialog dialog = new EditEventSeriesDialog(this, features,
+        //              event, calendarName);
+        //          dialog.setVisible(true);
+        //        });
+      }
+
 
       /*JMenuItem copyItem = new JMenuItem("Copy To");
       copyItem.addActionListener(evt -> {
@@ -1356,6 +1368,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       setSize(550, 700);
     }
   }
+
+
 
   private class SearchEventAcrossCalendarDialog extends JDialog {
     private JTextField inputKeyword;

@@ -42,8 +42,8 @@ class SecondMockModel implements CalendarInterface {
                                        String seriesEndDateTime)
       throws IllegalArgumentException {
     log.append("create event " + context.getSubject()
-        + " from " + context.getStartDateTime() + " to " + context.getEndDateTime() + " repeats " +
-        weekdays
+        + " from " + context.getStartDateTime() + " to " + context.getEndDateTime() + " repeats "
+        + weekdays
         + " for " + repeatTimes + " times" + "\nexit\n");
     return null;
   }

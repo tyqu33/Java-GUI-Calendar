@@ -45,10 +45,6 @@ public interface Features {
 
   void editCalendarProperty(String calendarName, String propertyName, String propertyValue);
 
-  void manipulateCalendar();
-
-  void backToCalendarToday();
-
   Collection<EventDecorator> getEventsAcrossCalendar(String keyword);
 
   /**

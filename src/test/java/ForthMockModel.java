@@ -38,8 +38,8 @@ public class ForthMockModel implements CalendarInterface {
                                        String seriesEndDateTime)
       throws IllegalArgumentException {
     log.append(
-        "create event " + context.getSubject() + " on " + context.getStartDateTime() + " repeats " +
-            weekdays
+        "create event " + context.getSubject() + " on " + context.getStartDateTime() + " repeats "
+            + weekdays
             + " until " + seriesEndDateTime + "\nexit\n");
     return null;
   }

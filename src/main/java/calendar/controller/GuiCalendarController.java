@@ -186,16 +186,6 @@ public class GuiCalendarController implements Features {
   }
 
   @Override
-  public void manipulateCalendar() {
-
-  }
-
-  @Override
-  public void backToCalendarToday() {
-
-  }
-
-  @Override
   public Collection<EventDecorator> getEventsAcrossCalendar(String keyword) {
     return model.getEventsAcrossCalendar(keyword);
   }
