@@ -469,13 +469,15 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     optionsButton.addActionListener(e -> {
       JPopupMenu popup = new JPopupMenu();
 
+      boolean isPartOfSeries = event.getSeriesId() != null;
+
       JMenuItem editItem = new JMenuItem("Edit");
       editItem.addActionListener(evt -> {
         //        String oldEventName = event.getSubject();
         //        LocalDateTime oldStart = event.getStartDateTime();
         //        LocalDateTime oldEnd = event.getEndDateTime();
         EditSingleEventDialog dialog = new EditSingleEventDialog(this, features,
-            event, calendarName);
+            event, calendarName, false);
         dialog.setVisible(true);
       });
 
@@ -487,6 +489,17 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       popup.add(editItem);
       //popup.addSeparator();
       //popup.add(copyItem);
+
+      if (isPartOfSeries) {
+        JMenuItem editSeriesItem = new JMenuItem("Edit Series");
+        editSeriesItem.addActionListener(evt -> {
+          EditSingleEventDialog dialog = new EditSingleEventDialog(
+              this, features, event, calendarName, true);
+          dialog.setVisible(true);
+        });
+        popup.add(editSeriesItem);
+      }
+
       popup.show(optionsButton, 0, eventInfoLabel.getHeight());
     });
     JPanel btnContainer = new JPanel(new BorderLayout());
@@ -596,16 +609,28 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
         readingCalendarList = true;
         try {
-          calendarSelector.removeAllItems();
-          calendarSelector.addItem("Default");
-          for (String calendarName : features.getAllCalendarNames()) {
-            if (!calendarName.equals("Default")) {
-              calendarSelector.addItem(calendarName);
-            }
-          }
           Object currentSelection = calendarSelector.getSelectedItem();
+
+          calendarSelector.removeAllItems();
+
+          Collection<String> allCalendarNames = features.getAllCalendarNames();
+          for (String calendarName : allCalendarNames) {
+            calendarSelector.addItem(calendarName);
+          }
           if (currentSelection != null) {
-            calendarSelector.setSelectedItem(currentSelection);
+            boolean stillExists = false;
+            for (String name : allCalendarNames) {
+              if (name.equals(currentSelection)) {
+                stillExists = true;
+                break;
+              }
+            }
+            if (stillExists) {
+              calendarSelector.setSelectedItem(currentSelection);
+            } else {
+              String currentCalendarName = features.getCurrentCalendarName();
+              calendarSelector.setSelectedItem(currentCalendarName);
+            }
           }
         } finally {
           readingCalendarList = false;
@@ -788,10 +813,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
   private class EditSingleEventDialog extends JDialog {
     private SingleEventPanel panel;
+    private boolean isEditSeries;
 
     public EditSingleEventDialog(JFrame parent, Features features,
-                                 Event oldEvent, String calendarName) {
-      super(parent, "Edit Single Event", true);
+                                 Event oldEvent, String calendarName, boolean isEditSeries) {
+      super(parent, isEditSeries ? "Edit Event Series" : "Edit Single Event", true);
+      this.isEditSeries = isEditSeries;
       setLayout(new BorderLayout(10, 10));
       panel = new SingleEventPanel();
       add(panel, BorderLayout.CENTER);
@@ -802,11 +829,32 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       JButton cancelButton = new JButton("Cancel");
 
       confirmButton.addActionListener(e -> {
-        EventContext newContext = new EventContext(this.panel.getEventName(),
-            this.panel.getStartTime().toString(), this.panel.getEndTime().toString(),
-            this.panel.getDescription(), this.panel.getEventLocation(), this.panel.getEventStatus());
-        features.editEvent(oldEvent.getSubject(), oldEvent.getStartDateTime().toString(),
-            oldEvent.getEndDateTime().toString(), newContext, calendarName);
+        EventContext newContext = new EventContext(
+            this.panel.getEventName(),
+            this.panel.getStartTime().toString(),
+            this.panel.getEndTime().toString(),
+            this.panel.getDescription(),
+            this.panel.getEventLocation(),
+            this.panel.getEventStatus()
+        );
+
+        if (isEditSeries) {
+          features.editEventSeries(
+              oldEvent.getSubject(),
+              oldEvent.getStartDateTime().toString(),
+              oldEvent.getEndDateTime().toString(),
+              newContext,
+              calendarName
+          );
+        } else {
+          features.editEvent(
+            oldEvent.getSubject(),
+            oldEvent.getStartDateTime().toString(),
+            oldEvent.getEndDateTime().toString(),
+            newContext,
+            calendarName
+        );
+        }
         dispose();
       });
       cancelButton.addActionListener(e -> dispose());
@@ -940,15 +988,15 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       LocalDateTime end = event.getEndDateTime();
 
       inputYear.setSelectedItem(start.getYear());
-      inputMonth.setSelectedItem(start.getMonthValue() - 1);
+      inputMonth.setSelectedIndex(start.getMonthValue() - 1);
       // remember to test the day of month when changing year and month!
       getDayOptions(inputYear, inputMonth, inputDay);
       inputDay.setSelectedItem(start.getDayOfMonth());
       setLocalDateTimeToSpinner(event.getStartDateTime(), startTimeSpinner);
       setLocalDateTimeToSpinner(event.getEndDateTime(), endTimeSpinner);
-      inputDescription.setText(event.getDescription());
-      inputLocation.setText(event.getLocation());
-      inputEventStatus.setSelectedItem(event.getEventStatus());
+      inputDescription.setText(event.getDescription() != null ? event.getDescription() : "");
+      inputLocation.setText(event.getLocation() != null ? event.getLocation() : "");
+      inputEventStatus.setSelectedItem(event.getEventStatus().toString());
     }
 
   }

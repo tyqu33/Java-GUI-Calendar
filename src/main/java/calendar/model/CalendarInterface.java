@@ -153,4 +153,6 @@ public interface CalendarInterface {
    * @return the event series with given seriesId
    */
   EventSeries getEventSeries(String seriesId);
+
+  void convertTimezone(ZoneId oldZone, ZoneId newZone);
 }

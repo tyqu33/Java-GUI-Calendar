@@ -77,9 +77,9 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
     if (!this.calendarManager.containsKey(calendarName)) {
       throw new IllegalArgumentException("Calendar with name does not exist: " + calendarName);
     }
-    if (property.equals("name")) {
-      CalendarEntityInterface oldEntity = this.calendarManager.get(calendarName);
+    CalendarEntityInterface oldEntity = this.calendarManager.get(calendarName);
 
+    if (property.equals("name")) {
       CalendarEntityInterface newEntity = new CalendarEntity.CalendarEntityBuilder()
           .calendarName(propertyValue.trim())
           .timezone(oldEntity.getTimeZone())
@@ -90,26 +90,31 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
       this.calendarEntity = newEntity;
       return newEntity;
     } else if (property.equals("timezone")) {
-      ZoneId newZoneId = null;
+      ZoneId oldZone = oldEntity.getTimeZone();
+      ZoneId newZone;
       try {
-        newZoneId = ZoneId.of(propertyValue.trim());
+        newZone = ZoneId.of(propertyValue.trim());
       } catch (DateTimeException e) {
         throw new IllegalArgumentException("Invalid time zone: " + propertyValue);
       }
-      CalendarEntityInterface oldEntity = this.calendarManager.get(calendarName);
+      CalendarInterface calendar = oldEntity.getCalendar();
+      calendar.convertTimezone(oldZone, newZone);
 
       CalendarEntityInterface newEntity = new CalendarEntity.CalendarEntityBuilder()
           .calendarName(calendarName)
-          .timezone(newZoneId)
-          .calendar((Calendar) oldEntity.getCalendar())
+          .timezone(newZone)
+          .calendar((Calendar) calendar)
           .build();
 
       this.calendarManager.replace(calendarName, newEntity);
+      if (this.calendarEntity != null
+          && this.calendarEntity.getCalendarName().equals(calendarName)) {
+        this.calendarEntity = newEntity;
+      }
       return newEntity;
     } else {
       throw new IllegalArgumentException("Invalid property input: " + property);
     }
-
   }
 
   @Override

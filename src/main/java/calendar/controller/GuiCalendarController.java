@@ -126,12 +126,9 @@ public class GuiCalendarController implements Features {
   public void switchCalendar(String calendarName) {
     CalendarEntityInterface entity = model.getCalendarEntity(calendarName);
     if (entity != null) {
-      model.useThisCalendarEntity(entity);
-      LocalDate oldToday = LocalDate.now();
-      ZoneId oldZoneId = ZoneId.systemDefault();
-      LocalDate today = oldToday.atStartOfDay(oldZoneId)
-          .withZoneSameInstant(entity.getTimeZone()).toLocalDate();
-      view.displayMonthView(today.getYear(), today.getMonthValue(), new HashMap<>());
+      model.useThisCalendarEntity(entity);model.useThisCalendarEntity(entity);
+
+      refreshCurrentMonth();
       view.displayCurrentCalendar(entity.getCalendarName(), entity.getTimeZone().toString());
     }
   }
@@ -167,19 +164,24 @@ public class GuiCalendarController implements Features {
 
   @Override
   public void editCalendarProperty(String calendarName, String propertyName, String propertyValue) {
-    model.editCalendar(calendarName, propertyName, propertyValue);
+    try {
+      model.editCalendar(calendarName, propertyName, propertyValue);
 
-    CalendarEntityInterface currentEntity = model.getCurrentCalendarEntity();
-    if (currentEntity != null) {
-      view.displayCurrentCalendar(
-          currentEntity.getCalendarName(),
-          currentEntity.getTimeZone().toString()
-      );
-      List<String> allCalendarNames = new ArrayList<>();
-      for (CalendarEntityInterface entity : model.getAllCalendars()) {
-        allCalendarNames.add(entity.getCalendarName());
+      CalendarEntityInterface currentEntity = model.getCurrentCalendarEntity();
+      if (currentEntity != null) {
+        view.displayCurrentCalendar(
+            currentEntity.getCalendarName(),
+            currentEntity.getTimeZone().toString()
+        );
+        List<String> allCalendarNames = new ArrayList<>();
+        for (CalendarEntityInterface entity : model.getAllCalendars()) {
+          allCalendarNames.add(entity.getCalendarName());
+        }
+        view.displayAvailableCalendars(allCalendarNames);
+        refreshCurrentMonth();
       }
-      view.displayAvailableCalendars(allCalendarNames);
+    } catch (IllegalArgumentException e) {
+      view.displayError("Failed to edit calendar: " + e.getMessage());
     }
   }
 
@@ -290,4 +292,49 @@ public class GuiCalendarController implements Features {
     return entity != null ? entity.getTimeZone().getId() : ZoneId.systemDefault().getId();
   }
 
+  @Override
+  public void editEventSeries(String subject, String startDateTime, String endDateTime,
+                              EventContext newContext, String calendarName) {
+    try {
+      CalendarEntityInterface entity;
+      if (calendarName == null || calendarName.isEmpty()) {
+        entity = model.getCurrentCalendarEntity();
+      } else {
+        entity = model.getCalendarEntity(calendarName);
+      }
+
+      if (entity == null) {
+        view.displayError("No calendar selected. Please select or create a calendar first.");
+        return;
+      }
+
+      CalendarInterface calendar = entity.getCalendar();
+
+      EventInterface updatedSeries = calendar.editEventSeries(
+          subject,
+          startDateTime,
+          endDateTime,
+          newContext
+      );
+
+      if (updatedSeries != null) {
+        view.displaySuccess("Event series '" + newContext.getSubject()
+            + "' updated successfully!");
+        refreshCurrentMonth();
+      } else {
+        view.displayError("Failed to update event series.");
+      }
+
+    } catch (IllegalArgumentException e) {
+      if (e.getMessage().equals("Event on the new subject, start date/time,"
+          + " end date/time already exists")) {
+        view.displayError("Failed to edit event series: "
+            + "Event after edition conflicts with existing event");
+      } else {
+        view.displayError("Failed to edit event series: " + e.getMessage());
+      }
+    } catch (Exception e) {
+      view.displayError("Unexpected error: " + e.getMessage());
+    }
+  }
 }

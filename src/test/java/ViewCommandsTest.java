@@ -282,6 +282,11 @@ public class ViewCommandsTest {
     }
 
     @Override
+    public void convertTimezone(ZoneId oldZone, ZoneId newZone) {
+      return;
+    }
+
+    @Override
     public Event createSingleEvent(EventContext context, String seriesId) {
       return null;
     }

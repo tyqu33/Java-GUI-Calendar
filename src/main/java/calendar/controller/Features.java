@@ -76,4 +76,7 @@ public interface Features {
   String getCurrentCalendarName();
 
   String getCurrentCalendarTimezone();
+
+  void editEventSeries(String subject, String startDateTime, String endDateTime,
+                       EventContext newContext, String calendarName);
 }

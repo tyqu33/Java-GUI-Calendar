@@ -14,6 +14,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -291,16 +292,17 @@ public class Calendar implements CalendarInterface {
   public EventSeries editEventSeries(String subject, String startDateTime, String endDateTime,
                                      EventContext context) throws IllegalArgumentException {
 
-
     if (subject == null || subject.isEmpty() || startDateTime == null || startDateTime.isEmpty()) {
       throw new IllegalArgumentException("subject or startDateTime cannot be empty");
     }
+
     LocalDateTime oldStart;
     try {
       oldStart = LocalDateTime.parse(startDateTime);
     } catch (DateTimeParseException e) {
       throw new IllegalArgumentException("Invalid start date/time: " + startDateTime);
     }
+
     LocalDateTime oldEnd = null;
     boolean hasEnd = false;
     if (endDateTime != null && !endDateTime.isEmpty()) {
@@ -325,11 +327,11 @@ public class Calendar implements CalendarInterface {
 
     EventKey oldKey = new EventKey(subject, oldStart, oldEnd);
     Event oldEvent = calendar.get(oldKey);
+
     if (oldEvent == null) {
       throw new IllegalArgumentException("Event does not exist, subject: "
           + subject + ", start: " + startDateTime + ", end: " + endDateTime);
     }
-
     String newSubject = context.getSubject();
     String newStartDateTime = context.getStartDateTime();
     String newEndDateTime = context.getEndDateTime();
@@ -337,117 +339,151 @@ public class Calendar implements CalendarInterface {
         (newSubject != null && !newSubject.isEmpty())
             || (newStartDateTime != null && !newStartDateTime.isEmpty())
             || (newEndDateTime != null && !newEndDateTime.isEmpty());
+
     String seriesId = oldEvent.getSeriesId();
 
     String newDescription = context.getDescription();
     String newLocation = context.getLocation();
     String newEventStatus = context.getEventStatus();
+
     // This event does not belong to any series
     if (seriesId == null) {
       EventContext newContext =
           new EventContext(newSubject, newStartDateTime, newEndDateTime, newDescription,
               newLocation, newEventStatus);
       editSingleEvent(subject, startDateTime, endDateTime, newContext);
-    } else {
-      EventSeries series = seriesManager.get(seriesId);
-      if (series == null) {
-        throw new IllegalStateException("The series with subject: " + subject
-            + ", start: " + startDateTime + ", end: " + endDateTime + "does not exit");
-      } else {
-        if (!isKeyChanged) {
-          for (EventKey eventKey : series.getEventKeys()) {
-            Event eventInSeries = calendar.get(eventKey);
-            if (eventInSeries != null) {
-              if (newDescription != null && !newDescription.isEmpty()) {
-                eventInSeries.editDescription(newDescription);
-              }
-              if (newLocation != null && !newLocation.isEmpty()) {
-                eventInSeries.editLocation(newLocation);
-              }
-              if (newEventStatus != null && !newEventStatus.isEmpty()) {
-                if (!newEventStatus.equals("private") && !newEventStatus.equals("public")) {
-                  throw new IllegalArgumentException("Invalid event series status: "
-                      + newEventStatus);
-                }
-                eventInSeries.editEventStatus(newEventStatus);
-              }
-            }
-          }
+      return null;
+    }
+
+    EventSeries oldSeries = seriesManager.get(seriesId);
+    if (oldSeries == null) {
+      throw new IllegalStateException("The series with subject: " + subject
+          + ", start: " + startDateTime + ", end: " + endDateTime + " does not exist");
+    }
+
+    if (!isKeyChanged) {
+      for (EventKey eventKey : oldSeries.getEventKeys()) {
+        Event eventInSeries = calendar.get(eventKey);
+        if (eventInSeries != null) {
           if (newDescription != null && !newDescription.isEmpty()) {
-            series.editDescription(newDescription);
+            eventInSeries.editDescription(newDescription);
           }
           if (newLocation != null && !newLocation.isEmpty()) {
-            series.editLocation(newLocation);
+            eventInSeries.editLocation(newLocation);
           }
           if (newEventStatus != null && !newEventStatus.isEmpty()) {
-            series.editEventStatus(newEventStatus);
+            if (!newEventStatus.equals("private") && !newEventStatus.equals("public")) {
+              throw new IllegalArgumentException("Invalid event series status: "
+                  + newEventStatus);
+            }
+            eventInSeries.editEventStatus(newEventStatus);
           }
-          return series;
-        } else {
+        }
+      }
+      if (newDescription != null && !newDescription.isEmpty()) {
+        oldSeries.editDescription(newDescription);
+      }
+      if (newLocation != null && !newLocation.isEmpty()) {
+        oldSeries.editLocation(newLocation);
+      }
+      if (newEventStatus != null && !newEventStatus.isEmpty()) {
+        oldSeries.editEventStatus(newEventStatus);
+      }
+      return oldSeries;
+    }
 
-          series = seriesManager.get(seriesId);
-          //          for (EventKey keyToDel : series.getEventKeys()) {
-          //            calendar.remove(keyToDel);
-          //          }
-          Set<EventKey> keysInOldSeries = series.getEventKeys();
-          for (EventKey keyToDel : keysInOldSeries) {
-            if (!keyToDel.getStartDateTime().isBefore(oldStart)) {
-              calendar.remove(keyToDel);
-              series.removeEventKey(keyToDel);
-            }
-          }
-          if (series != null) {
-            series.removeEventKey(oldKey);
-          }
+    else {
+      Set<EventKey> oldKeys = new HashSet<>(oldSeries.getEventKeys());
+      for (EventKey keyToDel : oldKeys) {
+        calendar.remove(keyToDel);
+      }
 
-          String finalNewSubject =
-              (newSubject != null && !newSubject.isEmpty()) ? newSubject : oldEvent.getSubject();
-          LocalDateTime finalNewStart;
-          if (newStartDateTime != null && !newStartDateTime.isEmpty()) {
-            try {
-              finalNewStart = LocalDateTime.parse(newStartDateTime);
-            } catch (DateTimeParseException e) {
-              throw new IllegalArgumentException(
-                  "Invalid new start date/time: " + newStartDateTime);
-            }
-          } else {
-            finalNewStart = oldEvent.getStartDateTime();
-          }
-          LocalDateTime finalNewEnd;
-          if (newEndDateTime != null && !newEndDateTime.isEmpty()) {
-            try {
-              finalNewEnd = LocalDateTime.parse(newEndDateTime);
-            } catch (DateTimeParseException e) {
-              throw new IllegalArgumentException("Invalid new end date/time: " + newEndDateTime);
-            }
-          } else {
-            finalNewEnd = oldEvent.getEndDateTime();
-          }
-          EventKey newKey = new EventKey(finalNewSubject, finalNewStart, finalNewEnd);
-          String newSeriesId = series.getSeriesId();
-          newDescription = series.getDescription();
-          newLocation = series.getLocation();
-          newEventStatus = series.getEventStatus().toString();
-          String newWeekdays = series.getWeekdays();
-          int newRepeatTimes =
-              (series.getOccurrences() == null ? 0 : series.getOccurrences().intValue());
-          String newSeriesEndDate =
-              series.getEndDate() == null ? "" : series.getEndDate().toString();
-          EventContext newContext =
-              new EventContext(finalNewSubject, finalNewStart.toString(), finalNewEnd.toString(),
-                  newDescription, newLocation, newEventStatus);
-          EventSeries newSeries = createEventSeries(newContext,
-              newWeekdays, newRepeatTimes, newSeriesEndDate);
-          return newSeries;
+      seriesManager.remove(seriesId);
+
+      LocalDate originalFirstDate = oldSeries.getFirstOccurrence();
+      LocalTime originalStartTime = oldSeries.getStartDateTime().toLocalTime();
+      LocalTime originalEndTime = oldSeries.getEndDateTime().toLocalTime();
+
+      String finalNewSubject =
+          (newSubject != null && !newSubject.isEmpty()) ? newSubject : oldSeries.getSubject();
+
+      LocalTime finalStartTime = originalStartTime;
+      LocalTime finalEndTime = originalEndTime;
+
+      if (newStartDateTime != null && !newStartDateTime.isEmpty()) {
+        try {
+          LocalDateTime newStart = LocalDateTime.parse(newStartDateTime);
+          finalStartTime = newStart.toLocalTime();
+        } catch (DateTimeParseException e) {
+          throw new IllegalArgumentException("Invalid new start date/time: " + newStartDateTime);
         }
       }
 
+      if (newEndDateTime != null && !newEndDateTime.isEmpty()) {
+        try {
+          LocalDateTime newEnd = LocalDateTime.parse(newEndDateTime);
+          finalEndTime = newEnd.toLocalTime();
+        } catch (DateTimeParseException e) {
+          throw new IllegalArgumentException("Invalid new end date/time: " + newEndDateTime);
+        }
+      }
+      LocalDateTime finalNewStart = LocalDateTime.of(originalFirstDate, finalStartTime);
+      LocalDateTime finalNewEnd = LocalDateTime.of(originalFirstDate, finalEndTime);
+
+      String finalDescription = (newDescription != null && !newDescription.isEmpty())
+          ? newDescription : oldSeries.getDescription();
+      String finalLocation = (newLocation != null && !newLocation.isEmpty())
+          ? newLocation : oldSeries.getLocation();
+      String finalEventStatus = (newEventStatus != null && !newEventStatus.isEmpty())
+          ? newEventStatus : oldSeries.getEventStatus().toString();
+      String finalWeekdays = oldSeries.getWeekdays();
+      int finalRepeatTimes =
+          (oldSeries.getOccurrences() == null ? 0 : oldSeries.getOccurrences().intValue());
+      String finalSeriesEndDate =
+          oldSeries.getEndDate() == null ? "" : oldSeries.getEndDate().toString();
+
+      EventSeries.EventSeriesBuilder seriesBuilder = EventSeries.builder(
+              finalNewSubject,
+              finalNewStart,
+              finalWeekdays
+          )
+          .description(finalDescription)
+          .location(finalLocation)
+          .status(finalEventStatus)
+          .withExistingId(seriesId);
+
+      if (finalNewEnd != null) {
+        seriesBuilder.end(finalNewEnd);
+      }
+      if (finalRepeatTimes > 0) {
+        seriesBuilder.occurrences(finalRepeatTimes);
+      } else if (finalSeriesEndDate != null && !finalSeriesEndDate.isEmpty()) {
+        seriesBuilder.setEndDate(LocalDate.parse(finalSeriesEndDate));
+      } else {
+        throw new IllegalArgumentException("Must specify either occurrences or end date");
+      }
+
+      EventSeries newSeries = seriesBuilder.build();
+      Set<EventKey> newKeys = newSeries.getSeriesKeys();
+      for (EventKey key : newKeys) {
+        Event eventInstance = new Event.EventBuilder(key.getSubject(), key.getStartDateTime())
+            .end(key.getEndDateTime())
+            .description(finalDescription)
+            .location(finalLocation)
+            .status(finalEventStatus)
+            .seriesId(seriesId)
+            .build();
+
+        if (calendar.containsKey(key)) {
+          throw new IllegalArgumentException("Event already exists");
+        }
+        calendar.put(key, eventInstance);
+      }
+      seriesManager.put(seriesId, newSeries);
+
+      return newSeries;
     }
-
-
-    return null;
   }
-
 
   @Override
   public List<Event> getEventsOnDate(LocalDate date) {
@@ -514,5 +550,104 @@ public class Calendar implements CalendarInterface {
   @Override
   public EventSeries getEventSeries(String seriesId) {
     return this.seriesManager.get(seriesId);
+  }
+
+  @Override
+  public void convertTimezone(ZoneId oldZone, ZoneId newZone) {
+    if (oldZone.equals(newZone)) {
+      return;
+    }
+
+    Map<EventKey, Event> oldCalendar = new HashMap<>(this.calendar);
+    Map<String, EventSeries> oldSeriesManager = new HashMap<>(this.seriesManager);
+
+    this.calendar.clear();
+    this.seriesManager.clear();
+
+    for (EventSeries oldSeries : oldSeriesManager.values()) {
+      LocalDateTime oldStartDateTime = oldSeries.getStartDateTime();
+      LocalDateTime oldEndDateTime = oldSeries.getEndDateTime();
+
+      LocalDateTime newStartDateTime = oldStartDateTime
+          .atZone(oldZone)
+          .withZoneSameInstant(newZone)
+          .toLocalDateTime();
+
+      LocalDateTime newEndDateTime = oldEndDateTime
+          .atZone(oldZone)
+          .withZoneSameInstant(newZone)
+          .toLocalDateTime();
+
+      EventSeries.EventSeriesBuilder builder = EventSeries.builder(
+              oldSeries.getSubject(),
+              newStartDateTime,
+              oldSeries.getWeekdays()
+          )
+          .description(oldSeries.getDescription())
+          .location(oldSeries.getLocation())
+          .status(oldSeries.getEventStatus().toString())
+          .withExistingId(oldSeries.getSeriesId())
+          .withExistingRemovedDates(oldSeries.getRemovedDates());
+
+      if (newEndDateTime != null) {
+        builder.end(newEndDateTime);
+      }
+      if (oldSeries.getOccurrences() != null) {
+        builder.occurrences(oldSeries.getOccurrences());
+      } else if (oldSeries.getEndDate() != null) {
+        builder.setEndDate(oldSeries.getEndDate());
+      }
+
+      EventSeries newSeries = builder.build();
+      String seriesId = newSeries.getSeriesId();
+      Set<EventKey> newKeys = newSeries.getSeriesKeys();
+      for (EventKey key : newKeys) {
+        Event eventInstance = new Event.EventBuilder(key.getSubject(), key.getStartDateTime())
+            .end(key.getEndDateTime())
+            .description(oldSeries.getDescription())
+            .location(oldSeries.getLocation())
+            .status(oldSeries.getEventStatus().toString())
+            .seriesId(seriesId)
+            .build();
+        this.calendar.put(key, eventInstance);
+      }
+
+      this.seriesManager.put(seriesId, newSeries);
+    }
+
+    for (Map.Entry<EventKey, Event> entry : oldCalendar.entrySet()) {
+      Event oldEvent = entry.getValue();
+
+      if (oldEvent.getSeriesId() != null) {
+        continue;
+      }
+      LocalDateTime oldStartDateTime = oldEvent.getStartDateTime();
+      LocalDateTime oldEndDateTime = oldEvent.getEndDateTime();
+
+      LocalDateTime newStartDateTime = oldStartDateTime
+          .atZone(oldZone)
+          .withZoneSameInstant(newZone)
+          .toLocalDateTime();
+
+      LocalDateTime newEndDateTime = oldEndDateTime
+          .atZone(oldZone)
+          .withZoneSameInstant(newZone)
+          .toLocalDateTime();
+
+      Event newEvent = new Event.EventBuilder(oldEvent.getSubject(), newStartDateTime)
+          .end(newEndDateTime)
+          .description(oldEvent.getDescription())
+          .location(oldEvent.getLocation())
+          .status(oldEvent.getEventStatus().toString())
+          .seriesId(null)
+          .build();
+
+      EventKey newKey = new EventKey(
+          newEvent.getSubject(),
+          newStartDateTime,
+          newEndDateTime
+      );
+      this.calendar.put(newKey, newEvent);
+    }
   }
 }

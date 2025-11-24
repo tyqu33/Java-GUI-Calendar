@@ -112,4 +112,9 @@ class MockModel implements CalendarInterface {
   public EventSeries getEventSeries(String seriesId) {
     return null;
   }
+
+  @Override
+  public void convertTimezone(ZoneId oldZone, ZoneId newZone) {
+    return;
+  }
 }
