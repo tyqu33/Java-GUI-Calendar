@@ -75,4 +75,8 @@ public interface Features {
    * @param date the date to view events for
    */
   void viewEventsOnDate(LocalDate date);
+
+  String getCurrentCalendarName();
+
+  String getCurrentCalendarTimezone();
 }

@@ -174,6 +174,19 @@ public class GuiCalendarController implements Features {
   @Override
   public void editCalendarProperty(String calendarName, String propertyName, String propertyValue) {
     model.editCalendar(calendarName, propertyName, propertyValue);
+
+    CalendarEntityInterface currentEntity = model.getCurrentCalendarEntity();
+    if (currentEntity != null) {
+      view.displayCurrentCalendar(
+          currentEntity.getCalendarName(),
+          currentEntity.getTimeZone().toString()
+      );
+      List<String> allCalendarNames = new ArrayList<>();
+      for (CalendarEntityInterface entity : model.getAllCalendars()) {
+        allCalendarNames.add(entity.getCalendarName());
+      }
+      view.displayAvailableCalendars(allCalendarNames);
+    }
   }
 
   @Override
@@ -269,6 +282,18 @@ public class GuiCalendarController implements Features {
     } catch (Exception e) {
       view.displayError("Failed to export calendar: " + e.getMessage());
     }
+  }
+
+  @Override
+  public String getCurrentCalendarName() {
+    CalendarEntityInterface entity = model.getCurrentCalendarEntity();
+    return entity != null ? entity.getCalendarName() : "Default";
+  }
+
+  @Override
+  public String getCurrentCalendarTimezone() {
+    CalendarEntityInterface entity = model.getCurrentCalendarEntity();
+    return entity != null ? entity.getTimeZone().getId() : ZoneId.systemDefault().getId();
   }
 
 }

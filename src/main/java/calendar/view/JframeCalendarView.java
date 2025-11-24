@@ -84,6 +84,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private JButton createEventButton;
   private JButton createEventSeriesButton;
   private JButton createCalendarButton;
+  private JButton editCalendarButton;
   private JButton exportButton;
   private JButton searchButton;
   // private JTextArea eventDisplayArea;
@@ -137,6 +138,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     searchButton = new JButton("Search");
     createCalendarButton = new JButton("New Calendar");
 
+    editCalendarButton = new JButton("Edit");
+    editCalendarButton.setPreferredSize(new Dimension(60, 25));
+    editCalendarButton.setFont(new Font("Arial", Font.PLAIN, 11));
+
     createEventButton = new JButton("Create Event");
     createEventSeriesButton = new JButton("Create EventSeries");
     exportButton = new JButton("Export");
@@ -154,11 +159,15 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
     eventDisplayArea = new JPanel();
     eventDisplayArea.setLayout(new BoxLayout(eventDisplayArea, BoxLayout.Y_AXIS));
+    eventDisplayArea.setBackground(Color.WHITE);
     eventDisplayArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
     eventScrollPane = new JScrollPane(eventDisplayArea);
     eventScrollPane.setBorder(BorderFactory.createTitledBorder("Events on Selected Date"));
     eventScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     eventScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    eventScrollPane.getViewport().setBackground(Color.WHITE);
+    eventScrollPane.setPreferredSize(new Dimension(300, 400));
   }
 
   /**
@@ -179,8 +188,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     leftControlPanel.setLayout(new BoxLayout(leftControlPanel, BoxLayout.Y_AXIS));
     leftControlPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
-    JPanel calendarInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+    JPanel calendarInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
     calendarInfoPanel.add(currentCalendarLabel);
+    editCalendarButton.setPreferredSize(new Dimension(60, 25));
+    editCalendarButton.setFont(new Font("Arial", Font.PLAIN, 11));
+    calendarInfoPanel.add(editCalendarButton);
     calendarInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     JPanel timezonePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
@@ -375,10 +387,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       //    }
       JLabel eventsLabel = new JLabel("Events on " + date + ":\n\n");
       eventsLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      eventsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
       eventDisplayArea.add(eventsLabel);
 
       for (Event event : events) {
         JPanel singleEventPanel = createSingleEventPanel(event);
+        singleEventPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         eventDisplayArea.add(singleEventPanel);
         eventDisplayArea.add(Box.createVerticalStrut(5));
       }
@@ -431,9 +445,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       popup.add(copyItem);
       popup.show(optionsButton, 0, eventInfoLabel.getHeight());
     });
-    JPanel btnContainer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+    JPanel btnContainer = new JPanel(new BorderLayout());
     btnContainer.setOpaque(false);
-    btnContainer.add(optionsButton);
+    btnContainer.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+    btnContainer.add(optionsButton, BorderLayout.CENTER);
 
     row.add(btnContainer, BorderLayout.EAST);
     return row;
@@ -639,6 +654,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       dialog.setVisible(true);
     });
 
+    editCalendarButton.addActionListener(evt -> {
+      EditCalendarDialog dialog = new EditCalendarDialog(JframeCalendarView.this, features);
+      dialog.setVisible(true);
+    });
   }
 
   private class CreateCalendarDialog extends JDialog {
@@ -1264,7 +1283,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     public SearchEventAcrossCalendarDialog(JFrame parent, Features features) {
       super(parent, "Search Events", true);
       setLayout(new BorderLayout(10, 10));
-      setSize(550, 700);
+      setPreferredSize(new Dimension(600, 500));
+      //setSize(550, 700);
       JPanel panel = new JPanel(new BorderLayout(10, 10));
       panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -1280,8 +1300,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
       JPanel resultPanel = new JPanel();
       resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
+      resultPanel.setBackground(Color.WHITE);
       JScrollPane scrollPane = new JScrollPane(resultPanel);
       scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+      scrollPane.getViewport().setBackground(Color.WHITE);
       add(scrollPane, BorderLayout.CENTER);
 
       // buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 10, 20));
@@ -1336,6 +1358,74 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       JPanel panel = new JPanel();
       panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
       panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+    }
+  }
+
+  private class EditCalendarDialog extends JDialog {
+    private JTextField inputCalendarName;
+    private JComboBox<String> inputTimezone;
+    private String currentCalendarName;
+
+    public EditCalendarDialog(JFrame parent, Features features) {
+      super(parent, "Edit Calendar", true);
+      setLayout(new BorderLayout(10, 10));
+
+      currentCalendarName = features.getCurrentCalendarName();
+      String currentTimezone = features.getCurrentCalendarTimezone();
+
+      JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+      panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+
+      panel.add(new JLabel("Calendar Name:"));
+      this.inputCalendarName = new JTextField(currentCalendarName);
+      panel.add(this.inputCalendarName);
+
+      panel.add(new JLabel("Time Zone:"));
+      Set<String> zoneIdSet = ZoneId.getAvailableZoneIds();
+      String[] zoneIds = zoneIdSet.stream().sorted().toArray(String[]::new);
+      this.inputTimezone = new JComboBox<>(zoneIds);
+      this.inputTimezone.setSelectedItem(currentTimezone);
+      panel.add(this.inputTimezone);
+
+      add(panel, BorderLayout.CENTER);
+
+      JPanel buttonPanel = new JPanel();
+      JButton saveButton = new JButton("Save");
+      JButton cancelButton = new JButton("Cancel");
+
+      saveButton.addActionListener(ev -> {
+        String newCalendarName = inputCalendarName.getText().trim();
+        String newTimeZone = inputTimezone.getSelectedItem().toString();
+
+        if (newCalendarName.isEmpty()) {
+          JOptionPane.showMessageDialog(this,
+              "Calendar name cannot be empty!",
+              "Error",
+              JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+
+        if (!newCalendarName.equals(currentCalendarName)) {
+          features.editCalendarProperty(currentCalendarName, "name", newCalendarName);
+        }
+
+        if (!newTimeZone.equals(currentTimezone)) {
+          features.editCalendarProperty(
+              newCalendarName.equals(currentCalendarName) ? currentCalendarName : newCalendarName,
+              "timezone",
+              newTimeZone
+          );
+        }
+        dispose();
+      });
+      cancelButton.addActionListener(ev -> dispose());
+
+      buttonPanel.add(saveButton);
+      buttonPanel.add(cancelButton);
+      add(buttonPanel, BorderLayout.SOUTH);
+
+      setLocationRelativeTo(getParent());
+      pack();
     }
   }
 }
