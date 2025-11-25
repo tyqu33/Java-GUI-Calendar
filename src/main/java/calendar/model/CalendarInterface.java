@@ -154,5 +154,11 @@ public interface CalendarInterface {
    */
   EventSeries getEventSeries(String seriesId);
 
+  /**
+   * Convert events in the calendar to a new timezone.
+   *
+   * @param oldZone the old timezone
+   * @param newZone the new timezone
+   */
   void convertTimezone(ZoneId oldZone, ZoneId newZone);
 }

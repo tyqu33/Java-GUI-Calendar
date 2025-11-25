@@ -126,7 +126,8 @@ public class GuiCalendarController implements Features {
   public void switchCalendar(String calendarName) {
     CalendarEntityInterface entity = model.getCalendarEntity(calendarName);
     if (entity != null) {
-      model.useThisCalendarEntity(entity);model.useThisCalendarEntity(entity);
+      model.useThisCalendarEntity(entity);
+      model.useThisCalendarEntity(entity);
 
       refreshCurrentMonth();
       view.displayCurrentCalendar(entity.getCalendarName(), entity.getTimeZone().toString());

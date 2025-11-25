@@ -66,8 +66,8 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.text.DateFormatter;
 
 /**
- * Swing-based graphical user interface for the calendar application.
- * Provides a month view and interactive controls for managing calendars and events.
+ * Swing-based graphical user interface using JFrame.
+ * Provides a month view and interactive controls for operations on calendars and events.
  */
 public class JframeCalendarView extends JFrame implements CalendarViewInterface {
   private Features features;
@@ -448,10 +448,23 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     // eventDisplayArea.setText(sb.toString());
   }
 
+  /**
+   * Create a panel displaying information for a single event.
+   *
+   * @param event the event to display
+   * @return a JPanel containing the event information and options button
+   */
   private JPanel createSingleEventPanel(Event event) {
     return createSingleEventPanel(event, null);
   }
 
+  /**
+   * Create a panel displaying information for a single event with calendar name.
+   *
+   * @param event the event to display
+   * @param calendarName calendarName the name of the calendar containing the event
+   * @return a JPanel containing the event information and options button
+   */
   private JPanel createSingleEventPanel(Event event, String calendarName) {
     JPanel row = new JPanel(new BorderLayout(5, 5));
     row.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
@@ -470,8 +483,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
     optionsButton.addActionListener(e -> {
       JPopupMenu popup = new JPopupMenu();
-
-      boolean isPartOfSeries = event.getSeriesId() != null;
 
       JMenuItem editItem = new JMenuItem("Edit");
       editItem.addActionListener(evt -> {
@@ -501,6 +512,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       popup.add(editItem);
       //popup.addSeparator();
       //popup.add(copyItem);
+      boolean isPartOfSeries = event.getSeriesId() != null;
 
       if (isPartOfSeries) {
         JMenuItem editSeriesItem = new JMenuItem("Edit Series");
@@ -522,6 +534,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     return row;
   }
 
+  /**
+   * Format event information as a string for display.
+   *
+   * @param event the event to format
+   * @return a StringBuilder containing formatted events
+   */
   private StringBuilder printSingleEventInfo(Event event) {
     StringBuilder sb = new StringBuilder();
     sb.append("• ").append(event.getSubject()).append("\n");
@@ -585,12 +603,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
   @Override
   public void displayWelcome() {
-    /**JOptionPane.showMessageDialog(this,
+    /*JOptionPane.showMessageDialog(this,
      "Welcome to Virtual Calendar Application!\n\n"
      + "Select a date to view events\n"
      + "Click 'Create Event' to add new events",
      "Welcome",
-     JOptionPane.INFORMATION_MESSAGE);**/
+     JOptionPane.INFORMATION_MESSAGE);*/
   }
 
   @Override
@@ -740,6 +758,9 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     });
   }
 
+  /**
+   * Dialog for creating a new calendar.
+   */
   private class CreateCalendarDialog extends JDialog {
     private JTextField inputCalendarName;
     private JComboBox<String> inputTimezone;
@@ -789,6 +810,9 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     }
   }
 
+  /**
+   * Dialog for creating a new single event.
+   */
   private class CreateSingleEventDialog extends JDialog {
     private SingleEventPanel panel;
 
@@ -823,11 +847,23 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     }
   }
 
+  /**
+   * Dialog for editing an existing single event.
+   */
   private class EditSingleEventDialog extends JDialog {
     private SingleEventPanel panel;
     private boolean isEditSeries;
     private Event originalEvent;
 
+    /**
+     * Constructor for EditSingleEventDialog.
+     *
+     * @param parent the parent frame
+     * @param features the Features interface
+     * @param oldEvent the event to edit
+     * @param calendarName the name of the calendar
+     * @param isEditSeries true if editing the entire series, false if editing single event
+     */
     public EditSingleEventDialog(JFrame parent, Features features,
                                  Event oldEvent, String calendarName, boolean isEditSeries) {
       super(parent, isEditSeries ? "Edit Event Series" : "Edit Single Event", true);
@@ -846,9 +882,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
         String newSubject = null;
         String newStartTime = null;
         String newEndTime = null;
-        String newDescription = null;
-        String newLocation = null;
-        String newStatus = null;
 
         if (!this.panel.getEventName().equals(originalEvent.getSubject())) {
           newSubject = this.panel.getEventName();
@@ -864,19 +897,23 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
           newEndTime = panelEndTime.toString();
         }
 
-        String oldDesc = originalEvent.getDescription() == null ? "" : originalEvent.getDescription();
+        String oldDesc = originalEvent.getDescription() == null ? "" :
+            originalEvent.getDescription();
         String newDesc = this.panel.getDescription();
+        String newDescription = null;
         if (newDesc != null && !newDesc.isEmpty() && !newDesc.equals(oldDesc)) {
           newDescription = newDesc;
         }
 
         String oldLoc = originalEvent.getLocation() == null ? "" : originalEvent.getLocation();
         String newLoc = this.panel.getEventLocation();
+        String newLocation = null;
         if (newLoc != null && !newLoc.isEmpty() && !newLoc.equals(oldLoc)) {
           newLocation = newLoc;
         }
 
         String panelStatus = this.panel.getEventStatus();
+        String newStatus = null;
         if (!panelStatus.equals(originalEvent.getEventStatus().toString())) {
           newStatus = panelStatus;
         }
@@ -918,7 +955,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     }
   }
 
-
+  /**
+   * Panel for displaying and editing event properties.
+   * Reused by create and edit dialogs.
+   */
   private class SingleEventPanel extends JPanel {
     private JTextField inputEventName;
     private JComboBox<Integer> inputYear;
@@ -930,12 +970,18 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     private JTextField inputLocation;
     private JComboBox<String> inputEventStatus;
 
+    /**
+     * Constructor for SingleEventPanel.
+     */
     public SingleEventPanel() {
       this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
       this.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
       this.initializeEventComponents();
     }
 
+    /**
+     * Initialize all event input components.
+     */
     private void initializeEventComponents() {
       JPanel namePanel = new JPanel(new BorderLayout());
       namePanel.setBorder(BorderFactory.createTitledBorder("Event Name:"));
@@ -1005,31 +1051,66 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       this.add(eventStatusPanel);
     }
 
+    /**
+     * Get the event name from the input.
+     *
+     * @return the event name
+     */
     String getEventName() {
       return this.inputEventName.getText();
     }
 
+    /**
+     * Get the start date and time from the input.
+     *
+     * @return the start LocalDateTime
+     */
     LocalDateTime getStartTime() {
       return getInputDateTime(this.startTimeSpinner, this.inputYear,
           this.inputMonth, this.inputDay);
     }
 
+    /**
+     * Get the end date and time from the input.
+     *
+     * @return the end LocalDateTime
+     */
     LocalDateTime getEndTime() {
       return getInputDateTime(this.endTimeSpinner, this.inputYear, this.inputMonth, this.inputDay);
     }
 
+    /**
+     * Get the event description from the input.
+     *
+     * @return the event description
+     */
     String getDescription() {
       return this.inputDescription.getText();
     }
 
+    /**
+     * Get the event location from the input.
+     *
+     * @return the event location
+     */
     String getEventLocation() {
       return this.inputLocation.getText();
     }
 
+    /**
+     * Get the event status from the input field.
+     *
+     * @return the event status as a string
+     */
     String getEventStatus() {
       return this.inputEventStatus.getSelectedItem().toString();
     }
 
+    /**
+     * Set the input fields to display the properties of an existing event.
+     *
+     * @param event the event to be displayed
+     */
     void setOldPropertyValues(Event event) {
       inputEventName.setText(event.getSubject());
       LocalDateTime start = event.getStartDateTime();
@@ -1049,6 +1130,13 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
   }
 
+  /**
+   * Update the day combo box options.
+   *
+   * @param inputYear the year combo box
+   * @param inputMonth the month combo box
+   * @param inputDay the day combo box to update
+   */
   private void getDayOptions(JComboBox<Integer> inputYear,
                              JComboBox<String> inputMonth,
                              JComboBox<Integer> inputDay) {
@@ -1066,6 +1154,11 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     }
   }
 
+  /**
+   * Create a time spinner for selecting hours and minutes.
+   *
+   * @return a JSpinner for time input
+   */
   private JSpinner createTimeSpinner() {
     SpinnerDateModel model = new SpinnerDateModel();
     model.setCalendarField(Calendar.MINUTE);
@@ -1083,6 +1176,15 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     return spinner;
   }
 
+  /**
+   * Combine date and time components into a LocalDateTime.
+   *
+   * @param spinner the time spinner
+   * @param inputYear the year combo box
+   * @param inputMonth the month combo box
+   * @param inputDay the day combo box
+   * @return the combined LocalDateTime
+   */
   private LocalDateTime getInputDateTime(JSpinner spinner,
                                          JComboBox<Integer> inputYear,
                                          JComboBox<String> inputMonth,
@@ -1099,6 +1201,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     return LocalDateTime.of(year, month, day, hour, minute);
   }
 
+  /**
+   * Set a time spinner to display a specific LocalDateTime.
+   *
+   * @param localDateTime the LocalDateTime
+   * @param spinner the spinner to update
+   */
   private void setLocalDateTimeToSpinner(LocalDateTime localDateTime, JSpinner spinner) {
     Calendar calendar = Calendar.getInstance();
     // calendar.setTime(localDateTime.toLocalDate());
@@ -1129,6 +1237,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     private JComboBox<String> endMonthComboBox;
     private JComboBox<Integer> endDayComboBox;
 
+    /**
+     * Constructor for CreateEventSeriesDialog.
+     *
+     * @param parent the parent frame
+     * @param features the Features interface
+     */
     public CreateEventSeriesDialog(JFrame parent, Features features) {
       super(parent, "Create Event Series", true);
       setLayout(new BorderLayout(10, 10));
@@ -1242,8 +1356,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       JPanel endConditionPanel = new JPanel();
       endConditionPanel.setLayout(new BoxLayout(endConditionPanel, BoxLayout.Y_AXIS));
 
-      ButtonGroup endGroup = new ButtonGroup();
-
       // End after N occurrences
       JPanel occurrencesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
       occurrencesRadio = new JRadioButton("End after");
@@ -1251,10 +1363,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       occurrencesPanel.add(occurrencesRadio);
       occurrencesPanel.add(occurrencesSpinner);
       occurrencesPanel.add(new JLabel("occurrences"));
+      ButtonGroup endGroup = new ButtonGroup();
       endGroup.add(occurrencesRadio);
 
-      // End by date
-      JPanel endDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
       endDateRadio = new JRadioButton("End by date:");
 
       LocalDate futureDate = LocalDate.now().plusMonths(1);
@@ -1277,6 +1389,8 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       endMonthComboBox.addActionListener(
           e -> getDayOptions(endYearComboBox, endMonthComboBox, endDayComboBox));
 
+      // End by date
+      JPanel endDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
       endDatePanel.add(endDateRadio);
       endDatePanel.add(endYearComboBox);
       endDatePanel.add(endMonthComboBox);
@@ -1350,13 +1464,13 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
             startDateTime = startDate.toString();
             endDateTime = null;
           } else {
-            LocalDateTime startDT = getInputDateTime(startTimeSpinner, inputYear,
+            LocalDateTime startDt = getInputDateTime(startTimeSpinner, inputYear,
                 inputMonth, inputDay);
-            LocalDateTime endDT = getInputDateTime(endTimeSpinner, inputYear,
+            LocalDateTime endDt = getInputDateTime(endTimeSpinner, inputYear,
                 inputMonth, inputDay);
 
-            startDateTime = startDT.toString();
-            endDateTime = endDT.toString();
+            startDateTime = startDt.toString();
+            endDateTime = endDt.toString();
           }
 
           String description = inputDescription.getText().trim();
@@ -1406,11 +1520,19 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   }
 
 
-
+  /**
+   * Dialog for searching events across all calendars and displaying search results.
+   */
   private class SearchEventAcrossCalendarDialog extends JDialog {
     private JTextField inputKeyword;
     private JButton searchButton;
 
+    /**
+     * Constructor for SearchEventAcrossCalendarDialog.
+     *
+     * @param parent the parent frame
+     * @param features the Features interface
+     */
     public SearchEventAcrossCalendarDialog(JFrame parent, Features features) {
       super(parent, "Search Events", true);
       setLayout(new BorderLayout(10, 10));
@@ -1472,6 +1594,9 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     }
   }
 
+  /**
+   * Dialog for copying a single event to another calendar or date.
+   */
   private class CopySingleEventDialog extends JDialog {
     private JTextField inputEventName;
     private JComboBox<Integer> inputYear;
@@ -1483,6 +1608,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     private JTextField inputLocation;
     private JComboBox<String> inputEventStatus;
 
+    /**
+     * Constructor for CopySingleEventDialog.
+     *
+     * @param parent the parent frame
+     * @param features the Features interface
+     */
     public CopySingleEventDialog(JFrame parent, Features features) {
       super(parent, "Copy Single Event", true);
       setLayout(new BorderLayout(10, 10));
@@ -1492,17 +1623,26 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     }
   }
 
+  /**
+   * Dialog for editing calendar properties.
+   * Change timezone will convert all event times.
+   */
   private class EditCalendarDialog extends JDialog {
     private JTextField inputCalendarName;
     private JComboBox<String> inputTimezone;
     private String currentCalendarName;
 
+    /**
+     * Constructor for EditCalendarDialog.
+     *
+     * @param parent the parent frame
+     * @param features the Features interface
+     */
     public EditCalendarDialog(JFrame parent, Features features) {
       super(parent, "Edit Calendar", true);
       setLayout(new BorderLayout(10, 10));
 
       currentCalendarName = features.getCurrentCalendarName();
-      String currentTimezone = features.getCurrentCalendarTimezone();
 
       JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
       panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
@@ -1514,6 +1654,7 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       panel.add(new JLabel("Time Zone:"));
       Set<String> zoneIdSet = ZoneId.getAvailableZoneIds();
       String[] zoneIds = zoneIdSet.stream().sorted().toArray(String[]::new);
+      String currentTimezone = features.getCurrentCalendarTimezone();
       this.inputTimezone = new JComboBox<>(zoneIds);
       this.inputTimezone.setSelectedItem(currentTimezone);
       panel.add(this.inputTimezone);

@@ -388,12 +388,7 @@ public class Calendar implements CalendarInterface {
         series.editEventStatus(newEventStatus);
       }
       return series;
-    }
-
-    else {
-      LocalTime originalStartTime = series.getStartDateTime().toLocalTime();
-      LocalTime originalEndTime = series.getEndDateTime().toLocalTime();
-
+    } else {
       Set<EventKey> keysToDelete = new HashSet<>();
       for (EventKey key : series.getEventKeys()) {
         if (!key.getStartDateTime().isBefore(oldStart)) {
@@ -408,9 +403,8 @@ public class Calendar implements CalendarInterface {
         series.removeEventKey(keyToDel);
       }
 
-      String finalNewSubject =
-          (newSubject != null && !newSubject.isEmpty()) ? newSubject : oldEvent.getSubject();
-
+      LocalTime originalStartTime = series.getStartDateTime().toLocalTime();
+      LocalTime originalEndTime = series.getEndDateTime().toLocalTime();
       LocalTime finalStartTime = originalStartTime;
       LocalTime finalEndTime = originalEndTime;
       if (newStartDateTime != null && !newStartDateTime.isEmpty()) {
@@ -454,6 +448,8 @@ public class Calendar implements CalendarInterface {
         newRepeatTimes = 0;
       }
 
+      String finalNewSubject =
+          (newSubject != null && !newSubject.isEmpty()) ? newSubject : oldEvent.getSubject();
       String newSeriesEndDate =
           series.getEndDate() == null ? "" : series.getEndDate().toString();
 
@@ -549,7 +545,6 @@ public class Calendar implements CalendarInterface {
       return;
     }
 
-    Map<EventKey, Event> oldCalendar = new HashMap<>(this.calendar);
     Map<String, EventSeries> oldSeriesManager = new HashMap<>(this.seriesManager);
 
     this.calendar.clear();
@@ -606,6 +601,7 @@ public class Calendar implements CalendarInterface {
       this.seriesManager.put(seriesId, newSeries);
     }
 
+    Map<EventKey, Event> oldCalendar = new HashMap<>(this.calendar);
     for (Map.Entry<EventKey, Event> entry : oldCalendar.entrySet()) {
       Event oldEvent = entry.getValue();
 
