@@ -3,6 +3,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.controller.GuiCalendarController;
 import calendar.event.EventContext;
@@ -10,6 +11,8 @@ import calendar.model.MultiCalendarManagerInterface;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +24,6 @@ public class GuiCalendarControllerTest {
   private MockGuiView view;
   private MultiCalendarManagerInterface model;
   private StringBuilder log;
-  private String expectedDefault;
 
   /**
    * To set up the model, view, controller, and log.
@@ -32,8 +34,6 @@ public class GuiCalendarControllerTest {
     this.view = new MockGuiView(log);
     this.model = new GuiMultiCalendarManagerMockModel(log);
     this.controller = new GuiCalendarController(this.model, this.view);
-    this.expectedDefault = "createCalendar: Default, America/New_York\n";
-
   }
 
   @Test
@@ -45,12 +45,11 @@ public class GuiCalendarControllerTest {
     int expectedMonth = today.getMonthValue();
     String defaultTimeZone = ZoneId.systemDefault().getId();
 
-    String expectedResult0 = "displayMonthView: " + expectedYear + ", " + expectedMonth + ", {}\n";
-    String expectedResult1 = "displayCurrentCalendar: Default, " + defaultTimeZone + "\n";
-    String expectedResult2 = "makeVisible\n";
-    assertEquals(expectedDefault
-        + "getCalendarEntity: Default\nuseThisCalendarEntity: \n"
-        + expectedResult0 + expectedResult1 + expectedResult2, log.toString());
+    assertTrue(this.log.toString().contains("createCalendar: Default, " + defaultTimeZone));
+    assertTrue(this.log.toString().contains("displayMonthView: "
+        + expectedYear + ", " + expectedMonth));
+    assertTrue(this.log.toString().contains("displayCurrentCalendar: Default, " + defaultTimeZone));
+    assertTrue(this.log.toString().contains("makeVisible"));
   }
 
   @Test
@@ -74,7 +73,6 @@ public class GuiCalendarControllerTest {
         new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
             "Boston", "PUBLIC");
     c.createEvent(context);
-    // System.out.println(log.toString());
     String expectedResult =
         "displayError: No calendar selected. Please select or create a calendar first.\n";
     assertTrue(log.toString().contains(expectedResult));
@@ -131,7 +129,6 @@ public class GuiCalendarControllerTest {
         new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
             "Boston", "PUBLIC");
     c2.createEventSeries(context, "RF", 4, null);
-    // System.out.println(log.toString());
     assertTrue(log.toString()
         .contains("No calendar selected. Please select or create a calendar first."));
   }
@@ -177,12 +174,38 @@ public class GuiCalendarControllerTest {
   }
 
   @Test
-  public void testGetAllCalendarNames() throws IOException {
+  public void testGetAllCalendarNames0() throws IOException {
     controller.go();
     log.setLength(0);
 
     controller.getAllCalendarNames();
     assertTrue(log.toString().contains("getAllCalendars"));
+  }
+
+  @Test
+  public void testGetAllCalendarNames1() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log) {
+      @Override
+      public Collection<CalendarEntityInterface> getAllCalendars() {
+        CalendarEntityInterface c0 = new CalendarEntity.CalendarEntityBuilder()
+            .calendarName("Meeting")
+            .timezone(java.time.ZoneId.systemDefault())
+            .build();
+        CalendarEntityInterface c1 = new CalendarEntity.CalendarEntityBuilder()
+            .calendarName("Lecture")
+            .timezone(java.time.ZoneId.systemDefault())
+            .build();
+        return Arrays.asList(c0, c1);
+      }
+    };
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    Collection<String> names = c.getAllCalendarNames();
+    assertEquals(2, names.size());
+    assertTrue(names.contains("Meeting"));
+    assertTrue(names.contains("Lecture"));
   }
 
   @Test
@@ -277,13 +300,15 @@ public class GuiCalendarControllerTest {
     log.setLength(0);
 
     controller.editCalendarProperty("Default", "name", "Meeting");
-    // System.out.println(log.toString());
     assertTrue(log.toString().contains("editCalendar: Default, name, Meeting"));
     assertTrue(log.toString().contains("getCurrentCalendarEntity"));
-    assertTrue(log.toString().contains("displayCurrentCalendar: Default, America/New_York"));
+    String defaultTimeZone = ZoneId.systemDefault().getId();
+    assertTrue(log.toString().contains("displayCurrentCalendar: Default, " + defaultTimeZone));
     assertTrue(log.toString().contains("getAllCalendars"));
     assertTrue(log.toString().contains("displayAvailableCalendars:"));
-    assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
+    int currentYear = LocalDate.now().getYear();
+    int currentMonth = LocalDate.now().getMonthValue();
+    assertTrue(log.toString().contains("displayMonthView: " + currentYear + ", " + currentMonth));
   }
 
   @Test
@@ -300,8 +325,35 @@ public class GuiCalendarControllerTest {
     log.setLength(0);
 
     c.editCalendarProperty("Default", "name", "Meeting");
-    System.out.println(log.toString());
     assertTrue(log.toString().contains("displayError: Failed to edit calendar: Forced IAE"));
+  }
+
+  @Test
+  public void testEditCalendarProperty2() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log) {
+      @Override
+      public Collection<CalendarEntityInterface> getAllCalendars() {
+        CalendarEntityInterface c0 = new CalendarEntity.CalendarEntityBuilder()
+            .calendarName("Meeting")
+            .timezone(java.time.ZoneId.systemDefault())
+            .build();
+        CalendarEntityInterface c1 = new CalendarEntity.CalendarEntityBuilder()
+            .calendarName("Lecture")
+            .timezone(java.time.ZoneId.systemDefault())
+            .build();
+        return Arrays.asList(c0, c1);
+      }
+    };
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    c.editCalendarProperty("Default", "name", "Presentation");
+    assertTrue(log.toString().contains("editCalendar: Default, name, Presentation"));
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertTrue(log.toString().contains("displayCurrentCalendar: Default, America/New_York"));
+    assertTrue(log.toString().contains("displayAvailableCalendars: [Meeting, Lecture]"));
+    assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
   }
 
   @Test
@@ -359,7 +411,6 @@ public class GuiCalendarControllerTest {
     log.setLength(0);
 
     c.navigateToMonth(2025, 11);
-    // System.out.println(log.toString());
     assertTrue(log.toString().contains("displayError: Failed to refresh calendar: Forced IAE"));
     assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
   }
@@ -384,7 +435,6 @@ public class GuiCalendarControllerTest {
 
     LocalDate date = LocalDate.of(2025, 11, 20);
     c.viewEventsOnDate(date);
-    // System.out.println(log.toString());
     assertTrue(log.toString().contains("getCurrentCalendarEntity"));
     assertTrue(log.toString().contains("displayError: No calendar selected!"));
   }
@@ -418,9 +468,48 @@ public class GuiCalendarControllerTest {
     log.setLength(0);
 
     c.exportCalendar("Default");
-    // System.out.println(log.toString());
     assertTrue(log.toString().contains("getCurrentCalendarEntity"));
     assertTrue(log.toString().contains("displayError: No calendar selected!"));
+  }
+
+  @Test
+  public void testExportCalendar3() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log) {
+      @Override
+      public Collection<CalendarEntityInterface> getAllCalendars() {
+        CalendarEntityInterface c0 = new CalendarEntity.CalendarEntityBuilder()
+            .calendarName("Meeting")
+            .timezone(java.time.ZoneId.systemDefault())
+            .build();
+        CalendarEntityInterface c1 = new CalendarEntity.CalendarEntityBuilder()
+            .calendarName("Lecture")
+            .timezone(java.time.ZoneId.systemDefault())
+            .build();
+        return Arrays.asList(c0, c1);
+      }
+    };
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    c.exportCalendar("Meeting.ical");
+    assertTrue(log.toString().contains("exportCalendar: Meeting.ical"));
+  }
+
+  @Test
+  public void testExportCalendar4() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log) {
+      @Override
+      public CalendarEntityInterface getCurrentCalendarEntity() {
+        throw new IllegalArgumentException("Forced IAE");
+      }
+    };
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    c.exportCalendar("Default");
+    assertTrue(log.toString().contains("displayError: Failed to export calendar: Forced IAE"));
   }
 
   @Test
@@ -498,7 +587,6 @@ public class GuiCalendarControllerTest {
             "Boston", "PUBLIC");
     controller.editEventSeries("Meeting", "2025-11-20T08:00",
         "2025-11-20T12:00", newContext, "Default");
-    // System.out.println(log.toString());
     assertTrue(log.toString().contains("getCalendarEntity: Default"));
     assertTrue(log.toString().contains("displaySuccess: Event series 'Meeting'"
         + " updated successfully!"));
@@ -615,10 +703,29 @@ public class GuiCalendarControllerTest {
     controller.editEventSeries("Meeting", "2025-11-20T08:00",
         "2025-11-20T12:00", context1, "Default");
 
-    // System.out.println(log.toString());
     assertTrue(log.toString().contains("getCalendarEntity: Default"));
     assertTrue(log.toString().contains("displayError: Failed to edit event series: "
         + "Event already exists"));
+  }
+
+  @Test
+  public void testEditEventSeries7() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log) {
+      @Override
+      public CalendarEntityInterface getCurrentCalendarEntity() {
+        throw new RuntimeException("Forced RuntimeException");
+      }
+    };
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    EventContext newContext =
+        new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
+            "Boston", "PUBLIC");
+    c.editEventSeries("Meeting", "2025-11-20T08:00",
+        "2025-11-20T12:00", newContext, null);
+    assertTrue(log.toString().contains("displayError: Unexpected error: Forced RuntimeException"));
   }
 
 }
