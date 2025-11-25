@@ -826,11 +826,13 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   private class EditSingleEventDialog extends JDialog {
     private SingleEventPanel panel;
     private boolean isEditSeries;
+    private Event originalEvent;
 
     public EditSingleEventDialog(JFrame parent, Features features,
                                  Event oldEvent, String calendarName, boolean isEditSeries) {
       super(parent, isEditSeries ? "Edit Event Series" : "Edit Single Event", true);
       this.isEditSeries = isEditSeries;
+      this.originalEvent = oldEvent;
       setLayout(new BorderLayout(10, 10));
       panel = new SingleEventPanel();
       add(panel, BorderLayout.CENTER);
@@ -841,15 +843,52 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       JButton cancelButton = new JButton("Cancel");
 
       confirmButton.addActionListener(e -> {
-        EventContext newContext = new EventContext(
-            this.panel.getEventName(),
-            this.panel.getStartTime().toString(),
-            this.panel.getEndTime().toString(),
-            this.panel.getDescription(),
-            this.panel.getEventLocation(),
-            this.panel.getEventStatus()
-        );
+        String newSubject = null;
+        String newStartTime = null;
+        String newEndTime = null;
+        String newDescription = null;
+        String newLocation = null;
+        String newStatus = null;
 
+        if (!this.panel.getEventName().equals(originalEvent.getSubject())) {
+          newSubject = this.panel.getEventName();
+        }
+
+        LocalDateTime panelStartTime = this.panel.getStartTime();
+        if (!panelStartTime.equals(originalEvent.getStartDateTime())) {
+          newStartTime = panelStartTime.toString();
+        }
+
+        LocalDateTime panelEndTime = this.panel.getEndTime();
+        if (!panelEndTime.equals(originalEvent.getEndDateTime())) {
+          newEndTime = panelEndTime.toString();
+        }
+
+        String oldDesc = originalEvent.getDescription() == null ? "" : originalEvent.getDescription();
+        String newDesc = this.panel.getDescription();
+        if (newDesc != null && !newDesc.isEmpty() && !newDesc.equals(oldDesc)) {
+          newDescription = newDesc;
+        }
+
+        String oldLoc = originalEvent.getLocation() == null ? "" : originalEvent.getLocation();
+        String newLoc = this.panel.getEventLocation();
+        if (newLoc != null && !newLoc.isEmpty() && !newLoc.equals(oldLoc)) {
+          newLocation = newLoc;
+        }
+
+        String panelStatus = this.panel.getEventStatus();
+        if (!panelStatus.equals(originalEvent.getEventStatus().toString())) {
+          newStatus = panelStatus;
+        }
+
+        EventContext newContext = new EventContext(
+            newSubject,
+            newStartTime,
+            newEndTime,
+            newDescription,
+            newLocation,
+            newStatus
+        );
         if (isEditSeries) {
           features.editEventSeries(
               oldEvent.getSubject(),
@@ -860,12 +899,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
           );
         } else {
           features.editEvent(
-            oldEvent.getSubject(),
-            oldEvent.getStartDateTime().toString(),
-            oldEvent.getEndDateTime().toString(),
-            newContext,
-            calendarName
-        );
+              oldEvent.getSubject(),
+              oldEvent.getStartDateTime().toString(),
+              oldEvent.getEndDateTime().toString(),
+              newContext,
+              calendarName
+          );
         }
         dispose();
       });
@@ -876,9 +915,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       add(buttonPanel, BorderLayout.SOUTH);
       setLocationRelativeTo(getParent());
       pack();
-    }
-
-    private void go() {
     }
   }
 
