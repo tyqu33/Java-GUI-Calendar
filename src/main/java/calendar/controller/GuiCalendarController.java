@@ -107,9 +107,11 @@ public class GuiCalendarController implements Features {
       refreshCurrentMonth();
 
     } catch (IllegalArgumentException e) {
-      view.displayError("Failed to create event series: " + e.getMessage());
-    } catch (Exception e) {
-      view.displayError("Unexpected error: " + e.getMessage());
+      if (e.getMessage().equals("subject or startDateTime cannot be empty")) {
+        view.displayError("Failed to create event series: Event Series Name cannot be empty");
+      } else {
+        view.displayError("Failed to create event series: " + e.getMessage());
+      }
     }
   }
 
@@ -228,20 +230,20 @@ public class GuiCalendarController implements Features {
 
   @Override
   public void viewEventsOnDate(LocalDate date) {
-    try {
-      CalendarEntityInterface currentEntity = model.getCurrentCalendarEntity();
+    // try {
+    CalendarEntityInterface currentEntity = model.getCurrentCalendarEntity();
 
-      if (currentEntity == null) {
-        view.displayError("No calendar selected!");
-        return;
-      }
-
-      List<Event> events = currentEntity.getCalendar().getEventsOnDate(date);
-      view.displayEventsOnDate(events, date);
-
-    } catch (Exception e) {
-      view.displayError("Failed to load events: " + e.getMessage());
+    if (currentEntity == null) {
+      view.displayError("No calendar selected!");
+      return;
     }
+
+    List<Event> events = currentEntity.getCalendar().getEventsOnDate(date);
+    view.displayEventsOnDate(events, date);
+
+    //    } catch (Exception e) {
+    //      view.displayError("Failed to load events: " + e.getMessage());
+    //    } // method calls don't throw any exception
   }
 
   @Override

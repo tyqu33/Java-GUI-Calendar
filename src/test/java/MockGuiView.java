@@ -54,13 +54,12 @@ public class MockGuiView implements CalendarViewInterface {
 
   @Override
   public void exportCalendar(String content, String fileName) {
-
+    log.append("exportCalendar: " + fileName + ", " + content + "\n");
   }
 
   @Override
   public void displaySuccess(String message) {
     log.append("displaySuccess: " + message + "\n");
-
   }
 
   @Override

@@ -1,6 +1,9 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import calendar.calendarentity.CalendarEntityInterface;
 import calendar.controller.GuiCalendarController;
 import calendar.event.EventContext;
 import calendar.model.MultiCalendarManagerInterface;
@@ -127,11 +130,10 @@ public class GuiCalendarControllerTest {
     EventContext context =
         new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
             "Boston", "PUBLIC");
-    controller.createEventSeries(context, "RF", 4, null);
+    c2.createEventSeries(context, "RF", 4, null);
     // System.out.println(log.toString());
-    //    assertTrue(
-    //        log.toString().contains("No calendar selected.
-    //        Please select or create a calendar first."));
+    assertTrue(log.toString()
+        .contains("No calendar selected. Please select or create a calendar first."));
   }
 
   @Test
@@ -159,6 +161,28 @@ public class GuiCalendarControllerTest {
     controller.createEventSeries(context, "RF", 4, null);
     assertTrue(log.toString()
         .contains("displayError: Failed to create event series: Event already exists"));
+  }
+
+  @Test
+  public void testCreateEventSeries3() throws IOException {
+    controller.go();
+    log.setLength(0);
+
+    EventContext context =
+        new EventContext("", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.createEventSeries(context, "RF", 4, null);
+    assertTrue(log.toString().contains("displayError: "
+        + "Failed to create event series: Event Series Name cannot be empty"));
+  }
+
+  @Test
+  public void testGetAllCalendarNames() throws IOException {
+    controller.go();
+    log.setLength(0);
+
+    controller.getAllCalendarNames();
+    assertTrue(log.toString().contains("getAllCalendars"));
   }
 
   @Test
@@ -232,15 +256,52 @@ public class GuiCalendarControllerTest {
   }
 
   @Test
-  public void testEditCalendarProperty() throws IOException {
+  public void testEditEvent3() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log, 1);
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    EventContext newContext =
+        new EventContext("Presentation", "2025-11-19T09:30", "2025-11-19T10:30", "Long Description",
+            "New York", "PUBLIC");
+    c.editEvent("Lecture", "2025-11-20T09:00", "2025-11-20T10:00", newContext, null);
+    assertTrue(
+        log.toString().contains("displayError: No calendar selected."
+            + " Please select or create a calendar first."));
+  }
+
+  @Test
+  public void testEditCalendarProperty0() throws IOException {
     controller.go();
     log.setLength(0);
 
     controller.editCalendarProperty("Default", "name", "Meeting");
+    // System.out.println(log.toString());
+    assertTrue(log.toString().contains("editCalendar: Default, name, Meeting"));
     assertTrue(log.toString().contains("getCurrentCalendarEntity"));
     assertTrue(log.toString().contains("displayCurrentCalendar: Default, America/New_York"));
     assertTrue(log.toString().contains("getAllCalendars"));
     assertTrue(log.toString().contains("displayAvailableCalendars:"));
+    assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
+  }
+
+  @Test
+  public void testEditCalendarProperty1() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log) {
+      @Override
+      public CalendarEntityInterface editCalendar(String calendarName, String property,
+                                                  String propertyValue) {
+        throw new IllegalArgumentException("Forced IAE");
+      }
+    };
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    c.editCalendarProperty("Default", "name", "Meeting");
+    System.out.println(log.toString());
+    assertTrue(log.toString().contains("displayError: Failed to edit calendar: Forced IAE"));
   }
 
   @Test
@@ -268,22 +329,296 @@ public class GuiCalendarControllerTest {
     log.setLength(0);
 
     controller.navigateToMonth(2025, 11);
-    // System.out.println(log.toString());
     assertTrue(log.toString().contains("getCurrentCalendarEntity"));
     assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
   }
 
   @Test
-  public void testViewEventsOnDate() throws IOException {
+  public void testRefreshCurrentMonth0() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log, 1);
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    c.navigateToMonth(2025, 11);
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
+    assertFalse(log.toString().contains("displayError"));
+  }
+
+  @Test
+  public void testRefreshCurrentMonth1() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log) {
+      @Override
+      public CalendarEntityInterface getCurrentCalendarEntity() {
+        throw new IllegalArgumentException("Forced IAE");
+      }
+    };
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    c.navigateToMonth(2025, 11);
+    // System.out.println(log.toString());
+    assertTrue(log.toString().contains("displayError: Failed to refresh calendar: Forced IAE"));
+    assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
+  }
+
+  @Test
+  public void testViewEventsOnDate0() throws IOException {
     controller.go();
     log.setLength(0);
 
     LocalDate date = LocalDate.of(2025, 11, 20);
     controller.viewEventsOnDate(date);
-    // System.out.println(log.toString());
     assertTrue(log.toString().contains("getCurrentCalendarEntity"));
     assertTrue(log.toString().contains("displayEventsOnDate: 2025-11-20"));
   }
 
+  @Test
+  public void testViewEventsOnDate1() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log, 1);
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    LocalDate date = LocalDate.of(2025, 11, 20);
+    c.viewEventsOnDate(date);
+    // System.out.println(log.toString());
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertTrue(log.toString().contains("displayError: No calendar selected!"));
+  }
+
+  @Test
+  public void testExportCalendar0() throws IOException {
+    controller.go();
+    log.setLength(0);
+
+    controller.exportCalendar("Default.csv");
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertTrue(log.toString().contains("exportCalendar: Default.csv, Subject,Start Date,"
+        + "Start Time,End Date,End Time,All Day Event,Description,Location,Private"));
+  }
+
+  @Test
+  public void testExportCalendar1() throws IOException {
+    controller.go();
+    log.setLength(0);
+
+    controller.exportCalendar("Default");
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertTrue(log.toString().contains("displayError: Invalid file format. Use .csv or .ical"));
+  }
+
+  @Test
+  public void testExportCalendar2() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log, 1);
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    c.exportCalendar("Default");
+    // System.out.println(log.toString());
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertTrue(log.toString().contains("displayError: No calendar selected!"));
+  }
+
+  @Test
+  public void testGetCurrentCalendarName0() throws IOException {
+    controller.go();
+    log.setLength(0);
+
+    String name = controller.getCurrentCalendarName();
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertEquals("Default", name);
+  }
+
+  @Test
+  public void testGetCurrentCalendarName1() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log, 1);
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    String name = c.getCurrentCalendarName();
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertEquals("Default", name);
+  }
+
+  @Test
+  public void testGetCurrentCalendarTimezone0() throws IOException {
+    controller.go();
+    log.setLength(0);
+
+    String timezone = controller.getCurrentCalendarTimezone();
+    String expectedTimeZone = ZoneId.systemDefault().getId();
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertEquals(expectedTimeZone, timezone);
+  }
+
+  @Test
+  public void testGetCurrentCalendarTimezone01() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log, 1);
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    String timezone = c.getCurrentCalendarTimezone();
+    String expectedTimeZone = ZoneId.systemDefault().getId();
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertEquals(expectedTimeZone, timezone);
+  }
+
+  @Test
+  public void testEditEventSeries0() throws IOException {
+    controller.go();
+    log.setLength(0);
+
+    EventContext newContext =
+        new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.editEventSeries("Meeting", "2025-11-20T08:00",
+        "2025-11-20T12:00", newContext, "Default");
+    assertTrue(log.toString().contains("getCalendarEntity: Default"));
+    assertTrue(log.toString().contains("displayError: Failed to edit event series: Event does "
+        + "not exist, subject: Meeting, start: 2025-11-20T08:00, end: 2025-11-20T12:00"));
+  }
+
+  @Test
+  public void testEditEventSeries1() throws IOException {
+    controller.go();
+    EventContext context =
+        new EventContext("Meeting", "2025-11-20T08:00", "2025-11-20T12:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.createEventSeries(context, "RF", 4, null);
+    log.setLength(0);
+
+    EventContext newContext =
+        new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.editEventSeries("Meeting", "2025-11-20T08:00",
+        "2025-11-20T12:00", newContext, "Default");
+    // System.out.println(log.toString());
+    assertTrue(log.toString().contains("getCalendarEntity: Default"));
+    assertTrue(log.toString().contains("displaySuccess: Event series 'Meeting'"
+        + " updated successfully!"));
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+
+    assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
+    assertTrue(log.toString().contains("2025-11-20"));
+    assertTrue(log.toString().contains("2025-11-21"));
+    assertTrue(log.toString().contains("2025-11-27"));
+    assertTrue(log.toString().contains("2025-11-28"));
+  }
+
+  @Test
+  public void testEditEventSeries2() throws IOException {
+    controller.go();
+    EventContext context =
+        new EventContext("Meeting", "2025-11-20T08:00", "2025-11-20T12:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.createEventSeries(context, "RF", 4, null);
+    log.setLength(0);
+
+    EventContext newContext =
+        new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.editEventSeries("Meeting", "2025-11-20T08:00",
+        "2025-11-20T12:00", newContext, null);
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertTrue(log.toString().contains("displaySuccess: Event series 'Meeting'"
+        + " updated successfully!"));
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+
+    assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
+    assertTrue(log.toString().contains("2025-11-20"));
+    assertTrue(log.toString().contains("2025-11-21"));
+    assertTrue(log.toString().contains("2025-11-27"));
+    assertTrue(log.toString().contains("2025-11-28"));
+  }
+
+  @Test
+  public void testEditEventSeries3() throws IOException {
+    controller.go();
+    EventContext context =
+        new EventContext("Meeting", "2025-11-20T08:00", "2025-11-20T12:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.createEventSeries(context, "RF", 4, null);
+    log.setLength(0);
+
+    EventContext newContext =
+        new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.editEventSeries("Meeting", "2025-11-20T08:00",
+        "2025-11-20T12:00", newContext, "");
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertTrue(log.toString().contains("displaySuccess: Event series 'Meeting'"
+        + " updated successfully!"));
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+
+    assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
+    assertTrue(log.toString().contains("2025-11-20"));
+    assertTrue(log.toString().contains("2025-11-21"));
+    assertTrue(log.toString().contains("2025-11-27"));
+    assertTrue(log.toString().contains("2025-11-28"));
+  }
+
+  @Test
+  public void testEditEventSeries4() throws IOException {
+    MultiCalendarManagerInterface m = new GuiMultiCalendarManagerMockModel(this.log, 1);
+    GuiCalendarController c = new GuiCalendarController(m, this.view);
+    c.go();
+    log.setLength(0);
+
+    EventContext newContext =
+        new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
+            "Boston", "PUBLIC");
+    c.editEventSeries("Meeting", "2025-11-20T08:00",
+        "2025-11-20T12:00", newContext, null);
+    assertTrue(log.toString().contains("getCurrentCalendarEntity"));
+    assertTrue(log.toString().contains("displayError: No calendar selected."
+        + " Please select or create a calendar first."));
+  }
+
+  @Test
+  public void testEditEventSeries5() throws IOException {
+    controller.go();
+    EventContext context =
+        new EventContext("Meeting", "2025-11-20T08:00", "2025-11-20T12:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.createEvent(context);
+    log.setLength(0);
+
+    EventContext newContext =
+        new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.editEventSeries("Meeting", "2025-11-20T08:00",
+        "2025-11-20T12:00", newContext, "Default");
+
+    assertTrue(log.toString().contains("getCalendarEntity: Default"));
+    assertTrue(log.toString().contains("displayError: Failed to update event series."));
+  }
+
+  @Test
+  public void testEditEventSeries6() throws IOException {
+    controller.go();
+    EventContext context0 =
+        new EventContext("Meeting", "2025-11-20T08:00", "2025-11-20T12:00", "Long Description",
+            "Boston", "PUBLIC");
+    controller.createEventSeries(context0, "RF", 4, null);
+    EventContext context1 =
+        new EventContext("Lecture", "2025-11-20T09:00", "2025-11-20T10:00", "",
+            "", "PUBLIC");
+    controller.createEvent(context1);
+    log.setLength(0);
+
+    controller.editEventSeries("Meeting", "2025-11-20T08:00",
+        "2025-11-20T12:00", context1, "Default");
+
+    // System.out.println(log.toString());
+    assertTrue(log.toString().contains("getCalendarEntity: Default"));
+    assertTrue(log.toString().contains("displayError: Failed to edit event series: "
+        + "Event already exists"));
+  }
 
 }

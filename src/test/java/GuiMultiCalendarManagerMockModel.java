@@ -48,6 +48,7 @@ public class GuiMultiCalendarManagerMockModel implements MultiCalendarManagerInt
   @Override
   public CalendarEntityInterface editCalendar(String calendarName, String property,
                                               String propertyValue) {
+    log.append("editCalendar: " + calendarName + ", " + property + ", " + propertyValue + "\n");
     return null;
   }
 
