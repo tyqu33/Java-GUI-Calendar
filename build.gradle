@@ -44,6 +44,14 @@ jacocoTestReport {
         xml.required = false
         csv.required = true
     }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    '**/JframeCalendarView*.class'
+            ])
+        }))
+    }
 }
 
 test {
@@ -80,6 +88,7 @@ pitest {
     timestampedReports = false
 //    mutationThreshold = 90
     // Exclude certain mutators if needed
+    excludedClasses = ['calendar.view.JframeCalendarView*']
     // excludedMethods = ['hashCode', 'equals']
     // Include specific mutators (optional - by default all are included)
     // mutators = ['STRONGER']
