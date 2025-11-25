@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -155,6 +156,134 @@ public class CalendarTest {
   public void testHashCode2() {
     EventKey differentSubject = new EventKey("Other", time, time.plusHours(1));
     assertTrue(key1.hashCode() != differentSubject.hashCode());
+  }
+
+  @Test
+  public void testConvertTimezone() {
+    EventContext context = new EventContext(
+        "Meeting",
+        "2025-11-20T10:00",
+        "2025-11-20T11:00",
+        "Team meeting",
+        "New York",
+        "PUBLIC"
+    );
+    calendar.createSingleEvent(context, null);
+
+    ZoneId oldZone = ZoneId.of("America/New_York");
+    ZoneId newZone = ZoneId.of("Asia/Tokyo");
+    calendar.convertTimezone(oldZone, newZone);
+
+    Event event = calendar.getSingleEvent("Meeting", "2025-11-21T00:00", "2025-11-21T01:00");
+    assertNotNull(event);
+    assertEquals(LocalDateTime.parse("2025-11-21T00:00"), event.getStartDateTime());
+    assertEquals(LocalDateTime.parse("2025-11-21T01:00"), event.getEndDateTime());
+  }
+
+  @Test
+  public void testConvertEventSeriesTimezone() {
+    EventContext context = new EventContext(
+        "Meeting",
+        "2025-11-20T10:00",
+        "2025-11-20T11:00",
+        "Team sync",
+        "Office",
+        "PUBLIC"
+    );
+    calendar.createEventSeries(context, "MWF", 5, null);
+
+    ZoneId oldZone = ZoneId.of("America/New_York");
+    ZoneId newZone = ZoneId.of("Europe/London");
+    calendar.convertTimezone(oldZone, newZone);
+    List<Event> events = calendar.getEventsBetween(
+        LocalDateTime.parse("2025-11-20T00:00"),
+        LocalDateTime.parse("2025-12-01T00:00")
+    );
+
+    assertTrue(events.size() > 0);
+    for (Event event : events) {
+      assertEquals(15, event.getStartDateTime().getHour());
+      assertEquals(16, event.getEndDateTime().getHour());
+    }
+  }
+
+  @Test
+  public void testConvertTimezoneWithEndDate() {
+    EventContext context = new EventContext(
+        "Meeting",
+        "2025-11-20T10:00",
+        "2025-11-20T11:00",
+        "Team sync",
+        "Office",
+        "PUBLIC"
+    );
+    calendar.createEventSeries(context, "MW", 0, "2025-12-10");
+
+    ZoneId oldZone = ZoneId.of("America/New_York");
+    ZoneId newZone = ZoneId.of("Asia/Tokyo");
+    calendar.convertTimezone(oldZone, newZone);
+
+    List<Event> events = calendar.getEventsBetween(
+        LocalDateTime.parse("2025-11-20T00:00"),
+        LocalDateTime.parse("2025-12-11T00:00")
+    );
+
+    assertTrue(events.size() > 0);
+    for (Event event : events) {
+      if (event.getSubject().equals("Meeting")) {
+        assertEquals(0, event.getStartDateTime().getHour());
+        assertEquals(1, event.getEndDateTime().getHour());
+      }
+    }
+  }
+
+  @Test
+  public void testConvertTimezoneNoChange() {
+    EventContext context = new EventContext(
+        "Meeting",
+        "2025-11-20T10:00",
+        "2025-11-20T11:00",
+        "Test",
+        "Location",
+        "PUBLIC"
+    );
+    calendar.createSingleEvent(context, null);
+    ZoneId sameZone = ZoneId.of("America/New_York");
+    calendar.convertTimezone(sameZone, sameZone);
+    Event event = calendar.getSingleEvent("Meeting", "2025-11-20T10:00",
+        "2025-11-20T11:00");
+    assertNotNull(event);
+    assertEquals(LocalDateTime.parse("2025-11-20T10:00"), event.getStartDateTime());
+  }
+
+  @Test
+  public void testConvertTimezoneWithOccurrences() {
+    EventContext context = new EventContext(
+        "Meeting",
+        "2025-11-20T09:00",
+        "2025-11-20T09:30",
+        "Quick Meeting",
+        "Zoom",
+        "PUBLIC"
+    );
+    calendar.createEventSeries(context, "MTWRF", 5, null);
+
+    ZoneId oldZone = ZoneId.of("America/New_York");
+    ZoneId newZone = ZoneId.of("Europe/London");
+
+    calendar.convertTimezone(oldZone, newZone);
+    List<Event> events = calendar.getEventsBetween(
+        LocalDateTime.parse("2025-11-20T00:00"),
+        LocalDateTime.parse("2025-11-30T00:00")
+    );
+    assertTrue(events.size() > 0);
+    for (Event event : events) {
+      if (event.getSubject().equals("Meeting")) {
+        assertEquals(14, event.getStartDateTime().getHour());
+        assertEquals(14, event.getEndDateTime().getHour());
+        assertEquals(30, event.getEndDateTime().getMinute());
+      }
+    }
   }
 
 }

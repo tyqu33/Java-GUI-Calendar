@@ -3,6 +3,8 @@
 1) A GUI view (JframeCalendarView) has been added, along with Features interface and GuiCalendarController class in
    controller.
 2) A EventDecorator has been added to wrap up an Event with the name and timezone of its belonging calendar.
+3) Added convertTimezone(ZoneId oldZone, ZoneId newZone) method to CalendarInterface. This fixes a bug 
+   where changing a calendar's timezone would not update event times, causing events to display at incorrect local times
 
 # 2 Code Smell Fix from HW5 Feedback
 
@@ -42,7 +44,15 @@ The GUI supports:
 6) Create a single event using "Create Event" button, or create an event series using "Create Event Series" button. For
    event series, a user can specify the weekdays on which the event will repeat and the frequency in
    terms of number of occurrences or until an end date.
-7) Select a day cell in the month view, pick one event on the list, and edit event.
+7) Select a day cell in the month view, pick one event on the list, and edit the event. Users can choose to edit only 
+   that single occurrence or edit the entire series.
 8) Search events with the keyword of event name, using the "Search" button on the right-top corner. The result will show
    all events with name matching the keyword, regardless which calendar they belong to. Edit button has also been
    offered in the result list.
+9) Edit calendar properties (name and timezone) using the "Edit" button next to the calendar name. When the timezone is
+   changed, all event times in the calendar are automatically converted to the new timezone.
+10) Navigate between months using the previous ("<") and next (">") buttons to view different months.
+11) Switch between different calendars using the dropdown menu labeled "Switch to:" to view and manage events in
+    different calendars.
+12) Export the current calendar to either CSV or iCal format using the "Export" button.
+

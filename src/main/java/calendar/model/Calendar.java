@@ -544,8 +544,8 @@ public class Calendar implements CalendarInterface {
     if (oldZone.equals(newZone)) {
       return;
     }
-
-    Map<String, EventSeries> oldSeriesManager = new HashMap<>(this.seriesManager);
+    final Map<EventKey, Event> oldCalendar = new HashMap<>(this.calendar);
+    final Map<String, EventSeries> oldSeriesManager = new HashMap<>(this.seriesManager);
 
     this.calendar.clear();
     this.seriesManager.clear();
@@ -601,7 +601,6 @@ public class Calendar implements CalendarInterface {
       this.seriesManager.put(seriesId, newSeries);
     }
 
-    Map<EventKey, Event> oldCalendar = new HashMap<>(this.calendar);
     for (Map.Entry<EventKey, Event> entry : oldCalendar.entrySet()) {
       Event oldEvent = entry.getValue();
 

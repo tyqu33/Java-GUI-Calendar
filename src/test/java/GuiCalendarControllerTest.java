@@ -130,7 +130,8 @@ public class GuiCalendarControllerTest {
     controller.createEventSeries(context, "RF", 4, null);
     // System.out.println(log.toString());
     //    assertTrue(
-    //        log.toString().contains("No calendar selected. Please select or create a calendar first."));
+    //        log.toString().contains("No calendar selected.
+    //        Please select or create a calendar first."));
   }
 
   @Test
