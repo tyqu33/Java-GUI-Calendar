@@ -295,24 +295,23 @@ public class GuiCalendarController implements Features {
       } else {
         entity = model.getCalendarEntity(calendarName);
       }
-
       if (entity == null) {
         view.displayError("No calendar selected. Please select or create a calendar first.");
         return;
       }
-
       CalendarInterface calendar = entity.getCalendar();
-
       EventInterface updatedSeries = calendar.editEventSeries(
           subject,
           startDateTime,
           endDateTime,
           newContext
       );
-
+      String displayName = subject;
+      if (newContext.getSubject() != null && !newContext.getSubject().isEmpty()) {
+        displayName = newContext.getSubject();
+      }
       if (updatedSeries != null) {
-        view.displaySuccess("Event series '" + newContext.getSubject()
-            + "' updated successfully!");
+        view.displaySuccess("Event series '" + displayName + "' updated successfully!");
         refreshCurrentMonth();
       } else {
         view.displayError("Failed to update event series.");
