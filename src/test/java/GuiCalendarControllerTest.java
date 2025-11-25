@@ -351,9 +351,12 @@ public class GuiCalendarControllerTest {
     c.editCalendarProperty("Default", "name", "Presentation");
     assertTrue(log.toString().contains("editCalendar: Default, name, Presentation"));
     assertTrue(log.toString().contains("getCurrentCalendarEntity"));
-    assertTrue(log.toString().contains("displayCurrentCalendar: Default, America/New_York"));
+    String defaultTimeZone = ZoneId.systemDefault().getId();
+    assertTrue(log.toString().contains("displayCurrentCalendar: Default, " + defaultTimeZone));
     assertTrue(log.toString().contains("displayAvailableCalendars: [Meeting, Lecture]"));
-    assertTrue(log.toString().contains("displayMonthView: 2025, 11"));
+    int currentYear = LocalDate.now().getYear();
+    int currentMonth = LocalDate.now().getMonthValue();
+    assertTrue(log.toString().contains("displayMonthView: " + currentYear + ", " + currentMonth));
   }
 
   @Test
