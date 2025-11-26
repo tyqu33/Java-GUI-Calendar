@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Application Running Instructions</title>
+</head>
+<body>
+
+<h1>Calendar Application Running Instructions</h1>
+
+<p>This document details how to run the Calendar application using JAR file with arguments.</p>
+
+<h2>Running Preparation</h2>
+<p>The executable JAR file, CalendarApp.jar, is already included in this project: <code>build/libs/calendar-1.0.jar</code></p>
+
+<h2>GUI(Graphical User Interface) Mode</h2>
+<p>This mode launches a graphical calendar interface where users can interact with the application.</p>
+
+<p>Example:</p>
+<ul>
+    <li>Simply double-click on the jar file: <code>build/libs/calendar-1.0.jar</code></li>
+    <li>Or run: <code>java -jar build/libs/calendar-1.0.jar</code></li>
+</ul>
+
+<h2>Interactive Mode</h2>
+<p>In this mode, the application starts up, displays a welcome message, and waits for user commands to be entered line by line through the terminal.</p>
+
+<p>Example:</p>
+<ul>
+    <li>Run: <code>java -jar build/libs/calendar-1.0.jar --mode interactive</code></li>
+</ul>
+
+<h2>Headless Mode</h2>
+<p>This mode is used for batch processing. The application reads commands from the specified text file in sequence, executes the commands, and exits at the end of the file when it reaches "exit".</p>
+
+<p>Example:</p>
+<ul>
+    <li>Run: <code>java -jar build/libs/calendar-1.0.jar --mode headless commands.txt</code></li>
+</ul>
+
+<h2>Calendar Application GUI Guide</h2>
+
+<h3>Calendar Operations</h3>
+<ul>
+    <li><strong>Create a new calendar:</strong> Click "New Calendar" → Enter name and timezone → Click "Confirm"</li>
+    <li><strong>Switch between calendars:</strong> Use the "Switch to:" dropdown to select a different calendar</li>
+    <li><strong>Edit calendar properties:</strong> Click "Edit" next to calendar name → Modify name or timezone → Click "Save"</li>
+</ul>
+
+<h3>Event Operations</h3>
+<ul>
+    <li><strong>Create a single event:</strong> Click "Create Event" → Fill in event details → Click "Create"</li>
+    <li><strong>Create an event series:</strong> Click "Create EventSeries" → Enter details and recurrence pattern → Click "Create"</li>
+    <li><strong>View events on a date:</strong> Click any day cell in the calendar to see events in the left panel</li>
+    <li><strong>Edit a single event:</strong> Click day cell → Click "..." on event → Select "Edit" → Modify details → Click "Confirm"</li>
+    <li><strong>Edit an event series:</strong> Click day cell → Click "..." on series event → Select "Edit Series" → Modify properties → Click "Confirm"</li>
+    <li><strong>Search for events:</strong> Click "Search" → Enter keyword → Click "Search" to find events across all calendars</li>
+</ul>
+
+<h3>Other Operations</h3>
+<ul>
+    <li><strong>Navigate months:</strong> Use "&lt;" and "&gt;" buttons to move between months</li>
+    <li><strong>Export calendar:</strong> Click "Export" → Select CSV or iCal format → Enter filename → Click "OK"</li>
+</ul>
+
+</body>
+</html>
