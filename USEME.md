@@ -36,28 +36,28 @@ Example:
 
 ### Calendar Operations
 
-- Create a new calendar: Click "New Calendar" → Enter name and timezone → Click "Confirm"
+- Create a new calendar: Click "New Calendar" -> Enter name and timezone -> Click "Confirm"
 
 - Switch between calendars: Use the "Switch to:" dropdown to select a different calendar
 
-- Edit calendar properties: Click "Edit" next to calendar name → Modify name or timezone → Click "Save"
+- Edit calendar properties: Click "Edit" next to calendar name -> Modify name or timezone -> Click "Save"
 
 ### Event Operations
 
-- Create a single event: Click "Create Event" → Fill in event details → Click "Create"
+- Create a single event: Click "Create Event" -> Fill in event details -> Click "Create"
 
-- Create an event series: Click "Create EventSeries" → Enter details and recurrence pattern → Click "Create"
+- Create an event series: Click "Create EventSeries" -> Enter details and recurrence pattern -> Click "Create"
 
 - View events on a date: Click any day cell in the calendar to see events in the left panel
 
-- Edit a single event: Click day cell → Click "..." on event → Select "Edit" → Modify details → Click "Confirm"
+- Edit a single event: Click day cell -> Click "..." on event -> Select "Edit" -> Modify details -> Click "Confirm"
 
-- Edit an event series: Click day cell → Click "..." on series event → Select "Edit Series" → Modify properties → Click "Confirm"
+- Edit an event series: Click day cell -> Click "..." on series event -> Select "Edit Series" -> Modify properties -> Click "Confirm"
 
-- Search for events: Click "Search" → Enter keyword → Click "Search" to find events across all calendars
+- Search for events: Click "Search" -> Enter keyword -> Click "Search" to find events across all calendars
 
 ### Other Operations
 
 - Navigate months: Use "<" and ">" buttons to move between months
 
-- Export calendar: Click "Export" → Select CSV or iCal format → Enter filename → Click "OK"
+- Export calendar: Click "Export" -> Select CSV or iCal format -> Enter filename -> Click "OK"

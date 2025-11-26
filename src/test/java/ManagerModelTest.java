@@ -1,4 +1,5 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -8,6 +9,7 @@ import calendar.controller.CalendarController;
 import calendar.enums.EventStatus;
 import calendar.event.Event;
 import calendar.event.EventContext;
+import calendar.event.EventWrapper;
 import calendar.model.MultiCalendarManager;
 import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarView;
@@ -17,6 +19,9 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -1805,4 +1810,33 @@ public class ManagerModelTest {
     }
   }
 
+  @Test
+  public void testGetAllCalendars() {
+    MultiCalendarManager manager = new MultiCalendarManager();
+    manager.createCalendar("Default", "America/New_York");
+    manager.createCalendar("Calendar1", "America/New_York");
+    manager.createCalendar("Calendar2", "Europe/London");
+    manager.createCalendar("Calendar3", "Asia/Tokyo");
+
+    Collection<CalendarEntityInterface> allCalendars = manager.getAllCalendars();
+    assertEquals(4, allCalendars.size());
+
+    Set<String> calendarNames = new HashSet<>();
+    for (CalendarEntityInterface entity : allCalendars) {
+      calendarNames.add(entity.getCalendarName());
+    }
+    assertTrue(calendarNames.contains("Default"));
+    assertTrue(calendarNames.contains("Calendar1"));
+    assertTrue(calendarNames.contains("Calendar2"));
+    assertTrue(calendarNames.contains("Calendar3"));
+  }
+
+  @Test
+  public void testGetAllCalendarsEmpty() {
+    MultiCalendarManagerInterface emptyManager = new MultiCalendarManager();
+    Collection<CalendarEntityInterface> allCalendars = emptyManager.getAllCalendars();
+
+    assertNotNull(allCalendars);
+    assertEquals(0, allCalendars.size());
+  }
 }
