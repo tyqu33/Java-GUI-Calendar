@@ -4,9 +4,9 @@ import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
 import calendar.event.EventContext;
-import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
 import calendar.event.EventSeries;
+import calendar.event.EventWrapper;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * This class implements interface MultiCalendarManagerInterface and offers create, edit a calendar
@@ -334,14 +333,14 @@ public class MultiCalendarManager implements MultiCalendarManagerInterface {
   }
 
   @Override
-  public Collection<EventDecorator> getEventsAcrossCalendar(String keyword) {
-    Collection<EventDecorator> eventResult = new ArrayList<>();
+  public Collection<EventWrapper> getEventsAcrossCalendar(String keyword) {
+    Collection<EventWrapper> eventResult = new ArrayList<>();
     Collection<CalendarEntityInterface> calendarList = this.getAllCalendars();
     for (CalendarEntityInterface calendarEntity : calendarList) {
       Collection<Event> eventList = calendarEntity.getCalendar().getEvents();
       for (EventInterface event : eventList) {
         if (event.getSubject().equals(keyword)) {
-          eventResult.add(new EventDecorator(calendarEntity.getCalendarName(),
+          eventResult.add(new EventWrapper(calendarEntity.getCalendarName(),
               calendarEntity.getTimeZone().toString(), event));
         }
       }

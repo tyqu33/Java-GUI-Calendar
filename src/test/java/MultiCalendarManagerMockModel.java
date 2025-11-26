@@ -1,11 +1,9 @@
 import calendar.calendarentity.CalendarEntityInterface;
-import calendar.event.EventDecorator;
-import calendar.event.EventInterface;
+import calendar.event.EventWrapper;
 import calendar.model.MultiCalendarManagerInterface;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * This is a mock model to replace the MultiCalendarManager for testing the controller in isolation.
@@ -76,7 +74,7 @@ public class MultiCalendarManagerMockModel implements MultiCalendarManagerInterf
   }
 
   @Override
-  public Collection<EventDecorator> getEventsAcrossCalendar(String keyword) {
+  public Collection<EventWrapper> getEventsAcrossCalendar(String keyword) {
     return null;
   }
 }

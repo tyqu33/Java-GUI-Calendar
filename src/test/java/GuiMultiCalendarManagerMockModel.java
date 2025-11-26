@@ -1,8 +1,6 @@
 import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
-import calendar.event.EventDecorator;
-import calendar.model.Calendar;
-import calendar.model.CalendarInterface;
+import calendar.event.EventWrapper;
 import calendar.model.MultiCalendarManagerInterface;
 import java.time.ZoneId;
 import java.util.Collection;
@@ -99,7 +97,7 @@ public class GuiMultiCalendarManagerMockModel implements MultiCalendarManagerInt
   }
 
   @Override
-  public Collection<EventDecorator> getEventsAcrossCalendar(String keyword) {
+  public Collection<EventWrapper> getEventsAcrossCalendar(String keyword) {
     log.append("getEventsAcrossCalendar: " + keyword + "\n");
     return List.of();
   }

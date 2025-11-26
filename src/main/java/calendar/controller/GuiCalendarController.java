@@ -1,12 +1,10 @@
 package calendar.controller;
 
-import calendar.calendarentity.CalendarEntity;
 import calendar.calendarentity.CalendarEntityInterface;
 import calendar.event.Event;
 import calendar.event.EventContext;
-import calendar.event.EventDecorator;
 import calendar.event.EventInterface;
-import calendar.model.Calendar;
+import calendar.event.EventWrapper;
 import calendar.model.CalendarInterface;
 import calendar.model.MultiCalendarManagerInterface;
 import calendar.view.CalendarViewInterface;
@@ -18,7 +16,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * The controller implementation for GUI mode supporting Features.
@@ -189,7 +186,7 @@ public class GuiCalendarController implements Features {
   }
 
   @Override
-  public Collection<EventDecorator> getEventsAcrossCalendar(String keyword) {
+  public Collection<EventWrapper> getEventsAcrossCalendar(String keyword) {
     return model.getEventsAcrossCalendar(keyword);
   }
 

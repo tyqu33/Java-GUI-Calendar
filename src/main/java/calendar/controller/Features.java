@@ -1,12 +1,9 @@
 package calendar.controller;
 
 import calendar.event.EventContext;
-import calendar.event.EventDecorator;
-import calendar.event.EventInterface;
+import calendar.event.EventWrapper;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * The features for GUI functions.
@@ -81,7 +78,7 @@ public interface Features {
    * @param keyword the search term to match
    * @return a collection of EventDecorators containing matching events
    */
-  Collection<EventDecorator> getEventsAcrossCalendar(String keyword);
+  Collection<EventWrapper> getEventsAcrossCalendar(String keyword);
 
   /**
    * Navigate to a specific month and year.

@@ -5,8 +5,7 @@ import calendar.enums.EventStatus;
 import calendar.enums.UserStatus;
 import calendar.event.Event;
 import calendar.event.EventContext;
-import calendar.event.EventDecorator;
-import calendar.event.EventInterface;
+import calendar.event.EventWrapper;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -18,11 +17,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
@@ -34,8 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -54,13 +48,11 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.DateFormatter;
@@ -152,13 +144,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     calendarGridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     dayButtons = new JButton[6][7];
 
-    // Event display
-    //    eventDisplayArea = new JTextArea(10, 30);
-    //    eventDisplayArea.setEditable(false);
-    //    eventDisplayArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    //    eventDisplayArea.setBorder(BorderFactory.createTitledBorder("Events on Selected Date"));
-    //    eventDisplayArea.setText("No events");
-
     eventDisplayArea = new JPanel();
     eventDisplayArea.setLayout(new BoxLayout(eventDisplayArea, BoxLayout.Y_AXIS));
     eventDisplayArea.setBackground(Color.WHITE);
@@ -222,14 +207,12 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     JPanel leftPanel = new JPanel();
     leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
     leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-    //leftPanel.setBackground(LIGHT_BLUE_GRAY);
 
     leftPanel.add(Box.createRigidArea(new Dimension(0, 35)));
 
     JPanel actionPanel = new JPanel();
     actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
     actionPanel.setAlignmentX(0.0f);
-    //actionPanel.setBackground(LIGHT_BLUE_GRAY);
 
     actionPanel.setAlignmentX(0.0f);
 
@@ -247,17 +230,13 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     leftPanel.add(actionPanel);
 
     leftPanel.add(Box.createVerticalStrut(10));
-    // leftPanel.add(new JScrollPane(eventDisplayArea));
     leftPanel.add(eventScrollPane);
 
     buildCalendarGrid(new HashMap<>());
-    //calendarGridPanel.setBackground(LIGHT_BLUE_GRAY);
 
     add(topPanel, BorderLayout.NORTH);
     add(leftPanel, BorderLayout.WEST);
     add(calendarGridPanel, BorderLayout.CENTER);
-
-    //this.getContentPane().setBackground(LIGHT_BLUE_GRAY);
 
     updateMonthYearLabel();
   }
@@ -422,35 +401,10 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
   public void displayEventsOnDate(List<Event> events, LocalDate date) {
     eventDisplayArea.removeAll();
     if (events == null || events.isEmpty()) {
-      // eventDisplayArea.setText("No events on " + date);
       JLabel emptyLabel = new JLabel("No events on " + date);
       emptyLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
       eventDisplayArea.add(emptyLabel);
-      // return;
     } else {
-
-
-      //    StringBuilder sb = new StringBuilder();
-      //    sb.append("Events on ").append(date).append(":\n\n");
-      //    for (Event event : events) {
-      //      sb.append("• ").append(event.getSubject()).append("\n");
-      //      sb.append("  Time: ");
-      //
-      //      if (event.isAllDayEvent()) {
-      //        sb.append("All Day");
-      //      } else {
-      //        sb.append(event.getStartDateTime().toLocalTime());
-      //        if (event.getEndDateTime() != null) {
-      //          sb.append(" - ").append(event.getEndDateTime().toLocalTime());
-      //        }
-      //      }
-      //      sb.append("\n");
-      //
-      //      if (event.getLocation() != null && !event.getLocation().isEmpty()) {
-      //        sb.append("  Location: ").append(event.getLocation()).append("\n");
-      //      }
-      //      sb.append("\n");
-      //    }
       JLabel eventsLabel = new JLabel("Events on " + date + ":\n\n");
       eventsLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
       eventsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -466,8 +420,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     eventDisplayArea.add(Box.createVerticalGlue());
     eventDisplayArea.revalidate();
     eventDisplayArea.repaint();
-
-    // eventDisplayArea.setText(sb.toString());
   }
 
   /**
@@ -508,32 +460,13 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
       JMenuItem editItem = new JMenuItem("Edit");
       editItem.addActionListener(evt -> {
-        //        String oldEventName = event.getSubject();
-        //        LocalDateTime oldStart = event.getStartDateTime();
-        //        LocalDateTime oldEnd = event.getEndDateTime();
         EditSingleEventDialog dialog = new EditSingleEventDialog(this, features,
             event, calendarName, false);
         dialog.setVisible(true);
       });
 
-      if (ifSeries) {
-        //        JMenuItem editSeriesItem = new JMenuItem("Edit Series");
-        //        editSeriesItem.addActionListener(evt -> {
-        //          EditEventSeriesDialog dialog = new EditEventSeriesDialog(this, features,
-        //              event, calendarName);
-        //          dialog.setVisible(true);
-        //        });
-      }
-
-
-      /*JMenuItem copyItem = new JMenuItem("Copy To");
-      copyItem.addActionListener(evt -> {
-        CopySingleEventDialog dialog = new CopySingleEventDialog(this, features);
-        dialog.setVisible(true);
-      });*/
       popup.add(editItem);
-      //popup.addSeparator();
-      //popup.add(copyItem);
+
       boolean isPartOfSeries = event.getSeriesId() != null;
 
       if (isPartOfSeries) {
@@ -812,7 +745,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       confirmButton.addActionListener(ev -> {
         String calendarName = inputCalendarName.getText();
         String timeZone = inputTimezone.getSelectedItem().toString();
-        // remember to TEST if calendar name is null or empty!
         features.createCalendar(calendarName, timeZone);
         dispose();
       });
@@ -1140,7 +1072,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
 
       inputYear.setSelectedItem(start.getYear());
       inputMonth.setSelectedIndex(start.getMonthValue() - 1);
-      // remember to test the day of month when changing year and month!
       getDayOptions(inputYear, inputMonth, inputDay);
       inputDay.setSelectedItem(start.getDayOfMonth());
       setLocalDateTimeToSpinner(event.getStartDateTime(), startTimeSpinner);
@@ -1561,7 +1492,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       super(parent, "Search Events", true);
       setLayout(new BorderLayout(10, 10));
       setPreferredSize(new Dimension(600, 500));
-      //setSize(550, 700);
       JPanel panel = new JPanel(new BorderLayout(10, 10));
       panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -1583,20 +1513,18 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
       scrollPane.getViewport().setBackground(Color.WHITE);
       add(scrollPane, BorderLayout.CENTER);
 
-      // buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 10, 20));
-      // JButton searchButton = new JButton("Search");
       searchButton.addActionListener(ev -> {
         String keyword = inputKeyword.getText();
         if (keyword != null && !keyword.isEmpty()) {
           resultPanel.removeAll();
-          List<EventDecorator> events =
-              (List<EventDecorator>) features.getEventsAcrossCalendar(keyword);
+          List<EventWrapper> events =
+              (List<EventWrapper>) features.getEventsAcrossCalendar(keyword);
           if (events == null || events.isEmpty()) {
             resultPanel.add(new JLabel("No events found."));
           } else {
-            for (EventDecorator eventDecorator : events) {
-              String calendarName = eventDecorator.getCalendarName();
-              JPanel row = createSingleEventPanel((Event) eventDecorator.getEvent(), calendarName);
+            for (EventWrapper eventWrapper : events) {
+              String calendarName = eventWrapper.getCalendarName();
+              JPanel row = createSingleEventPanel((Event) eventWrapper.getEvent(), calendarName);
               row.setBorder(BorderFactory.createTitledBorder("Calendar: " + calendarName));
               row.setAlignmentX(Component.LEFT_ALIGNMENT);
               row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
@@ -1606,7 +1534,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
             }
           }
         }
-        // dispose();
         resultPanel.revalidate();
         resultPanel.repaint();
       });
@@ -1618,34 +1545,6 @@ public class JframeCalendarView extends JFrame implements CalendarViewInterface 
     }
   }
 
-  /**
-   * Dialog for copying a single event to another calendar or date.
-   */
-  private class CopySingleEventDialog extends JDialog {
-    private JTextField inputEventName;
-    private JComboBox<Integer> inputYear;
-    private JComboBox<String> inputMonth;
-    private JComboBox<Integer> inputDay;
-    private JSpinner startTimeSpinner;
-    private JSpinner endTimeSpinner;
-    private JTextField inputDescription;
-    private JTextField inputLocation;
-    private JComboBox<String> inputEventStatus;
-
-    /**
-     * Constructor for CopySingleEventDialog.
-     *
-     * @param parent the parent frame
-     * @param features the Features interface
-     */
-    public CopySingleEventDialog(JFrame parent, Features features) {
-      super(parent, "Copy Single Event", true);
-      setLayout(new BorderLayout(10, 10));
-      JPanel panel = new JPanel();
-      panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-      panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
-    }
-  }
 
   /**
    * Dialog for editing calendar properties.

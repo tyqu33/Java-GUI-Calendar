@@ -3,7 +3,7 @@ package calendar.event;
 /**
  * To wrap up a class with event and its calendar property.
  */
-public class EventDecorator {
+public class EventWrapper {
   String calendarName;
   String calendarTimezone;
   EventInterface event;
@@ -15,7 +15,7 @@ public class EventDecorator {
    * @param calendarTimezone the timezone of the calendar
    * @param event the event
    */
-  public EventDecorator(String calendarName, String calendarTimezone, EventInterface event) {
+  public EventWrapper(String calendarName, String calendarTimezone, EventInterface event) {
     this.calendarName = calendarName;
     this.calendarTimezone = calendarTimezone;
     this.event = event;
