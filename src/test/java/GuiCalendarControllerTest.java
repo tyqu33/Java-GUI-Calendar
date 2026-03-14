@@ -87,6 +87,7 @@ public class GuiCalendarControllerTest {
         new EventContext("Meeting", "2025-11-20T09:00", "2025-11-20T10:00", "Long Description",
             "Boston", "PUBLIC");
     controller.createEvent(context);
+    System.out.println(log.toString());
     assertTrue(log.toString().contains("displaySuccess: Event 'Meeting' created successfully!"));
     assertTrue(log.toString().contains("displayMonthView: 2025, 11, {2025-11-20"));
   }

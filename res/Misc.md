@@ -2,7 +2,7 @@
 
 1) A GUI view (JframeCalendarView) has been added, along with Features interface and GuiCalendarController class in
    controller.
-2) A EventDecorator has been added to wrap up an Event with the name and timezone of its belonging calendar.
+2) A EventWrapper has been added to wrap up an Event with the name and timezone of its belonging calendar.
 3) Added convertTimezone(ZoneId oldZone, ZoneId newZone) method to CalendarInterface. This fixes a bug 
    where changing a calendar's timezone would not update event times, causing events to display at incorrect local times
 
